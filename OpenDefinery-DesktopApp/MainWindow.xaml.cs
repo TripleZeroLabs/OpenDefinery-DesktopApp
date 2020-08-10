@@ -30,30 +30,34 @@ namespace OpenDefinery_DesktopApp
 
         public MainWindow()
         {
-            var username = "";
-            var password = "";
-
             InitializeComponent();
 
             // Instantiate a new Definery object
             Definery = new Definery();
+        }
 
-            Definery.Authenticate(Definery, username, password);
-            Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+        private void LoadData()
+        {
+            if (!string.IsNullOrEmpty(Definery.CsrfToken))
+            {
+                // Load the data from Drupal
+                //Definery.Parameters = SharedParameter.GetParamsByUser(Definery, Definery.CurrentUser.Name);
+                Definery.Groups = Group.GetAll(Definery);
+                Definery.DataTypes = DataType.GetAll(Definery);
 
-            // Load the data from Drupal
-            //Definery.Parameters = SharedParameter.GetParamsByUser(Definery, Definery.CurrentUser.Name);
-            Definery.Groups = Group.GetAll(Definery);
-            Definery.DataTypes = DataType.GetAll(Definery);
+                // Display Collections in listbox
+                Definery.Collections = Collection.GetAll(Definery);
+                CollectionsList.DisplayMemberPath = "Name";
+                CollectionsList.ItemsSource = Definery.Collections;
 
-            // Display Collections in listbox
-            Definery.Collections = Collection.GetAll(Definery);
-            CollectionsList.DisplayMemberPath = "Name";
-            CollectionsList.ItemsSource = Definery.Collections;
-
-            // Get the parameters of the logged in user by default and display in the DataGrid
-            Definery.Parameters = SharedParameter.GetParamsByUser(Definery, Definery.CurrentUser.Name);
-            DataGridParameters.ItemsSource = Definery.Parameters;
+                // Get the parameters of the logged in user by default and display in the DataGrid
+                Definery.Parameters = SharedParameter.GetParamsByUser(Definery, Definery.CurrentUser.Name);
+                DataGridParameters.ItemsSource = Definery.Parameters;
+            }
+            else
+            {
+                MessageBox.Show("There was an error logging in. Please try again.");
+            }
         }
 
         private void BttnUpload_Click(object sender, RoutedEventArgs e)
@@ -126,6 +130,24 @@ namespace OpenDefinery_DesktopApp
                     }
 
                 } while (line != null);
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var username = UsernameTextBox.Text;
+            var password = PasswordPasswordBox.Password;
+
+            Definery.Authenticate(Definery, username, password);
+            Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+
+            if (!string.IsNullOrEmpty(Definery.CsrfToken))
+            {
+                LoadData();
+            }
+            else
+            {
+                MessageBox.Show("Error: No CSRF token found.");
             }
         }
     }
