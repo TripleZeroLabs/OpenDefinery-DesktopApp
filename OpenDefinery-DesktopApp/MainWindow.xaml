@@ -1,0 +1,29 @@
+﻿<Window x:Class="OpenDefinery_DesktopApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OpenDefinery_DesktopApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="1080" Width="1920">
+    <StackPanel VerticalAlignment="Stretch">
+        <Grid Margin="0" Height="50">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1529*"/>
+                <ColumnDefinition Width="383*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BttnUpload" Content="Upload" Margin="0,10,10,9" HorizontalAlignment="Right" Width="120" Click="BttnUpload_Click" Grid.Column="1"/>
+            <TextBox x:Name="TxtBoxSpPath" Margin="0,10,135,9" TextWrapping="Wrap" Grid.ColumnSpan="2" HorizontalAlignment="Right" Width="879" Text="C:\Users\jmerlan\Downloads\CTC_MEPPP_Information_Kit_2019\Master Shared Parameters.txt"/>
+        </Grid>
+        <Grid Margin="0" VerticalAlignment="Stretch" Height="992">
+            <DockPanel LastChildFill="False" Margin="10,43,10,10">
+                <StackPanel Width="487">
+                    <TextBlock TextWrapping="Wrap"><Run Text="Collections"/></TextBlock>
+                    <ListBox x:Name="CollectionsList" Height="544" Margin="0,0,10,0"/>
+                </StackPanel>
+                <DataGrid x:Name="DataGridParameters" Margin="0,17,0,0" Width="1391"/>
+            </DockPanel>
+
+        </Grid>
+    </StackPanel>
+</Window>
