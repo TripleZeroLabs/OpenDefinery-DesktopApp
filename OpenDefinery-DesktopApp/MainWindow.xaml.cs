@@ -56,7 +56,8 @@ namespace OpenDefinery_DesktopApp
             }
             else
             {
-                MessageBox.Show("There was an error logging in. Please try again.");
+                MessageBox.Show("There was an error logging in. Please try again.\n\n" +
+                    "Error: No CSRF token found.");
             }
         }
 
@@ -123,7 +124,7 @@ namespace OpenDefinery_DesktopApp
                         else
                         {
                             newParameter.BatchId = batchId;
-                            var response = SharedParameter.Create(Definery, newParameter, "11180");
+                            var response = SharedParameter.Create(Definery, newParameter, CollectionIdTextBox.Text);
 
                             Debug.WriteLine(response);
                         }
@@ -133,22 +134,21 @@ namespace OpenDefinery_DesktopApp
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             var username = UsernameTextBox.Text;
             var password = PasswordPasswordBox.Password;
 
             Definery.Authenticate(Definery, username, password);
             Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+            
+            // Load all of the things!!!
+            LoadData();
+        }
 
-            if (!string.IsNullOrEmpty(Definery.CsrfToken))
-            {
-                LoadData();
-            }
-            else
-            {
-                MessageBox.Show("Error: No CSRF token found.");
-            }
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadData();
         }
     }
 }
