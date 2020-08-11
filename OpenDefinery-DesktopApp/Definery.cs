@@ -29,6 +29,12 @@ namespace OpenDefinery
             public string Name { get; set; }
         }
 
+        /// <summary>
+        /// Login to Drupal using a username and password.
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="username">The Drupal username to login</param>
+        /// <param name="password">The password of the Drupal user</param>
         public static void Authenticate(Definery definery, string username, string password)
         {
             var client = new RestClient(BaseUrl + "user/login?_format=json");

@@ -18,6 +18,11 @@ namespace OpenDefinery
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Get all Collections from Drupal.
+        /// </summary>
+        /// <param name="definery">The main Definery object provides the CSRF token.</param>
+        /// <returns>A list of Collection objects</returns>
         public static List<Collection> GetAll(Definery definery)
         {
             var client = new RestClient(Definery.BaseUrl + "rest/collections?_format=json");

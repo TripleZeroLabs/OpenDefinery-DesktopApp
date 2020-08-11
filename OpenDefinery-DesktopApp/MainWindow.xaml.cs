@@ -36,6 +36,9 @@ namespace OpenDefinery_DesktopApp
             Definery = new Definery();
         }
 
+        /// <summary>
+        /// Main method to load all the data from Drupal
+        /// </summary>
         private void LoadData()
         {
             if (!string.IsNullOrEmpty(Definery.CsrfToken))
@@ -61,6 +64,11 @@ namespace OpenDefinery_DesktopApp
             }
         }
 
+        /// <summary>
+        /// Method to execute when the Upload button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BttnUpload_Click(object sender, RoutedEventArgs e)
         {
             // Generate an ID for the batch upload
@@ -134,6 +142,11 @@ namespace OpenDefinery_DesktopApp
             }
         }
 
+        /// <summary>
+        /// Method to execute when the Login button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             var username = UsernameTextBox.Text;
@@ -146,6 +159,11 @@ namespace OpenDefinery_DesktopApp
             LoadData();
         }
 
+        /// <summary>
+        /// Method to execute when the Refresh button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             LoadData();

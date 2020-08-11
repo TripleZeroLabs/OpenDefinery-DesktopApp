@@ -17,6 +17,12 @@ namespace OpenDefinery
         public Guid Uuid { get; set; }
         public string Name { get; set; }
 
+        /// <summary>
+        /// Creates a new Tag on Drupal
+        /// </summary>
+        /// <param name="definery">The main Definery object provides the CSRF token</param>
+        /// <param name="tagName">The name for the new Tag</param>
+        /// <returns>The Tag ID of the newly created Tag as a string</returns>
         public static string Create(Definery definery, string tagName)
         {
             var client = new RestClient(Definery.BaseUrl + "taxonomy/term?_format=hal_json");
@@ -40,6 +46,12 @@ namespace OpenDefinery
             return tagId;
         }
 
+        /// <summary>
+        /// Retrieve the Tag ID from its name. Useful for passing into API calls where the ID is required.
+        /// </summary>
+        /// <param name="definery">The main Definery object provides the basic auth code</param>
+        /// <param name="tagName">The name of the Tag</param>
+        /// <returns>The Tag ID as a string</returns>
         public static string GetIdFromName(Definery definery, string tagName)
         {
             var client = new RestClient(Definery.BaseUrl + string.Format("rest/tags/{0}?_format=json", tagName));
@@ -67,10 +79,10 @@ namespace OpenDefinery
         }
 
         /// <summary>
-        /// Helper method to format tag names
+        /// Helper method to format tag names.
         /// </summary>
-        /// <param name="tagName"></param>
-        /// <returns></returns>
+        /// <param name="tagName">The name of the Tag to format</param>
+        /// <returns>The formatted Tag Name</returns>
         public static string FormatName(string tagName)
         {
             var newTag = tagName;
