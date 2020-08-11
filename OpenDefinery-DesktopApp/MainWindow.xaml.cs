@@ -115,7 +115,7 @@ namespace OpenDefinery_DesktopApp
                     if (line != null)
                     {
                         // Cast tab delimited line from shared parameter text file to SharedParameter object
-                        var newParameter = SharedParameter.FromTxt(Definery, line);
+                        var newParameter = SharedParameter.FromTxt(line);
 
                         // Get the name of the group and assign this to the property rather than the ID 
                         // This name will be passed to the Create() method to add as the tag
