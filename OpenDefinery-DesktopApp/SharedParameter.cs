@@ -1,6 +1,7 @@
 ﻿using KellermanSoftware.CompareNetObjects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenDefinery_DesktopApp;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -182,22 +183,29 @@ namespace OpenDefinery
         /// </summary>
         /// <param name="definery">The main Definery object provides the basic auth token</param>
         /// <param name="userName">The Drupal username of the user to check for</param>
+        /// <param name="itemsPerPage">The number of items to return per page</param>
+        /// <param name="offset">The offset of items to skip pages</param>
         /// <returns>A list of SharedParameter objects</returns>
-        public static List<SharedParameter> GetParamsByUser(Definery definery, string userName)
+        public static List<SharedParameter> GetParamsByUser(Definery definery, string userName, int itemsPerPage, int offset)
         {
-            // TODO: Add pagination
-            var client = new RestClient(Definery.BaseUrl + string.Format("rest/params/user/{0}?_format=json", userName));
+            var client = new RestClient(Definery.BaseUrl + string.Format(
+                "rest/params/user/{0}?_format=json&items_per_page={1}&offset={2}", userName, itemsPerPage, offset)
+                );
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);
             IRestResponse response = client.Execute(request);
 
-            // Return the data if the response was OK
+            // Logic if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
+                // Cast the rows from the reponse to a generic JSON object
                 JObject json = JObject.Parse(response.Content);
-
                 var paramResponse = json.SelectToken("rows");
+
+                // Retrieve the page object from the current application window.
+                // TODO: Is there a better way to pass the Pager data to this window?
+                var currentWin = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive) as MainWindow;
 
                 return JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
             }
@@ -207,7 +215,6 @@ namespace OpenDefinery
 
                 return null;
             }
-
         }
 
         /// <summary>

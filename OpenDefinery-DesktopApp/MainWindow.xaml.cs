@@ -27,13 +27,24 @@ namespace OpenDefinery_DesktopApp
     public partial class MainWindow : Window
     {
         public Definery Definery { get; set; }
+        public static Pager Pagination { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Instantiate a new Definery object
+            // Instantiate a new objects
             Definery = new Definery();
+            Pagination = new Pager();
+
+            // Set current pagination fields
+            Pagination.CurrentPage = 0;
+            Pagination.ItemsPerPage = 50;
+            Pagination.Offset = 0;
+
+            // Disable and/or hide UI elements at launch of app
+            PagerNextButton.IsEnabled = false;
+            PagerPreviousButton.IsEnabled = false;
         }
 
         /// <summary>
@@ -54,14 +65,66 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList.ItemsSource = Definery.Collections;
 
                 // Get the parameters of the logged in user by default and display in the DataGrid
-                Definery.Parameters = SharedParameter.GetParamsByUser(Definery, Definery.CurrentUser.Name);
+                Definery.Parameters = SharedParameter.GetParamsByUser(
+                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
+                    );
                 DataGridParameters.ItemsSource = Definery.Parameters;
+
+                // Update the pager UI elements
+                Pagination = Pager.LoadData(Definery, Pagination.ItemsPerPage, Pagination.Offset);
+                UpdatePagerUi(Pagination, 0);
             }
             else
             {
                 MessageBox.Show("There was an error logging in. Please try again.\n\n" +
                     "Error: No CSRF token found.");
             }
+        }
+
+        /// <summary>
+        /// Helper method to update the UI for the pagination
+        /// </summary>
+        /// <param name="pager">The Pager object to update</param>
+        /// <param name="incrementChange">The increment in which to update the page number (can be positive or negative)</param>
+        private void UpdatePagerUi(Pager pager, int incrementChange)
+        {
+            // Increment the current page
+            pager.CurrentPage += incrementChange;
+
+            // Set the Offset
+            if (pager.CurrentPage == 0)
+            {
+                pager.Offset = 0;
+            }
+            if (pager.CurrentPage >= 1)
+            {
+                pager.Offset = pager.ItemsPerPage * pager.CurrentPage;
+            }
+
+            // Enable UI as needed
+            if (pager.TotalPages > pager.CurrentPage + 1)
+            {
+                PagerNextButton.IsEnabled = true;
+            }
+            else
+            {
+                PagerNextButton.IsEnabled = false;
+            }
+
+            if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage >= 0)
+            {
+                PagerPreviousButton.IsEnabled = true;
+            }
+            if (pager.CurrentPage <= 0)
+            {
+                PagerPreviousButton.IsEnabled = false;
+            }
+
+            // Update the textbox
+            PagerTextBox.Text = string.Format("Page {0} of {1} (Total Parameters: {2})", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
+
+            // Set the object from the updated Pager object
+            Pagination = pager;
         }
 
         /// <summary>
@@ -167,6 +230,40 @@ namespace OpenDefinery_DesktopApp
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             LoadData();
+        }
+
+        /// <summary>
+        /// Method to execute when the Next button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PagerNextButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Upate the pager data and UI
+            UpdatePagerUi(Pagination, 1);
+
+            // Load the data and display in the DataGrid
+            Definery.Parameters = SharedParameter.GetParamsByUser(
+                Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
+                );
+            DataGridParameters.ItemsSource = Definery.Parameters;
+        }
+
+        /// <summary>
+        /// Method to execute when the Previous button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PagerPreviousButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Upate the pager data and UI
+            UpdatePagerUi(Pagination, -1);
+
+            // Load the data and display in the DataGrid
+            Definery.Parameters = SharedParameter.GetParamsByUser(
+                Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
+                );
+            DataGridParameters.ItemsSource = Definery.Parameters;
         }
     }
 }

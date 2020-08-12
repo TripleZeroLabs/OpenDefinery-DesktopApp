@@ -68,8 +68,10 @@
     <Compile Include="Collection.cs" />
     <Compile Include="DataType.cs" />
     <Compile Include="Group.cs" />
+    <Compile Include="Pager.cs" />
     <Compile Include="SharedParameter.cs" />
     <Compile Include="Tag.cs" />
+    <Compile Include="User.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -22,13 +22,7 @@ namespace OpenDefinery
         public List<DataType> DataTypes { get; set; }
         public List<Group> Groups { get; set; }
         public static User CurrentUser { get; set; }
-
-        public class User
-        {
-            public string Id { get; set; }
-            public string Name { get; set; }
-        }
-
+        
         /// <summary>
         /// Login to Drupal using a username and password.
         /// </summary>
