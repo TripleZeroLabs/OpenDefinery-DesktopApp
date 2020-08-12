@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OpenDefinery_DesktopApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1080" Width="1920"
+        Title="OpenDefinery Parameters" Height="1080" Width="1920"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -17,63 +17,53 @@
         >
     <Window.Resources>
 
-        <!--<Style TargetType="TextBox">
-            <Setter Property="Foreground" Value="Gray" />
-            <Setter Property="FontSize" Value="24" />
-        </Style>
-
-        <Style TargetType="PasswordBox">
-            <Setter Property="Foreground" Value="Gray" />
-            <Setter Property="FontSize" Value="24" />
-        </Style>
-
-        <Style TargetType="Button">
-            <Setter Property="Background" Value="#2a9fd6" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontSize" Value="18" />
-        </Style>-->
 
     </Window.Resources>
 
-    <Grid x:Name="MainGrid" Margin="0,0,-0.4,0.4">
-        <StackPanel VerticalAlignment="Stretch" Margin="0,0,-1,60" d:IsLocked="True">
-            <Grid Margin="0" Height="50">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="84*"/>
-                    <ColumnDefinition Width="155*"/>
-                </Grid.ColumnDefinitions>
-                <Button x:Name="BttnUpload" Content="Batch Upload" Margin="0,23,10,0" HorizontalAlignment="Right" Width="120" Click="BttnUpload_Click" Grid.Column="1" Height="24" VerticalAlignment="Top"/>
-                <TextBox x:Name="TxtBoxSpPath" Margin="0,23,135,0" TextWrapping="Wrap" HorizontalAlignment="Right" Width="874" Text="C:\Users\J\Downloads\NBS_BIMObjectStandardParameters_BOS_2_0_1\NBS_BIMObjectStandardParameters_BOS2.0.1.txt" Grid.Column="1" Height="24" VerticalAlignment="Top"/>
-                <Label Content="USERNAME" HorizontalAlignment="Left" Margin="6,-2,0,0" VerticalAlignment="Top" FontSize="12"/>
-                <Label Content="PASSWORD" HorizontalAlignment="Left" Margin="220,-2,0,0" FontSize="12" Height="26" VerticalAlignment="Top"/>
-                <TextBox x:Name="CollectionIdTextBox" Grid.Column="1" HorizontalAlignment="Left" Height="24" Margin="108,23,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="118" Text="13854"/>
-                <Label Content="COLLECTION ID" HorizontalAlignment="Left" Margin="108,-2,0,0" FontSize="12" Height="26" VerticalAlignment="Top" Grid.Column="1"/>
-                <Label Content="PATH TO SHARED PARAMETERS FILE" HorizontalAlignment="Left" Margin="231,-2,0,0" FontSize="12" Height="26" VerticalAlignment="Top" Grid.Column="1"/>
-            </Grid>
-            <Grid Margin="0" VerticalAlignment="Top" Height="952" d:IsLocked="True">
-                <DockPanel LastChildFill="False" Margin="10">
-                    <StackPanel Width="281" Margin="0,30,0,0">
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,10,0"><Run Text="Collections"/></TextBlock>
-                        <ListBox x:Name="CollectionsList" Height="313" Margin="0,0,10,0"/>
+    <Grid x:Name="MainGrid" Margin="0">
+        <StackPanel VerticalAlignment="Stretch" Margin="0">
+            <Grid Margin="0" Height="1045">
+                <Grid x:Name="ToolbarGrid" Height="57" VerticalAlignment="Top" Margin="0,0,-0.4,0" Background="#FF2E3742">
+                    <StackPanel Margin="0" Orientation="Horizontal">
+                        <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="BatchUploadOverlayButton" Content="Batch Upload" HorizontalAlignment="Left" Height="Auto" Click="BatchUploadOverlayButton_Click" Margin="50,5,0,5" Foreground="White"/>
                     </StackPanel>
-                    <StackPanel Width="1595" Margin="0,30,0,0" d:IsHidden="True">
-                        <Button x:Name="RefreshButton" Content="Reload" Height="47" Margin="0" HorizontalAlignment="Right" Width="118" Click="RefreshButton_Click"/>
-                        <DataGrid x:Name="DataGridParameters" Height="807"/>
-                        <Grid x:Name="PaginationGrid" Height="36" Margin="0,0,0.2,0">
-                            <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Width="85" Click="PagerNextButton_Click"/>
-                            <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Width="85" Margin="0,0,90,0" Click="PagerPreviousButton_Click"/>
+                </Grid>
+                <DockPanel LastChildFill="True" Margin="0,62,-0.4,0">
+                    <StackPanel x:Name="SidebarStack" Width="281" Margin="0" Background="#FFE9EBED">
+                        <TextBlock TextWrapping="Wrap" Margin="10,10,0,0" FontWeight="Bold" Text="COLLECTIONS" Foreground="#BF6E6E6E"/>
+                        <ListBox x:Name="CollectionsList" Height="265" Margin="10,0,9.8,0"/>
+                    </StackPanel>
+                    <StackPanel Margin="0">
+                        <Button Style="{DynamicResource MaterialDesignRaisedAccentButton}" x:Name="RefreshButton" Content="Reload" Height="47" Margin="0,0,10,0" HorizontalAlignment="Right" Width="118" Click="RefreshButton_Click"/>
+                        <DataGrid x:Name="DataGridParameters" Height="854" Margin="0,0,10,0" IsReadOnly="True"/>
+                        <Grid x:Name="PaginationGrid" Margin="0,10,0.2,0" Height="45">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1443*"/>
+                                <ColumnDefinition Width="152*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Width="111" Margin="0,4,120.8,5" Click="PagerPreviousButton_Click" Grid.ColumnSpan="2" Height="36"/>
                             <TextBox x:Name="PagerTextBox" HorizontalAlignment="Left" TextWrapping="Wrap" Width="345" Margin="0,3,0,0" IsReadOnly="True" BorderBrush="{x:Null}"/>
+                            <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Width="106" Click="PagerNextButton_Click" Grid.Column="1" Margin="0,4,10,5" Height="36"/>
                         </Grid>
                     </StackPanel>
                 </DockPanel>
-
             </Grid>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000">
-            <Grid x:Name="LoginGrid" Height="386" Margin="550,0" VerticalAlignment="Top" Background="White">
-                <PasswordBox x:Name="PasswordPasswordBox" Margin="200,159,195,0" Height="37" VerticalAlignment="Top" TabIndex="1"/>
-                <TextBox x:Name="UsernameTextBox" Margin="200,96,195,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center"/>
-                <Button x:Name="LoginButton" Content="Login" Margin="200,237,195,0" VerticalAlignment="Top" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="35"/>
+        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+            <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
+                <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
+                <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
+                <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,50" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
+                <Label Content="USERNAME" Margin="50,63,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
+                <Label Content="PASSWORD" Margin="50,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
+            </Grid>
+            <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center">
+                <Button x:Name="BttnUpload" Content="Batch Upload" Margin="0,0,50,31" Click="BttnUpload_Click" Height="41" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="185"/>
+                <TextBox x:Name="TxtBoxSpPath" Margin="50,64,50,0" TextWrapping="Wrap" Text="C:\Users\J\Downloads\NBS_BIMObjectStandardParameters_BOS_2_0_1\NBS_BIMObjectStandardParameters_BOS2.0.1.txt" Height="24" VerticalAlignment="Top"/>
+                <TextBox x:Name="CollectionIdTextBox" Height="24" Margin="50,147,50,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="13854"/>
+                <Label Content="COLLECTION ID" Margin="50,121,50,0" FontSize="12" Height="26" VerticalAlignment="Top"/>
+                <Label Content="PATH TO SHARED PARAMETERS FILE" Margin="50,38,50,0" FontSize="12" Height="26" VerticalAlignment="Top"/>
+                <Button x:Name="BatchUploadCancel" Style="{DynamicResource MaterialDesignToolButton}" Content="Cancel" Margin="0,0,269,31" Height="41" Click="BatchUploadCancel_Click" IsCancel="True" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="116"/>
             </Grid>
         </Grid>
     </Grid>

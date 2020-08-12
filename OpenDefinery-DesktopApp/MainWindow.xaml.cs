@@ -45,8 +45,15 @@ namespace OpenDefinery_DesktopApp
             Pagination.Offset = 0;
 
             // Disable and/or hide UI elements at launch of app
-            PagerNextButton.IsEnabled = false;
-            PagerPreviousButton.IsEnabled = false;
+            BatchUploadGrid.Visibility = Visibility.Hidden;  // The batch upload form
+            PagerNextButton.IsEnabled = false;  // Pager
+            PagerPreviousButton.IsEnabled = false;  // Pager
+
+            if (string.IsNullOrEmpty(Definery.AuthCode) | string.IsNullOrEmpty(Definery.CsrfToken))
+            {
+                OverlayGrid.Visibility = Visibility.Visible;
+                LoginGrid.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -276,6 +283,20 @@ namespace OpenDefinery_DesktopApp
                 Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
                 );
             DataGridParameters.ItemsSource = Definery.Parameters;
+        }
+
+        private void BatchUploadOverlayButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Show the batch upload form
+            OverlayGrid.Visibility = Visibility.Visible;
+            BatchUploadGrid.Visibility = Visibility.Visible;
+        }
+
+        private void BatchUploadCancel_Click(object sender, RoutedEventArgs e)
+        {
+            // Hide the batch upload form
+            OverlayGrid.Visibility = Visibility.Hidden;
+            BatchUploadGrid.Visibility = Visibility.Hidden;
         }
     }
 }
