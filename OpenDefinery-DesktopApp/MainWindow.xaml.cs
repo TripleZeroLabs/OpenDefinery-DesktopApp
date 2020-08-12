@@ -31,6 +31,8 @@ namespace OpenDefinery_DesktopApp
 
         public MainWindow()
         {
+            WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
             InitializeComponent();
 
             // Instantiate a new objects
@@ -215,8 +217,18 @@ namespace OpenDefinery_DesktopApp
             var username = UsernameTextBox.Text;
             var password = PasswordPasswordBox.Password;
 
-            Definery.Authenticate(Definery, username, password);
-            Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+            var loginResponse = Definery.Authenticate(Definery, username, password);
+
+            // If the CSRF token was retrieved from Drupal
+            if (!string.IsNullOrEmpty(Definery.CsrfToken))
+            {
+                // Store the auth code for GET requests
+                Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+
+                // Hide login form
+                OverlayGrid.Visibility = Visibility.Hidden;
+                LoginGrid.Visibility = Visibility.Hidden;
+            }
             
             // Load all of the things!!!
             LoadData();

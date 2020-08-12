@@ -29,7 +29,7 @@ namespace OpenDefinery
         /// <param name="definery">The main Definery object</param>
         /// <param name="username">The Drupal username to login</param>
         /// <param name="password">The password of the Drupal user</param>
-        public static void Authenticate(Definery definery, string username, string password)
+        public static System.Net.HttpStatusCode Authenticate(Definery definery, string username, string password)
         {
             var client = new RestClient(BaseUrl + "user/login?_format=json");
             client.Timeout = -1;
@@ -55,6 +55,8 @@ namespace OpenDefinery
             {
                 MessageBox.Show("There was an error logging in.");
             }
+
+            return response.StatusCode;
         }
     }
 }
