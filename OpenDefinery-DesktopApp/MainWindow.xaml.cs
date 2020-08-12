@@ -120,11 +120,11 @@ namespace OpenDefinery_DesktopApp
                 PagerNextButton.IsEnabled = false;
             }
 
-            if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage >= 0)
+            if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage > 0)
             {
                 PagerPreviousButton.IsEnabled = true;
             }
-            if (pager.CurrentPage <= 0)
+            if (pager.CurrentPage < 1)
             {
                 PagerPreviousButton.IsEnabled = false;
             }
@@ -248,6 +248,13 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
+            // Reset page back to 1
+            Pagination.CurrentPage = 0;
+
+            // Upate the pager data and UI
+            UpdatePagerUi(Pagination, 0);
+
+            // Load all of the things!!!
             LoadData();
         }
 

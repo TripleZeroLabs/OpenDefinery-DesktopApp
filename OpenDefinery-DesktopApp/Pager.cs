@@ -49,6 +49,7 @@ namespace OpenDefinery
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);
             IRestResponse response = client.Execute(request);
+
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // Cast the rows from the reponse to a generic JSON object
@@ -57,6 +58,9 @@ namespace OpenDefinery
                 // Add the Drupal pager data to the Pager object
                 var pagerResponse = json.SelectToken("pager");
                 pager = JsonConvert.DeserializeObject<Pager>(pagerResponse.ToString());
+                
+                // Add the MainWindow data to the Pager object
+                pager.CurrentPage = MainWindow.Pagination.CurrentPage;
 
                 // Set the Pager object to the MainWindow instance
                 MainWindow.Pagination = pager;
