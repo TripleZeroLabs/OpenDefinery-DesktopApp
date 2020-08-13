@@ -29,7 +29,7 @@
             </Grid>
             <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0,0,-0.4,0" Height="907" VerticalAlignment="Top">
                 <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED">
-                    <TextBlock TextWrapping="Wrap" Margin="10,10,0,0" FontWeight="Bold" Text="COLLECTIONS" Foreground="#BF6E6E6E"/>
+                    <Label Content="MY COLLECTIONS" Padding="10,4,4,4" Margin="0,10,0,0"/>
                     <ListBox x:Name="CollectionsList" Height="265" Margin="10,0,9.8,0" />
                 </StackPanel>
                 <StackPanel Margin="0,0,0,-0.2" DockPanel.Dock="Right">
@@ -38,21 +38,17 @@
                         <Button x:Name="AddToCollectionButton" Content="Add To Collection" HorizontalAlignment="Left" Margin="10,10,0,10" Width="160" Foreground="White" Click="AddToCollectionButton_Click" IsEnabled="False"/>
                     </StackPanel>
                     <DataGrid x:Name="DataGridParameters" Height="795" Margin="10,0" IsReadOnly="True" SelectionUnit="FullRow" SelectionChanged="DataGridParameters_SelectionChanged"/>
-                    <Grid x:Name="PaginationGrid" Margin="10,10,10,0" Height="45" VerticalAlignment="Bottom">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1443*"/>
-                            <ColumnDefinition Width="152*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Style="{DynamicResource MaterialDesignRaisedAccentButton}" x:Name="RefreshButton" Content="Reload" Height="36" Margin="0,4,91.2,5" HorizontalAlignment="Right" Width="84" Click="RefreshButton_Click"/>
-                        <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Width="111" Margin="0,0,120.8,0" Click="PagerPreviousButton_Click" Grid.ColumnSpan="2" Height="36"/>
-                        <TextBox x:Name="PagerTextBox" HorizontalAlignment="Left" TextWrapping="Wrap" Width="396" Margin="0" IsReadOnly="True" BorderBrush="{x:Null}"/>
-                        <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Width="106" Click="PagerNextButton_Click" Grid.Column="1" Margin="0" Height="36"/>
-                    </Grid>
+                    <StackPanel Height="45" VerticalAlignment="Top" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10">
+                        <TextBox x:Name="PagerTextBox" HorizontalAlignment="Left" TextWrapping="Wrap" Width="396" Margin="0,0,50,0" IsReadOnly="True" BorderBrush="{x:Null}" Height="45" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+                        <Button Style="{DynamicResource MaterialDesignRaisedAccentButton}" x:Name="RefreshButton" Content="Reload" Height="36" Margin="0,0,50,0" HorizontalAlignment="Right" Width="125" Click="RefreshButton_Click" Padding="16,4" HorizontalContentAlignment="Center" Grid.IsSharedSizeScope="True"/>
+                        <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Width="111" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="36"/>
+                        <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Width="106" Click="PagerNextButton_Click" Margin="0,0,20,0" Height="36" HorizontalContentAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000">
-            <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
+        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+            <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
                 <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,50" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
@@ -67,13 +63,13 @@
                 <Label Content="PATH TO SHARED PARAMETERS FILE" Margin="50,38,50,0" FontSize="12" Height="26" VerticalAlignment="Top"/>
                 <Button x:Name="BatchUploadCancel" Style="{DynamicResource MaterialDesignToolButton}" Content="Cancel" Margin="0,0,269,31" Height="41" Click="BatchUploadCancel_Click" IsCancel="True" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="116"/>
             </Grid>
-            <Grid x:Name="AddToCollectionGrid" Margin="706,0,706.6,0" Background="White" HorizontalAlignment="Center" Width="501" Height="237" VerticalAlignment="Top">
+            <Grid x:Name="AddToCollectionGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="237" VerticalAlignment="Top" d:IsHidden="True">
                 <Button x:Name="AddToCollectionFormButton" Content="Add to Collection" HorizontalAlignment="Center" Margin="0,121,0,0" VerticalAlignment="Top" Width="380" Click="AddToCollectionFormButton_Click"/>
                 <ComboBox x:Name="AddToCollectionCombo" Margin="0,64,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
             </Grid>
-            <Grid x:Name="AddParameterGrid" Margin="707,0,705.6,0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top" d:IsHidden="True">
+            <Grid x:Name="AddParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top" d:IsHidden="True">
                 <StackPanel Margin="0">
                     <Label Content="CHOOSE A COLLECTION" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <ComboBox x:Name="AddParamFormCombo" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
