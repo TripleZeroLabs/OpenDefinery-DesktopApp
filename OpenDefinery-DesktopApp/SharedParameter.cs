@@ -19,6 +19,9 @@ namespace OpenDefinery
 {
     public class SharedParameter
     {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
         [JsonProperty("guid")]
         public Guid Guid { get; set; }
         
@@ -203,10 +206,6 @@ namespace OpenDefinery
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
 
-                // Retrieve the page object from the current application window.
-                // TODO: Is there a better way to pass the Pager data to this window?
-                var currentWin = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive) as MainWindow;
-
                 return JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
             }
             else
@@ -305,6 +304,28 @@ namespace OpenDefinery
             IRestResponse response = client.Execute(request);
 
             return response.Content;
+        }
+
+        public static void AddToCollection(Definery definery, SharedParameter param, Collection collection)
+        {
+            var client = new RestClient(string.Format(Definery.BaseUrl + "node/{0}?_format=json", param.Id));
+            client.Timeout = -1;
+            var request = new RestRequest(Method.PATCH);
+            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            request.AddParameter("application/json", "{" +
+                "\"type\": [{" +
+                        "\"target_id\": \"shared_parameter\"" +
+                    "}]," +
+                    "\"field_collections\": {" +
+                        "\"und\": " + "\"" + collection.Id + "\"" +
+                    "}" +
+                "}", 
+                ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+
+            Debug.WriteLine(response.Content);
         }
     }
 }

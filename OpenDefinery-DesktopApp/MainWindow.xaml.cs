@@ -44,7 +44,10 @@ namespace OpenDefinery_DesktopApp
             Pagination.ItemsPerPage = 50;
             Pagination.Offset = 0;
 
-            // Disable and/or hide UI elements at launch of app
+            // Set up UI elements at launch of app
+            AddToCollectionGrid.Visibility = Visibility.Hidden;  // The Add to Collection form
+            AddToCollectionCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the Add to Collections combobox
+            AddToCollectionCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The batch upload form
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
@@ -214,6 +217,12 @@ namespace OpenDefinery_DesktopApp
             }
         }
 
+        private void UpdateUiWhenSelected()
+        {
+            // Enable the Add to Collection button
+            AddToCollectionButton.IsEnabled = true;
+        }
+
         /// <summary>
         /// Method to execute when the Login button is clicked.
         /// </summary>
@@ -304,6 +313,92 @@ namespace OpenDefinery_DesktopApp
             // Hide the batch upload form
             OverlayGrid.Visibility = Visibility.Hidden;
             BatchUploadGrid.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Method to execute when the Add to Collection button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddToCollectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Check if the current user has any Collections first
+            if (Definery.Collections.Count < 1)
+            {
+                MessageBox.Show("You do not have any Collections yet. Once you have created a collection, you may add Shared Parameters to it.");
+            }
+            else
+            {
+                if (DataGridParameters.SelectedItems.Count > 0)
+                {
+                    // Add the Collections from the main Definery object
+                    AddToCollectionCombo.ItemsSource = Definery.Collections;
+                    AddToCollectionCombo.SelectedIndex = 0;
+
+                    // Show the Add To Collection form
+                    OverlayGrid.Visibility = Visibility.Visible;
+                    AddToCollectionGrid.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    MessageBox.Show("Nothing is selected. Selected a Shared Parameter to add to a Collection.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Helper method to catch when a selection changes in the DataGrid.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateUiWhenSelected();
+        }
+
+        /// <summary>
+        /// Method to execute when the Save button is clicked on the Add to Collection form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddToCollectionFormButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Get the selected Collection as a Collection object
+            var selectedCollection = AddToCollectionCombo.SelectedItem as Collection;
+
+            foreach (var i in DataGridParameters.SelectedItems)
+            {
+                // Get current Shared Parameter as a SharedParameter object
+                var selectedParam = i as SharedParameter;
+
+                // Add the Shared Parameter to the collection
+                SharedParameter.AddToCollection(Definery, selectedParam, selectedCollection);
+            }
+
+            // Notify the user of the update
+            MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + selectedCollection.Name + ".");
+
+            // Hide the overlay
+            AddToCollectionGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+
+        }
+
+        /// <summary>
+        /// Method to execute when the Cancel button is click on the Add to Collection form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelAddToCollectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Hide the Add To Collection form
+            OverlayGrid.Visibility = Visibility.Hidden;
+            AddToCollectionGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }
