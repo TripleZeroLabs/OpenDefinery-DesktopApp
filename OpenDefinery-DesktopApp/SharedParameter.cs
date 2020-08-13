@@ -321,9 +321,16 @@ namespace OpenDefinery
 
             IRestResponse response = client.Execute(request);
 
+            // TODO: Return the new Shared Parameter object rather than the response.Content
             return response.Content;
         }
 
+        /// <summary>
+        /// Add a SharedParameter to a Collection. Warning: This will overwrite any existing Collection values.
+        /// </summary>
+        /// <param name="definery">The main Definery object provides the CSRF token</param>
+        /// <param name="param">The SharedParameter object to add</param>
+        /// <param name="collection">The Collection object to add the Shared Parameter to</param>
         public static void AddToCollection(Definery definery, SharedParameter param, Collection collection)
         {
             var client = new RestClient(string.Format(Definery.BaseUrl + "node/{0}?_format=json", param.Id));

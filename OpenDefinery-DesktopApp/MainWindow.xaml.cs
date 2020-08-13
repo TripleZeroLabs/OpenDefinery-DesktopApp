@@ -46,7 +46,8 @@ namespace OpenDefinery_DesktopApp
 
             // Set up UI elements at launch of app
             AddToCollectionGrid.Visibility = Visibility.Hidden;  // The Add to Collection form
-            AddParameterGrid.Visibility = Visibility.Hidden;  // The Add Parameter form
+            NewParameterGrid.Visibility = Visibility.Hidden;  // The New Parameter form
+            NewCollectionGrid.Visibility = Visibility.Hidden;  // The New Collection form
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The batch upload form
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
@@ -416,38 +417,38 @@ namespace OpenDefinery_DesktopApp
         private void NewParameterButton_Click(object sender, RoutedEventArgs e)
         {
             // Pass the Collections list to the combobox and configure
-            AddParamFormCombo.ItemsSource = Definery.Collections;
-            AddParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
-            AddParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+            NewParamFormCombo.ItemsSource = Definery.Collections;
+            NewParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
+            NewParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
 
             // Generate a GUID by default
-            AddParamGuidTextBox.Text = Guid.NewGuid().ToString();
+            NewParamGuidTextBox.Text = Guid.NewGuid().ToString();
 
             // Pass the DataType list to the combobox and configure
-            AddParamDataTypeCombo.ItemsSource = Definery.DataTypes;
-            AddParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
-            AddParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+            NewParamDataTypeCombo.ItemsSource = Definery.DataTypes;
+            NewParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
+            NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
 
             // Clear all values
-            AddParamNameTextBox.Text = "";
-            AddParamDescTextBox.Text = "";
-            AddParamVisibleCheck.IsChecked = true;
-            AddParamUserModCheckbox.IsChecked = true;
+            NewParamNameTextBox.Text = "";
+            NewParamDescTextBox.Text = "";
+            NewParamVisibleCheck.IsChecked = true;
+            NewParamUserModCheckbox.IsChecked = true;
 
             // Show the Add Parameter form
             OverlayGrid.Visibility = Visibility.Visible;
-            AddParameterGrid.Visibility = Visibility.Visible;
+            NewParameterGrid.Visibility = Visibility.Visible;
         }
 
         /// <summary>
-        /// Method to execute when the Add Parameter form Cancel button is clicked
+        /// Method to execute when the New Parameter form Cancel button is clicked
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CancelAddParamButton_Click(object sender, RoutedEventArgs e)
+        private void CancelNewParamButton_Click(object sender, RoutedEventArgs e)
         {
             // Hide the overlay and form
-            AddParameterGrid.Visibility = Visibility.Hidden;
+            NewParameterGrid.Visibility = Visibility.Hidden;
             OverlayGrid.Visibility = Visibility.Hidden;
         }
 
@@ -456,27 +457,27 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AddParamFormButton_Click(object sender, RoutedEventArgs e)
+        private void NewParamFormButton_Click(object sender, RoutedEventArgs e)
         {
             // Instantiate the data from the form inputs
-            var collection = AddParamFormCombo.SelectedItem as Collection;
+            var collection = NewParamFormCombo.SelectedItem as Collection;
 
-            var dataType = AddParamDataTypeCombo.SelectedItem as DataType;
+            var dataType = NewParamDataTypeCombo.SelectedItem as DataType;
 
             var param = new SharedParameter();
-            param.Name = AddParamNameTextBox.Text;
-            param.Guid = new Guid(AddParamGuidTextBox.Text);
-            param.Description = AddParamDescTextBox.Text;
+            param.Name = NewParamNameTextBox.Text;
+            param.Guid = new Guid(NewParamGuidTextBox.Text);
+            param.Description = NewParamDescTextBox.Text;
             param.DataType = dataType.Name;
-            param.Visible = (AddParamVisibleCheck.IsChecked ?? false) ? "1" : "0";  // Reports out a 1 or 0 as a string
-            param.UserModifiable = (AddParamUserModCheckbox.IsChecked ?? false) ? "1" : "0";
+            param.Visible = (NewParamVisibleCheck.IsChecked ?? false) ? "1" : "0";  // Reports out a 1 or 0 as a string
+            param.UserModifiable = (NewParamUserModCheckbox.IsChecked ?? false) ? "1" : "0";
 
             var response = SharedParameter.Create(Definery, param, collection.Id);
 
             Debug.Write(response);
 
             // Hide the overlay and form
-            AddParameterGrid.Visibility = Visibility.Hidden;
+            NewParameterGrid.Visibility = Visibility.Hidden;
             OverlayGrid.Visibility = Visibility.Hidden;
 
             MessageBox.Show("The parameter has been successfully created.");
@@ -491,6 +492,58 @@ namespace OpenDefinery_DesktopApp
         {
             // Hide the overlay
             AddToCollectionGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Method to execute when the New Collection button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewCollectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Clear the combobox in case it was previously canceled
+            NewCollectionFormTextBox.Text = string.Empty;
+
+            // Show the overlay
+            NewCollectionGrid.Visibility = Visibility.Visible;
+            OverlayGrid.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Method to execute when the New Collection Cancel button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewCollectionFormCancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Hide the overlay
+            NewCollectionGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Method to execute when the New Collection Save button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewCollectionFormSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var response = Collection.Create(Definery, NewCollectionFormTextBox.Text, NewCollectionFormDesc.Text);
+
+            // If the Collection was successfully created, refresh the Collections list
+            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                MessageBox.Show("The collection was successfully created.");
+
+                Definery.Collections = Collection.GetAll(Definery);
+
+                // Refresh the sidebar list UI
+                CollectionsList.ItemsSource = Definery.Collections;
+            }
+
+            // Hide the overlay
+            NewCollectionGrid.Visibility = Visibility.Hidden;
             OverlayGrid.Visibility = Visibility.Hidden;
         }
     }

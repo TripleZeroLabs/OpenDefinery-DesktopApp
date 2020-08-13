@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenDefinery_DesktopApp;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,5 +67,40 @@ namespace OpenDefinery
 
         }
 
+        public static IRestResponse Create(Definery definery, string name, string description)
+        {
+            var newCollection = new Collection();
+
+            var client = new RestClient(Definery.BaseUrl + "node?_format=hal_json");
+            client.Timeout = -1;
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            request.AddParameter("application/json", 
+                "{" +
+                    "\"type\":" +
+                    "[{" +
+                        "\"target_id\": \"collection\"" +
+                    "}]," +
+                    "\"title\":" +
+                    "[{" +
+                        "\"value\": \"" + name + "\"" +
+                    "}]," +
+                    "\"body\":" +
+                    "[{" +
+                        "\"value\": \"" + description + "\"" +
+                    "}]" +
+                "}", 
+
+                ParameterType.RequestBody);
+
+            IRestResponse response = client.Execute(request);
+
+            Debug.WriteLine(response.Content);
+
+            // TODO: Return the new Collection object rather than the response
+            return response;
+        }
     }
 }
