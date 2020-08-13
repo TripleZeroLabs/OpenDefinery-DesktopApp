@@ -30,11 +30,11 @@
             <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0,0,-0.4,0" Height="907" VerticalAlignment="Top">
                 <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED">
                     <TextBlock TextWrapping="Wrap" Margin="10,10,0,0" FontWeight="Bold" Text="COLLECTIONS" Foreground="#BF6E6E6E"/>
-                    <ListBox x:Name="CollectionsList" Height="265" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged"/>
+                    <ListBox x:Name="CollectionsList" Height="265" Margin="10,0,9.8,0" />
                 </StackPanel>
                 <StackPanel Margin="0,0,0,-0.2" DockPanel.Dock="Right">
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="New Parameter" Width="150" HorizontalAlignment="Left" Margin="20,0,0,0"/>
+                        <Button x:Name="NewParameterButton" Content="New Parameter" Width="150" HorizontalAlignment="Left" Margin="20,0,0,0" Click="NewParameterButton_Click" />
                         <Button x:Name="AddToCollectionButton" Content="Add To Collection" HorizontalAlignment="Left" Margin="10,10,0,10" Width="160" Foreground="White" Click="AddToCollectionButton_Click" IsEnabled="False"/>
                     </StackPanel>
                     <DataGrid x:Name="DataGridParameters" Height="795" Margin="10,0" IsReadOnly="True" SelectionUnit="FullRow" SelectionChanged="DataGridParameters_SelectionChanged"/>
@@ -51,7 +51,7 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+        <Grid x:Name="OverlayGrid" Background="#B2000000">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
@@ -71,7 +71,27 @@
                 <Button x:Name="AddToCollectionFormButton" Content="Add to Collection" HorizontalAlignment="Center" Margin="0,121,0,0" VerticalAlignment="Top" Width="380" Click="AddToCollectionFormButton_Click"/>
                 <ComboBox x:Name="AddToCollectionCombo" Margin="0,64,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
-                <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" />
+                <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
+            </Grid>
+            <Grid x:Name="AddParameterGrid" Margin="707,0,705.6,0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top" d:IsHidden="True">
+                <StackPanel Margin="0">
+                    <Label Content="CHOOSE A COLLECTION" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
+                    <ComboBox x:Name="AddParamFormCombo" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
+                    <Label Content="NAME" Margin="0,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
+                    <TextBox x:Name="AddParamNameTextBox" HorizontalAlignment="Center" Height="36" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" VerticalContentAlignment="Center"/>
+                    <Label Content="GUID" Margin="0,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
+                    <TextBox x:Name="AddParamGuidTextBox" HorizontalAlignment="Center" Height="36" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" VerticalContentAlignment="Center"/>
+                    <Label Content="DATA TYPE" Margin="0,39,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
+                    <ComboBox x:Name="AddParamDataTypeCombo" HorizontalAlignment="Center" VerticalAlignment="Top" Width="380"/>
+                    <Label Content="DESCRIPTION" Margin="0,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
+                    <TextBox x:Name="AddParamDescTextBox" HorizontalAlignment="Center" Height="101" Margin="60,0,60.8,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" MaxLength="260" VerticalScrollBarVisibility="Auto"/>
+                    <Grid Height="25" Margin="60,40,60.8,0" Width="380" HorizontalAlignment="Center">
+                        <CheckBox x:Name="AddParamVisibleCheck" Content="VISIBLE" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0" IsChecked="True"/>
+                        <CheckBox x:Name="AddParamUserModCheckbox" Content="USER MODIFIABLE" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0" IsChecked="True"/>
+                    </Grid>
+                    <Button x:Name="AddParamFormButton" Content="Create Parameter" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Bottom" Width="379" Click="AddParamFormButton_Click" />
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelAddParamButton_Click" />
+                </StackPanel>
             </Grid>
         </Grid>
     </Grid>

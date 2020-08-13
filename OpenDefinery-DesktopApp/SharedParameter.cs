@@ -223,7 +223,7 @@ namespace OpenDefinery
         /// <param name="param"></param>
         /// <param name="collectionId"></param>
         /// <returns></returns>
-        public static string Create(Definery definery, SharedParameter param, string collectionId)
+        public static string Create(Definery definery, SharedParameter param, int collectionId)
         {
             var client = new RestClient(Definery.BaseUrl + "node?_format=json");
             client.Timeout = -1;
@@ -239,26 +239,33 @@ namespace OpenDefinery
 
             // Get the tag ID from Drupal. If the tag does not exist, create a tag and assign the ID to request body
             // First format the tag name accordingly...
-            var tagName = Tag.FormatName(param.Group);
+            var tagName = string.Empty;
+            var tagId = string.Empty;
 
-            // ... Then attempt to retrieve the tag from Drupal
-            var tagId = Tag.GetIdFromName(definery, tagName);
-
-            // ... If the tag does not exist, an empty array is returned. Create the tag if neccessary.
-            if (tagId == "[]")
+            if (!string.IsNullOrEmpty(param.Group))
             {
-                Debug.WriteLine(string.Format("The tag \"{0}\" does not exist. Creating...", tagName));
+                tagName = Tag.FormatName(param.Group);
 
-                // Create the tag
-                var newTagId = Tag.Create(definery, tagName);
-                Debug.WriteLine(string.Format("New tag created for {0} with ID: {1}", tagName, newTagId));
+                // ... Then attempt to retrieve the tag from Drupal
+                tagId = Tag.GetIdFromName(definery, tagName);
 
-                // Get the ID of the newly created tag
-                tagId = newTagId;
+                // ... If the tag does not exist, an empty array is returned. Create the tag if neccessary.
+                if (tagId == "[]")
+                {
+                    Debug.WriteLine(string.Format("The tag \"{0}\" does not exist. Creating...", tagName));
+
+                    // Create the tag
+                    var newTagId = Tag.Create(definery, tagName);
+                    Debug.WriteLine(string.Format("New tag created for {0} with ID: {1}", tagName, newTagId));
+
+                    // Get the ID of the newly created tag
+                    tagId = newTagId;
+                }
             }
+            // If the there is not a value for the Group, assign the Default Group
             else
             {
-
+                tagId = null;
             }
 
             //TODO: Clean up this mess some day.
@@ -288,12 +295,23 @@ namespace OpenDefinery
                 "\"field_collections\": {" +
                 "\"und\": \"" + collectionId + "\"" +
                 "}," +
-                // Here we pass the existing parameter "group" from the text file and assign this as a tag instead of the group to maintain the data point
-                "\"field_tags\": {" +
-                "\"und\": \"" + tagId + "\"" +
-                "}" +
+                "\"field_visible\": {" +
+                "\"und\": \"" + param.Visible + "\"" +
+                "}," +
+                "\"field_user_modifiable\": {" +
+                "\"und\": \"" + param.UserModifiable + "\"" +
+                "}";
 
-            "}";
+            // Here we pass the existing parameter "group" from the text file and assign this as a tag instead of the group to maintain the data point
+            // This property is only added to the request if the tagId is not null.
+            if (!string.IsNullOrEmpty(tagId))
+            {
+                requestBody += ",\"field_tags\": {" +
+                    "\"und\": \"" + tagId + "\"" +
+                    "}";
+            }
+
+            requestBody += "}";
 
             var request = new RestRequest(Method.POST);
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);

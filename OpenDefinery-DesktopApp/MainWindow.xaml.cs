@@ -46,8 +46,7 @@ namespace OpenDefinery_DesktopApp
 
             // Set up UI elements at launch of app
             AddToCollectionGrid.Visibility = Visibility.Hidden;  // The Add to Collection form
-            AddToCollectionCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the Add to Collections combobox
-            AddToCollectionCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+            AddParameterGrid.Visibility = Visibility.Hidden;  // The Add Parameter form
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The batch upload form
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
@@ -67,9 +66,17 @@ namespace OpenDefinery_DesktopApp
             if (!string.IsNullOrEmpty(Definery.CsrfToken))
             {
                 // Load the data from Drupal
-                //Definery.Parameters = SharedParameter.GetParamsByUser(Definery, Definery.CurrentUser.Name);
                 Definery.Groups = Group.GetAll(Definery);
                 Definery.DataTypes = DataType.GetAll(Definery);
+
+                // Sort the lists for future use by UI
+                Definery.DataTypes.Sort(delegate (DataType x, DataType y)
+                {
+                    if (x.Name == null && y.Name == null) return 0;
+                    else if (x.Name == null) return -1;
+                    else if (y.Name == null) return 1;
+                    else return x.Name.CompareTo(y.Name);
+                });
 
                 // Display Collections in listbox
                 Definery.Collections = Collection.GetAll(Definery);
@@ -207,7 +214,9 @@ namespace OpenDefinery_DesktopApp
                         else
                         {
                             newParameter.BatchId = batchId;
-                            var response = SharedParameter.Create(Definery, newParameter, CollectionIdTextBox.Text);
+
+                            // Create the SharedParameter
+                            var response = SharedParameter.Create(Definery, newParameter, Convert.ToInt32(CollectionIdTextBox.Text));
 
                             Debug.WriteLine(response);
                         }
@@ -329,6 +338,9 @@ namespace OpenDefinery_DesktopApp
             }
             else
             {
+                AddToCollectionCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the Add to Collections combobox
+                AddToCollectionCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+
                 if (DataGridParameters.SelectedItems.Count > 0)
                 {
                     // Add the Collections from the main Definery object
@@ -396,9 +408,90 @@ namespace OpenDefinery_DesktopApp
             AddToCollectionGrid.Visibility = Visibility.Hidden;
         }
 
-        private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// Method to execute when the Add Parameter button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewParameterButton_Click(object sender, RoutedEventArgs e)
         {
+            // Pass the Collections list to the combobox and configure
+            AddParamFormCombo.ItemsSource = Definery.Collections;
+            AddParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
+            AddParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
 
+            // Generate a GUID by default
+            AddParamGuidTextBox.Text = Guid.NewGuid().ToString();
+
+            // Pass the DataType list to the combobox and configure
+            AddParamDataTypeCombo.ItemsSource = Definery.DataTypes;
+            AddParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
+            AddParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+
+            // Clear all values
+            AddParamNameTextBox.Text = "";
+            AddParamDescTextBox.Text = "";
+            AddParamVisibleCheck.IsChecked = true;
+            AddParamUserModCheckbox.IsChecked = true;
+
+            // Show the Add Parameter form
+            OverlayGrid.Visibility = Visibility.Visible;
+            AddParameterGrid.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Method to execute when the Add Parameter form Cancel button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelAddParamButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Hide the overlay and form
+            AddParameterGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Method to execute when the Add Parameter button on form is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddParamFormButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Instantiate the data from the form inputs
+            var collection = AddParamFormCombo.SelectedItem as Collection;
+
+            var dataType = AddParamDataTypeCombo.SelectedItem as DataType;
+
+            var param = new SharedParameter();
+            param.Name = AddParamNameTextBox.Text;
+            param.Guid = new Guid(AddParamGuidTextBox.Text);
+            param.Description = AddParamDescTextBox.Text;
+            param.DataType = dataType.Name;
+            param.Visible = (AddParamVisibleCheck.IsChecked ?? false) ? "1" : "0";  // Reports out a 1 or 0 as a string
+            param.UserModifiable = (AddParamUserModCheckbox.IsChecked ?? false) ? "1" : "0";
+
+            var response = SharedParameter.Create(Definery, param, collection.Id);
+
+            Debug.Write(response);
+
+            // Hide the overlay and form
+            AddParameterGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+
+            MessageBox.Show("The parameter has been successfully created.");
+        }
+
+        /// <summary>
+        /// Method to execute when the Add to Collection Cancel button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelAddToCollectionButton_Click_1(object sender, RoutedEventArgs e)
+        {
+            // Hide the overlay
+            AddToCollectionGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
         }
     }
 }
