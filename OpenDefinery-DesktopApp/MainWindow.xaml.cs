@@ -85,19 +85,16 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList.ItemsSource = Definery.Collections;
 
                 // Get the parameters of the logged in user by default and display in the DataGrid
-                Definery.Parameters = SharedParameter.GetParamsByUser(
-                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
+                Definery.Parameters = SharedParameter.ByUser(
+                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, true
                     );
-                DataGridParameters.ItemsSource = Definery.Parameters;
 
-                // Update the pager UI elements
-                Pagination = Pager.LoadData(Definery, Pagination.ItemsPerPage, Pagination.Offset);
-                UpdatePagerUi(Pagination, 0);
+                // Update the GUI anytime data is loaded
+                RefreshUi();
             }
             else
             {
-                MessageBox.Show("There was an error logging in. Please try again.\n\n" +
-                    "Error: No CSRF token found.");
+                // Do nothing for now.
             }
         }
 
@@ -105,8 +102,8 @@ namespace OpenDefinery_DesktopApp
         /// Helper method to update the UI for the pagination
         /// </summary>
         /// <param name="pager">The Pager object to update</param>
-        /// <param name="incrementChange">The increment in which to update the page number (can be positive or negative)</param>
-        private void UpdatePagerUi(Pager pager, int incrementChange)
+        /// <param name="incrementChange">The increment in which to update the page number (can be positive or negative). Note the first page number is 0.</param>
+        private void UpdatePager(Pager pager, int incrementChange)
         {
             // Increment the current page
             pager.CurrentPage += incrementChange;
@@ -114,10 +111,12 @@ namespace OpenDefinery_DesktopApp
             // Set the Offset
             if (pager.CurrentPage == 0)
             {
+                // Set the new offset to 0
                 pager.Offset = 0;
             }
             if (pager.CurrentPage >= 1)
             {
+                // Set the new offset based on the items per page and current page
                 pager.Offset = pager.ItemsPerPage * pager.CurrentPage;
             }
 
@@ -131,12 +130,19 @@ namespace OpenDefinery_DesktopApp
                 PagerNextButton.IsEnabled = false;
             }
 
-            if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage > 0)
+            if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage >= 0)
             {
                 PagerPreviousButton.IsEnabled = true;
             }
             if (pager.CurrentPage < 1)
             {
+                PagerPreviousButton.IsEnabled = false;
+            }
+
+            // Disable the pager buttons if there is only one page
+            if (pager.CurrentPage == 0 & pager.TotalPages == 1)
+            {
+                PagerNextButton.IsEnabled = false;
                 PagerPreviousButton.IsEnabled = false;
             }
 
@@ -216,8 +222,11 @@ namespace OpenDefinery_DesktopApp
                         {
                             newParameter.BatchId = batchId;
 
+                            // Instantiate the selected item as a Collection
+                            var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
+
                             // Create the SharedParameter
-                            var response = SharedParameter.Create(Definery, newParameter, Convert.ToInt32(CollectionIdTextBox.Text));
+                            var response = SharedParameter.Create(Definery, newParameter, sollection.Id);
 
                             Debug.WriteLine(response);
                         }
@@ -225,6 +234,19 @@ namespace OpenDefinery_DesktopApp
 
                 } while (line != null);
             }
+
+            // Hide the UI
+            BatchUploadGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+
+            // Reload the data
+            // Get the parameters of the logged in user by default and display in the DataGrid
+            Definery.Parameters = SharedParameter.ByUser(
+                Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, true
+                );
+
+            // Update the GUI anytime data is loaded
+            RefreshUi();
         }
 
         private void UpdateUiWhenSelected()
@@ -271,7 +293,7 @@ namespace OpenDefinery_DesktopApp
             Pagination.CurrentPage = 0;
 
             // Upate the pager data and UI
-            UpdatePagerUi(Pagination, 0);
+            UpdatePager(Pagination, 0);
 
             // Load all of the things!!!
             LoadData();
@@ -285,13 +307,24 @@ namespace OpenDefinery_DesktopApp
         private void PagerNextButton_Click(object sender, RoutedEventArgs e)
         {
             // Upate the pager data and UI
-            UpdatePagerUi(Pagination, 1);
+            UpdatePager(Pagination, 1);
 
-            // Load the data and display in the DataGrid
-            Definery.Parameters = SharedParameter.GetParamsByUser(
-                Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
-                );
-            DataGridParameters.ItemsSource = Definery.Parameters;
+            if (CollectionsList.SelectedItems.Count > 0)
+            {
+                // Load the data based on selected Collection and display in the DataGrid
+                Definery.Parameters = SharedParameter.ByCollection(
+                    Definery, CollectionsList.SelectedItem as Collection, Pagination.ItemsPerPage, Pagination.Offset, false
+                    );
+                DataGridParameters.ItemsSource = Definery.Parameters;
+            }
+            else
+            {
+                // Load the data based on the logged in user and display in the DataGrid
+                Definery.Parameters = SharedParameter.ByUser(
+                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, false
+                    );
+                DataGridParameters.ItemsSource = Definery.Parameters;
+            }
         }
 
         /// <summary>
@@ -302,17 +335,38 @@ namespace OpenDefinery_DesktopApp
         private void PagerPreviousButton_Click(object sender, RoutedEventArgs e)
         {
             // Upate the pager data and UI
-            UpdatePagerUi(Pagination, -1);
+            UpdatePager(Pagination, -1);
 
-            // Load the data and display in the DataGrid
-            Definery.Parameters = SharedParameter.GetParamsByUser(
-                Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset
-                );
-            DataGridParameters.ItemsSource = Definery.Parameters;
+            if (CollectionsList.SelectedItems.Count > 0)
+            {
+                // Load the data based on selected Collection and display in the DataGrid
+                Definery.Parameters = SharedParameter.ByCollection(
+                    Definery, CollectionsList.SelectedItem as Collection, Pagination.ItemsPerPage, Pagination.Offset, false
+                    );
+                DataGridParameters.ItemsSource = Definery.Parameters;
+            }
+            else
+            {
+                // Load the data based on the logged in user and display in the DataGrid
+                Definery.Parameters = SharedParameter.ByUser(
+                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, false
+                    );
+                DataGridParameters.ItemsSource = Definery.Parameters;
+            }
         }
 
+        /// <summary>
+        ///  Method to execute when the Batch Upload button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BatchUploadOverlayButton_Click(object sender, RoutedEventArgs e)
         {
+            // Populate the Collections combo
+            BatchUploadCollectionCombo.ItemsSource = Definery.Collections;
+            BatchUploadCollectionCombo.DisplayMemberPath = "Name";
+            BatchUploadCollectionCombo.SelectedIndex = 0;
+
             // Show the batch upload form
             OverlayGrid.Visibility = Visibility.Visible;
             BatchUploadGrid.Visibility = Visibility.Visible;
@@ -367,6 +421,18 @@ namespace OpenDefinery_DesktopApp
         private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateUiWhenSelected();
+        }
+
+        /// <summary>
+        /// Helper method to refresh all UI elements after a new payload.
+        /// </summary>
+        private void RefreshUi()
+        {
+            DataGridParameters.ItemsSource = Definery.Parameters;
+
+            // Update the pager UI elements
+            //Pagination = Pager.LoadData(Definery, Pagination.ItemsPerPage, Pagination.Offset);
+            UpdatePager(Pagination, 0);
         }
 
         /// <summary>
@@ -545,6 +611,28 @@ namespace OpenDefinery_DesktopApp
             // Hide the overlay
             NewCollectionGrid.Visibility = Visibility.Hidden;
             OverlayGrid.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Method to execute when the My Collections selection changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Instantiate the selected item as a Collection object
+            var sollection = CollectionsList.SelectedItem as Collection;
+
+            // Get the parameters
+            Definery.Parameters = SharedParameter.ByCollection(Definery, sollection, Pagination.ItemsPerPage, 0, true
+                );
+
+            // Force the pager to page 0 and update
+            Pagination.CurrentPage = 0;
+            UpdatePager(Pagination, 0);
+
+            // Update the GUI anytime data is loaded
+            RefreshUi();
         }
     }
 }

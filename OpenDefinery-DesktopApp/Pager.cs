@@ -29,41 +29,35 @@ namespace OpenDefinery
         public int Offset { get; set; }
 
         /// <summary>
-        /// Retrieve the Pager data from Drupal using an API call.
+        /// Helper method to update the Pager object based on a Response
         /// </summary>
-        /// <param name="definery">The main Definery object provides the basic auth code</param>
-        /// <param name="itemsPerPage">The number of items per page</param>
-        /// <param name="offset">The number of items to skip for the current call</param>
-        /// <returns>A Pager object with total_pages and total_items set</returns>
-        public static Pager LoadData (Definery definery, int itemsPerPage, int offset)
+        /// <param name="responseContent">The IRestResponse.Content value as a string</param>
+        /// <returns>The new Pager object</returns>
+        public static Pager SetFromParamReponse(string responseContent, bool resetTotals)
         {
-            // TODO: Find a way to get this total without making a full API call. 
-            // Or can we implement this in the main SharedParameters.LoadData() method?
+            // Instantiate a new pager
             var pager = new Pager();
 
-            // First get a small subset of data from the first page to retrieve the pager values
-            var client = new RestClient(Definery.BaseUrl + string.Format(
-                "rest/params/user/{0}?_format=json&items_per_page={1}&offset={2}", Definery.CurrentUser.Name, itemsPerPage, offset)
-                );
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-            IRestResponse response = client.Execute(request);
+            // Cast the rows from the reponse to a generic JSON object
+            JObject json = JObject.Parse(responseContent);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            // Add the Drupal pager data to the Pager object
+            var pagerResponse = json.SelectToken("pager");
+            pager = JsonConvert.DeserializeObject<Pager>(pagerResponse.ToString());
+
+            // Add the MainWindow data to the Pager object
+            pager.CurrentPage = MainWindow.Pagination.CurrentPage;
+
+            // Always reassign values for total pages and items because the pager property from Drupal is relative to the current request,
+            // however we always want to report the absolute totals if they are greater than zero.
+            if (!resetTotals)
             {
-                // Cast the rows from the reponse to a generic JSON object
-                JObject json = JObject.Parse(response.Content);
-
-                // Add the Drupal pager data to the Pager object
-                var pagerResponse = json.SelectToken("pager");
-                pager = JsonConvert.DeserializeObject<Pager>(pagerResponse.ToString());
-                
-                // Add the MainWindow data to the Pager object
-                pager.CurrentPage = MainWindow.Pagination.CurrentPage;
-
-                // Set the Pager object to the MainWindow instance
-                MainWindow.Pagination = pager;
+                pager.TotalPages = MainWindow.Pagination.TotalPages;
+                pager.TotalItems = MainWindow.Pagination.TotalItems;
+            }
+            else
+            {
+                // Do nothing with the pager
             }
 
             return pager;

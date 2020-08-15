@@ -153,8 +153,9 @@ namespace OpenDefinery
         /// <param name="definery">The main Definery object provides the basic auth code.</param>
         /// <param name="itemsPerPage">The number of items per page (only increments of 5, 10, 25, 50, and 100 are allowed)</param>
         /// <param name="offset">The offset of items from zero (i.e., to start page two at 50 items per page, this should be set to 50).</param>
+        /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
         /// <returns>A list of SharedParameters</returns>
-        public static List<SharedParameter> GetPage(Definery definery, int itemsPerPage, int offset)
+        public static List<SharedParameter> GetPage(Definery definery, int itemsPerPage, int offset, bool resetTotals)
         {
             var client = new RestClient(Definery.BaseUrl + 
                 string.Format("rest/params?_format=json&items_per_page={0}&offset={1}", itemsPerPage, offset));
@@ -166,8 +167,12 @@ namespace OpenDefinery
             // Return the CSRF token if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                JObject json = JObject.Parse(response.Content);
 
+                // Set the Pager object on the Main Window
+                MainWindow.Pagination = Pager.SetFromParamReponse(response.Content, resetTotals);
+
+                // Get the SharedParameters as JToken
+                JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
 
                 return JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
@@ -186,10 +191,11 @@ namespace OpenDefinery
         /// </summary>
         /// <param name="definery">The main Definery object provides the basic auth token</param>
         /// <param name="userName">The Drupal username of the user to check for</param>
-        /// <param name="itemsPerPage">The number of items to return per page</param>
+        /// <param name="itemsPerPage">The number of items to return per page. Acceptable values are 5, 10, 25, 50, 100.</param>
         /// <param name="offset">The offset of items to skip pages</param>
+        /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
         /// <returns>A list of SharedParameter objects</returns>
-        public static List<SharedParameter> GetParamsByUser(Definery definery, string userName, int itemsPerPage, int offset)
+        public static List<SharedParameter> ByUser(Definery definery, string userName, int itemsPerPage, int offset, bool resetTotals)
         {
             var client = new RestClient(Definery.BaseUrl + string.Format(
                 "rest/params/user/{0}?_format=json&items_per_page={1}&offset={2}", userName, itemsPerPage, offset)
@@ -202,7 +208,10 @@ namespace OpenDefinery
             // Logic if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                // Cast the rows from the reponse to a generic JSON object
+                // Set the Pager object on the Main Window
+                MainWindow.Pagination = Pager.SetFromParamReponse(response.Content, resetTotals);
+
+                // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
 
@@ -215,6 +224,56 @@ namespace OpenDefinery
                 return null;
             }
         }
+
+        /// <summary>
+        /// Retrieve Shared Parameters from a Collection
+        /// </summary>
+        /// <param name="definery">The main Definery object provides the basic auth code.</param>
+        /// <param name="collection">The Collection to retrieve Shared Parameters from</param>
+        /// <param name="itemsPerPage">The number of items to return per page. Acceptable values are 5, 10, 25, 50, 100.</param>
+        /// <param name="offset">The offset of items to skip pages</param>
+        /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
+        /// <returns>A list of SharedParameter objects</returns>
+        public static List<SharedParameter> ByCollection(Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
+        {
+            var listOfParams = new List<SharedParameter>();
+
+            var client = new RestClient(Definery.BaseUrl + string.Format(
+                "rest/params/collection/{0}?_format=json&items_per_page={1}&offset={2}", collection.Id, itemsPerPage, offset)
+                );
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+
+            // Logic if the response was OK
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // Set the Pager object on the Main Window
+                MainWindow.Pagination = Pager.SetFromParamReponse(response.Content, resetTotals);
+
+                // Get the SharedParameters as JToken
+                JObject json = JObject.Parse(response.Content);
+                var paramResponse = json.SelectToken("rows");
+
+                if (paramResponse.Count() == 0)
+                {
+                    MessageBox.Show("This collection is empty.");
+                }
+                else
+                {
+                    // Cast the rows from the reponse to a List of Shared Parameters
+                    listOfParams = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+                }
+            }
+            else
+            {
+                MessageBox.Show("There was an error getting the parameters.");
+            }
+
+            return listOfParams;
+        }
+
 
         /// <summary>
         /// Creates a new Shared Parameter on Drupal
