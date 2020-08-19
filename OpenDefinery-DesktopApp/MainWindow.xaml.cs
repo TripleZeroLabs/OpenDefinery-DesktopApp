@@ -538,26 +538,57 @@ namespace OpenDefinery_DesktopApp
         {
             // Instantiate the data from the form inputs
             var collection = NewParamFormCombo.SelectedItem as Collection;
-
+            var response = string.Empty;
             var dataType = NewParamDataTypeCombo.SelectedItem as DataType;
 
             var param = new SharedParameter();
-            param.Name = NewParamNameTextBox.Text;
-            param.Guid = new Guid(NewParamGuidTextBox.Text);
             param.Description = NewParamDescTextBox.Text;
             param.DataType = dataType.Name;
             param.Visible = (NewParamVisibleCheck.IsChecked ?? false) ? "1" : "0";  // Reports out a 1 or 0 as a string
             param.UserModifiable = (NewParamUserModCheckbox.IsChecked ?? false) ? "1" : "0";
 
-            var response = SharedParameter.Create(Definery, param, collection.Id);
+            // Only create parameter if the form validates
+            if (NewParamNameTextBox.Text.Length < 4)
+            {
+                MessageBox.Show("The parameter name must be longer than four characters.");
+            }
+            else 
+            {
+                // Assign the name from the form
+                param.Name = NewParamNameTextBox.Text;
 
-            Debug.Write(response);
+                // Check that the description has a value
+                if (NewParamDescTextBox.Text.Length < 1)
+                {
+                    MessageBox.Show("The parameter description is required.");
+                }
+                else
+                {
+                    // Try to convert the string from the from into a GUID
+                    try
+                    {
+                        // Assign the GUID
+                        var guid = new Guid(NewParamGuidTextBox.Text);
+                        param.Guid = guid;
 
-            // Hide the overlay and form
-            NewParameterGrid.Visibility = Visibility.Hidden;
-            OverlayGrid.Visibility = Visibility.Hidden;
+                        // Finially create the parameter
+                        response = SharedParameter.Create(Definery, param, collection.Id);
 
-            MessageBox.Show("The parameter has been successfully created.");
+                        // Hide the overlay and form
+                        NewParameterGrid.Visibility = Visibility.Hidden;
+                        OverlayGrid.Visibility = Visibility.Hidden;
+
+                        MessageBox.Show("The parameter has been successfully created.");
+
+                        Debug.Write(response);
+                    }
+                    // Display a message if the text cannot be cast to a GUID
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
+                }
+            }
         }
 
         /// <summary>

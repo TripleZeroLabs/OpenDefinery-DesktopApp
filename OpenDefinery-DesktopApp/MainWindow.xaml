@@ -47,7 +47,7 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+        <Grid x:Name="OverlayGrid" Background="#B2000000">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
@@ -55,7 +55,7 @@
                 <Label Content="USERNAME" Margin="45,63,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
             </Grid>
-            <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center" Width="540">
+            <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center" Width="540" d:IsHidden="True">
                 <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="BrowseForTxtButton" Content="Browse" VerticalAlignment="Top" Height="24" Padding="16,0" Click="BrowseForTxtButton_Click" FontSize="12" Margin="0,64,20,0" HorizontalAlignment="Right" Width="75" Foreground="#FF673AB7"/>
                 <Button x:Name="BttnUpload" Margin="0,0,20,31" Click="BttnUpload_Click" Height="41" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="207" Content="Batch Load All Parameters"/>
                 <TextBox x:Name="TxtBoxSpPath" Margin="20,64,100,0" Height="24" VerticalAlignment="Top" HorizontalContentAlignment="Left" IsReadOnly="True"/>
@@ -70,7 +70,7 @@
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
             </Grid>
-            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top" d:IsHidden="True">
+            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top">
                 <StackPanel Margin="0">
                     <Label Content="CHOOSE A COLLECTION" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <ComboBox x:Name="NewParamFormCombo" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
