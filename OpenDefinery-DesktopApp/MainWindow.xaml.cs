@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Win32;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -193,46 +194,53 @@ namespace OpenDefinery_DesktopApp
                 MessageBox.Show(ex.ToString());
             }
 
-            // Parse the parameters string and cast each line to SharedParameter class
-            using (StringReader stringReader = new StringReader(parameterTable))
+            try
             {
-                string line = string.Empty;
-                string headerLine = stringReader.ReadLine();
-                do
+                // Parse the parameters string and cast each line to SharedParameter class
+                using (StringReader stringReader = new StringReader(parameterTable))
                 {
-                    line = stringReader.ReadLine();
-                    if (line != null)
+                    string line = string.Empty;
+                    string headerLine = stringReader.ReadLine();
+                    do
                     {
-                        // Cast tab delimited line from shared parameter text file to SharedParameter object
-                        var newParameter = SharedParameter.FromTxt(line);
-
-                        // Get the name of the group and assign this to the property rather than the ID 
-                        // This name will be passed to the Create() method to add as the tag
-                        var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
-                        newParameter.Group = groupName;
-
-                        // Check if the parameter exists
-                        if (SharedParameter.HasExactMatch(Definery, newParameter))
+                        line = stringReader.ReadLine();
+                        if (line != null)
                         {
-                            // Do nothing for now
-                            // TODO: Add existing SharedParameters to a log or report of some kind.
-                            Debug.WriteLine(newParameter.Name + " exists. Skipping");
+                            // Cast tab delimited line from shared parameter text file to SharedParameter object
+                            var newParameter = SharedParameter.FromTxt(line);
+
+                            // Get the name of the group and assign this to the property rather than the ID 
+                            // This name will be passed to the Create() method to add as the tag
+                            var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
+                            newParameter.Group = groupName;
+
+                            // Check if the parameter exists
+                            if (SharedParameter.HasExactMatch(Definery, newParameter))
+                            {
+                                // Do nothing for now
+                                // TODO: Add existing SharedParameters to a log or report of some kind.
+                                Debug.WriteLine(newParameter.Name + " exists. Skipping");
+                            }
+                            else
+                            {
+                                newParameter.BatchId = batchId;
+
+                                // Instantiate the selected item as a Collection
+                                var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
+
+                                // Create the SharedParameter
+                                var response = SharedParameter.Create(Definery, newParameter, sollection.Id);
+
+                                Debug.WriteLine(response);
+                            }
                         }
-                        else
-                        {
-                            newParameter.BatchId = batchId;
 
-                            // Instantiate the selected item as a Collection
-                            var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
-
-                            // Create the SharedParameter
-                            var response = SharedParameter.Create(Definery, newParameter, sollection.Id);
-
-                            Debug.WriteLine(response);
-                        }
-                    }
-
-                } while (line != null);
+                    } while (line != null);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
 
             // Hide the UI
@@ -362,6 +370,9 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void BatchUploadOverlayButton_Click(object sender, RoutedEventArgs e)
         {
+            // Clear form
+            TxtBoxSpPath.Text = string.Empty;
+
             // Populate the Collections combo
             BatchUploadCollectionCombo.ItemsSource = Definery.Collections;
             BatchUploadCollectionCombo.DisplayMemberPath = "Name";
@@ -633,6 +644,24 @@ namespace OpenDefinery_DesktopApp
 
             // Update the GUI anytime data is loaded
             RefreshUi();
+        }
+
+        /// <summary>
+        /// Method to execute when the Browse button is clicked on the Batch Upload form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BrowseForTxtButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Instantiate a file dialog
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            // Set the filter to only show text files
+            openFileDialog.Filter = "Shared Parameter Text Files (*.txt)|*.txt";
+
+            // Set the textbox path if a file was chosen
+            if (openFileDialog.ShowDialog() == true)
+                TxtBoxSpPath.Text = openFileDialog.FileName;
         }
     }
 }

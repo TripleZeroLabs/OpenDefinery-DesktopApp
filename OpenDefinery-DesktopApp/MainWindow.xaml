@@ -47,7 +47,7 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000">
+        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
@@ -55,9 +55,10 @@
                 <Label Content="USERNAME" Margin="45,63,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
             </Grid>
-            <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center" Width="540" d:IsHidden="True">
-                <Button x:Name="BttnUpload" Content="Batch Upload" Margin="0,0,20,31" Click="BttnUpload_Click" Height="41" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="185"/>
-                <TextBox x:Name="TxtBoxSpPath" Margin="20,64,20,0" Text="C:\Users\J\Downloads\NBS_BIMObjectStandardParameters_BOS_2_0_1\NBS_BIMObjectStandardParameters_BOS2.0.1.txt" Height="24" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
+            <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center" Width="540">
+                <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="BrowseForTxtButton" Content="Browse" VerticalAlignment="Top" Height="24" Padding="16,0" Click="BrowseForTxtButton_Click" FontSize="12" Margin="0,64,20,0" HorizontalAlignment="Right" Width="75" Foreground="#FF673AB7"/>
+                <Button x:Name="BttnUpload" Margin="0,0,20,31" Click="BttnUpload_Click" Height="41" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="207" Content="Batch Load All Parameters"/>
+                <TextBox x:Name="TxtBoxSpPath" Margin="20,64,100,0" Height="24" VerticalAlignment="Top" HorizontalContentAlignment="Left" IsReadOnly="True"/>
                 <Label Content="ADD TO A COLLECTION" Margin="20,121,20,0" FontSize="12" Height="26" VerticalAlignment="Top" Padding="0,4,4,4"/>
                 <Label Content="CHOOSE A SHARED PARAMETER TXT FILE" Margin="20,38,20,0" FontSize="12" Height="26" VerticalAlignment="Top" Padding="0,4,4,4"/>
                 <Button x:Name="BatchUploadCancel" Style="{DynamicResource MaterialDesignToolButton}" Content="Cancel" Margin="20,0,0,31" Height="41" Click="BatchUploadCancel_Click" IsCancel="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="116"/>
@@ -89,7 +90,7 @@
                     <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelNewParamButton_Click" />
                 </StackPanel>
             </Grid>
-            <Grid x:Name="NewCollectionGrid" Margin="0" Width="600" HorizontalAlignment="Center" VerticalAlignment="Top" Background="White">
+            <Grid x:Name="NewCollectionGrid" Margin="0" Width="600" HorizontalAlignment="Center" VerticalAlignment="Top" Background="White" d:IsHidden="True">
                 <StackPanel>
                     <Label Content="NAME OF NEW COLLECTION" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Padding="0,4,4,4" Width="380"/>
                     <TextBox x:Name="NewCollectionFormTextBox" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380"/>
