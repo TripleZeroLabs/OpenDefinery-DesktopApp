@@ -96,6 +96,10 @@ namespace OpenDefinery_DesktopApp
                     Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, true
                     );
 
+                // Update the main Pager object
+                Pager.CurrentPage = 0;
+                UpdatePager(Pager, 0);
+
                 // Update the GUI anytime data is loaded
                 RefreshUi();
             }
