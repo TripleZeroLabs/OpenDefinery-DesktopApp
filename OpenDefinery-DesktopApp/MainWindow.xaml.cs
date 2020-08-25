@@ -28,28 +28,32 @@ namespace OpenDefinery_DesktopApp
     public partial class MainWindow : Window
     {
         public Definery Definery { get; set; }
-        public static Pager Pagination { get; set; }
+        public static Pager Pager { get; set; }
+        public static Collection SelectedCollection { get; set; }
 
         public MainWindow()
         {
-            WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
             InitializeComponent();
 
             // Instantiate a new objects
             Definery = new Definery();
-            Pagination = new Pager();
+            Pager = new Pager();
 
             // Set current pagination fields
-            Pagination.CurrentPage = 0;
-            Pagination.ItemsPerPage = 50;
-            Pagination.Offset = 0;
+            Pager.CurrentPage = 0;
+            Pager.ItemsPerPage = 50;
+            Pager.Offset = 0;
 
             // Set up UI elements at launch of app
             AddToCollectionGrid.Visibility = Visibility.Hidden;  // The Add to Collection form
             NewParameterGrid.Visibility = Visibility.Hidden;  // The New Parameter form
             NewCollectionGrid.Visibility = Visibility.Hidden;  // The New Collection form
-            BatchUploadGrid.Visibility = Visibility.Hidden;  // The batch upload form
+            BatchUploadGrid.Visibility = Visibility.Hidden;  // The Batch Upload form
+            AddToCollectionButton.Visibility = Visibility.Hidden;  // Add to Collection button
+            ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
+
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
 
@@ -57,6 +61,8 @@ namespace OpenDefinery_DesktopApp
             {
                 OverlayGrid.Visibility = Visibility.Visible;
                 LoginGrid.Visibility = Visibility.Visible;
+
+                UsernameTextBox.Focus();
             }
         }
 
@@ -87,7 +93,7 @@ namespace OpenDefinery_DesktopApp
 
                 // Get the parameters of the logged in user by default and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByUser(
-                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, true
+                    Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, true
                     );
 
                 // Update the GUI anytime data is loaded
@@ -104,54 +110,68 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         /// <param name="pager">The Pager object to update</param>
         /// <param name="incrementChange">The increment in which to update the page number (can be positive or negative). Note the first page number is 0.</param>
-        private void UpdatePager(Pager pager, int incrementChange)
+        public static void UpdatePager(Pager pager, int incrementChange)
         {
+            // Get the current instance of the application window
+            MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+
             // Increment the current page
             pager.CurrentPage += incrementChange;
 
             // Set the Offset
             if (pager.CurrentPage == 0)
             {
+                pager.IsFirstPage = true;
+                pager.IsLastPage = false;
+
                 // Set the new offset to 0
                 pager.Offset = 0;
             }
             if (pager.CurrentPage >= 1)
             {
+                pager.IsFirstPage = false;
+
                 // Set the new offset based on the items per page and current page
                 pager.Offset = pager.ItemsPerPage * pager.CurrentPage;
             }
 
             // Enable UI as needed
-            if (pager.TotalPages > pager.CurrentPage + 1)
+            if (pager.CurrentPage < pager.TotalPages - 1)
             {
-                PagerNextButton.IsEnabled = true;
+                mw.PagerNextButton.IsEnabled = true;
             }
-            else
+            if (pager.CurrentPage == pager.TotalPages - 1)
             {
-                PagerNextButton.IsEnabled = false;
+                mw.PagerNextButton.IsEnabled = false;
+                pager.IsLastPage = true;
             }
 
             if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage >= 0)
             {
-                PagerPreviousButton.IsEnabled = true;
+                mw.PagerPreviousButton.IsEnabled = true;
             }
             if (pager.CurrentPage < 1)
             {
-                PagerPreviousButton.IsEnabled = false;
+                mw.PagerPreviousButton.IsEnabled = false;
+                pager.IsFirstPage = true;
             }
 
             // Disable the pager buttons if there is only one page
             if (pager.CurrentPage == 0 & pager.TotalPages == 1)
             {
-                PagerNextButton.IsEnabled = false;
-                PagerPreviousButton.IsEnabled = false;
+                mw.PagerNextButton.IsEnabled = false;
+                mw.PagerPreviousButton.IsEnabled = false;
+                
+                // First and last page are both true when there is only one page
+                pager.IsFirstPage = true;
+                pager.IsLastPage = true;
             }
 
             // Update the textbox
-            PagerTextBox.Text = string.Format("Page {0} of {1} (Total Parameters: {2})", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
+            mw.PagerTextBox.Text = string.Format("Page {0} of {1} (Total Parameters: {2})", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
 
             // Set the object from the updated Pager object
-            Pagination = pager;
+            Pager = pager;
         }
 
         /// <summary>
@@ -250,17 +270,11 @@ namespace OpenDefinery_DesktopApp
             // Reload the data
             // Get the parameters of the logged in user by default and display in the DataGrid
             Definery.Parameters = SharedParameter.ByUser(
-                Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, true
+                Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, true
                 );
 
             // Update the GUI anytime data is loaded
             RefreshUi();
-        }
-
-        private void UpdateUiWhenSelected()
-        {
-            // Enable the Add to Collection button
-            AddToCollectionButton.IsEnabled = true;
         }
 
         /// <summary>
@@ -298,10 +312,10 @@ namespace OpenDefinery_DesktopApp
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             // Reset page back to 1
-            Pagination.CurrentPage = 0;
+            Pager.CurrentPage = 0;
 
             // Upate the pager data and UI
-            UpdatePager(Pagination, 0);
+            UpdatePager(Pager, 0);
 
             // Load all of the things!!!
             LoadData();
@@ -315,13 +329,13 @@ namespace OpenDefinery_DesktopApp
         private void PagerNextButton_Click(object sender, RoutedEventArgs e)
         {
             // Upate the pager data and UI
-            UpdatePager(Pagination, 1);
+            UpdatePager(Pager, 1);
 
             if (CollectionsList.SelectedItems.Count > 0)
             {
                 // Load the data based on selected Collection and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByCollection(
-                    Definery, CollectionsList.SelectedItem as Collection, Pagination.ItemsPerPage, Pagination.Offset, false
+                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
@@ -329,7 +343,7 @@ namespace OpenDefinery_DesktopApp
             {
                 // Load the data based on the logged in user and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByUser(
-                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, false
+                    Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, false
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
@@ -343,13 +357,13 @@ namespace OpenDefinery_DesktopApp
         private void PagerPreviousButton_Click(object sender, RoutedEventArgs e)
         {
             // Upate the pager data and UI
-            UpdatePager(Pagination, -1);
+            UpdatePager(Pager, -1);
 
             if (CollectionsList.SelectedItems.Count > 0)
             {
                 // Load the data based on selected Collection and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByCollection(
-                    Definery, CollectionsList.SelectedItem as Collection, Pagination.ItemsPerPage, Pagination.Offset, false
+                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
@@ -357,7 +371,7 @@ namespace OpenDefinery_DesktopApp
             {
                 // Load the data based on the logged in user and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByUser(
-                    Definery, Definery.CurrentUser.Name, Pagination.ItemsPerPage, Pagination.Offset, false
+                    Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, false
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
@@ -431,7 +445,11 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateUiWhenSelected();
+            // Show the Add to Collection button if something is selected.
+            if (DataGridParameters.Items.Count > 0)
+            {
+                AddToCollectionButton.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -443,7 +461,7 @@ namespace OpenDefinery_DesktopApp
 
             // Update the pager UI elements
             //Pagination = Pager.LoadData(Definery, Pagination.ItemsPerPage, Pagination.Offset);
-            UpdatePager(Pagination, 0);
+            //UpdatePager(Pagination, 0);
         }
 
         /// <summary>
@@ -454,7 +472,7 @@ namespace OpenDefinery_DesktopApp
         private void AddToCollectionFormButton_Click(object sender, RoutedEventArgs e)
         {
             // Get the selected Collection as a Collection object
-            var selectedCollection = AddToCollectionCombo.SelectedItem as Collection;
+            SelectedCollection = AddToCollectionCombo.SelectedItem as Collection;
 
             foreach (var i in DataGridParameters.SelectedItems)
             {
@@ -462,11 +480,11 @@ namespace OpenDefinery_DesktopApp
                 var selectedParam = i as SharedParameter;
 
                 // Add the Shared Parameter to the collection
-                SharedParameter.AddToCollection(Definery, selectedParam, selectedCollection);
+                SharedParameter.AddToCollection(Definery, selectedParam, SelectedCollection);
             }
 
             // Notify the user of the update
-            MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + selectedCollection.Name + ".");
+            MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
 
             // Hide the overlay
             AddToCollectionGrid.Visibility = Visibility.Hidden;
@@ -662,19 +680,36 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Instantiate the selected item as a Collection object
-            var sollection = CollectionsList.SelectedItem as Collection;
+            if (CollectionsList.SelectedItems.Count > 0)
+            {
+                // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
+                SelectedCollection = CollectionsList.SelectedItem as Collection;
 
-            // Get the parameters
-            Definery.Parameters = SharedParameter.ByCollection(Definery, sollection, Pagination.ItemsPerPage, 0, true
-                );
+                // Get the parameters
+                Definery.Parameters = SharedParameter.ByCollection(Definery, SelectedCollection, Pager.ItemsPerPage, 0, true
+                    );
 
-            // Force the pager to page 0 and update
-            Pagination.CurrentPage = 0;
-            UpdatePager(Pagination, 0);
+                // Force the pager to page 0 and update
+                Pager.CurrentPage = 0;
+                UpdatePager(Pager, 0);
 
-            // Update the GUI anytime data is loaded
-            RefreshUi();
+                // Update the GUI anytime data is loaded
+                RefreshUi();
+
+                // Logic to execute if there are parameters within the collection
+                if (Definery.Parameters.Count() > 0)
+                {
+                    // Show the export button
+                    ExportCollectionButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    ExportCollectionButton.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            // Hide the add to collection button because nothing will be selected
+            AddToCollectionButton.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -693,6 +728,39 @@ namespace OpenDefinery_DesktopApp
             // Set the textbox path if a file was chosen
             if (openFileDialog.ShowDialog() == true)
                 TxtBoxSpPath.Text = openFileDialog.FileName;
+        }
+
+        /// <summary>
+        /// Method to execute when the Export Txt button on the Export Txt form is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExportCollectionTxtButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Reset pagination
+            Pager.Offset = 0;
+            Pager.CurrentPage = 0;
+            Pager.IsFirstPage = true;
+            Pager.IsLastPage = false;
+
+            // Get all of the SharedParameters from the Collection
+            var allParams = SharedParameter.GetAllFromCollection(Definery, SelectedCollection);
+
+            // Generate the text file
+            Exporter.ToRevitTxt(Definery, allParams);
+
+            // Refresh the data
+            Pager.CurrentPage = 0;
+            Pager.Offset = 0;
+
+            // Get the parameters of the logged in user by default and display in the DataGrid
+            // Get the parameters of the logged in user by default and display in the DataGrid
+            Definery.Parameters = SharedParameter.ByCollection(
+                Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
+                );
+
+            // Update the GUI anytime data is loaded
+            RefreshUi();
         }
     }
 }

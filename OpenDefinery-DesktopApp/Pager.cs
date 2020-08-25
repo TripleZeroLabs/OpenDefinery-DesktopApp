@@ -27,6 +27,8 @@ namespace OpenDefinery
 
         // The Offset is not included in the Drupal response, so it must be set elsewhere
         public int Offset { get; set; }
+        public bool IsFirstPage { get; set; }
+        public bool IsLastPage { get; set; }
 
         /// <summary>
         /// Helper method to update the Pager object based on a Response
@@ -46,14 +48,14 @@ namespace OpenDefinery
             pager = JsonConvert.DeserializeObject<Pager>(pagerResponse.ToString());
 
             // Add the MainWindow data to the Pager object
-            pager.CurrentPage = MainWindow.Pagination.CurrentPage;
+            pager.CurrentPage = MainWindow.Pager.CurrentPage;
 
             // Always reassign values for total pages and items because the pager property from Drupal is relative to the current request,
             // however we always want to report the absolute totals if they are greater than zero.
             if (!resetTotals)
             {
-                pager.TotalPages = MainWindow.Pagination.TotalPages;
-                pager.TotalItems = MainWindow.Pagination.TotalItems;
+                pager.TotalPages = MainWindow.Pager.TotalPages;
+                pager.TotalItems = MainWindow.Pager.TotalItems;
             }
             else
             {

@@ -78,6 +78,7 @@
     </ApplicationDefinition>
     <Compile Include="Collection.cs" />
     <Compile Include="DataType.cs" />
+    <Compile Include="Exporter.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="Pager.cs" />
     <Compile Include="SharedParameter.cs" />

@@ -180,7 +180,7 @@ namespace OpenDefinery
             {
 
                 // Set the Pager object on the Main Window
-                MainWindow.Pagination = Pager.SetFromParamReponse(response.Content, resetTotals);
+                MainWindow.Pager = Pager.SetFromParamReponse(response.Content, resetTotals);
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
@@ -220,7 +220,7 @@ namespace OpenDefinery
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // Set the Pager object on the Main Window
-                MainWindow.Pagination = Pager.SetFromParamReponse(response.Content, resetTotals);
+                MainWindow.Pager = Pager.SetFromParamReponse(response.Content, resetTotals);
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
@@ -247,6 +247,9 @@ namespace OpenDefinery
         /// <returns>A list of SharedParameter objects</returns>
         public static List<SharedParameter> ByCollection(Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
         {
+            // Get the current instance of the application window
+            MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+
             var listOfParams = new List<SharedParameter>();
 
             var client = new RestClient(Definery.BaseUrl + string.Format(
@@ -261,7 +264,7 @@ namespace OpenDefinery
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // Set the Pager object on the Main Window
-                MainWindow.Pagination = Pager.SetFromParamReponse(response.Content, resetTotals);
+                MainWindow.Pager = Pager.SetFromParamReponse(response.Content, resetTotals);
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
@@ -285,6 +288,36 @@ namespace OpenDefinery
             return listOfParams;
         }
 
+        /// <summary>
+        /// Retrieve all SharedParameters on all pages from a Collection
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="collection">The Collection to retrieve the parameters from</param>
+        /// <returns>A List of all SharedParameters in the Collection</returns>
+        public static List<SharedParameter> GetAllFromCollection(Definery definery, Collection collection)
+        {
+            // Get the first page of SharedParameters
+            var allParams = ByCollection(definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true);
+
+            // Update the pager since it is not the last page
+            MainWindow.UpdatePager(MainWindow.Pager, 1);
+
+            // Loop through all of the pages
+            do
+            {
+                // Get all SharedParameters of the current page
+                allParams.AddRange(ByCollection(
+                    definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, false));
+
+                // Update the pager since it is not the last page
+                MainWindow.UpdatePager(MainWindow.Pager, 1);
+
+            } while (MainWindow.Pager.CurrentPage < MainWindow.Pager.TotalPages);
+
+            Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), collection.Name));
+
+            return allParams;
+        }
 
         /// <summary>
         /// Creates a new Shared Parameter on Drupal
@@ -422,5 +455,37 @@ namespace OpenDefinery
 
             Debug.WriteLine(response.Content);
         }
+
+        /// <summary>
+        /// Generate a tab delimited string of shared parameters (including header)
+        /// </summary>
+        /// <param name="paramList">The list of parameters to convert</param>
+        /// <returns></returns>
+        public static string CreateParamTable(List<SharedParameter> paramList)
+        {
+            // Instatiate string with header row of TSV
+            var output = "*PARAM\tGUID\tNAME\tDATATYPE\tDATACATEGORY\tGROUP\tVISIBLE\tDESCRIPTION\tUSERMODIFIABLE\n";
+
+            // Add a line of text for each SharedParameter from the list
+            foreach (var p in paramList)
+            {
+                output += "PARAM\t";
+                output += p.Guid + "\t";
+                output += p.Name + "\t";
+                output += p.DataType + "\t";
+                output += p.DataCategory + "\t";
+                //output += p.Group + "\t";
+                output += "999\t";  // Assign the "Default Group" until more robust group system is in place
+                output += p.Visible + "\t";
+                output += p.Description + "\t";
+                output += p.UserModifiable + "\t";
+
+                // Finally, add a new line
+                output += '\n';
+            }
+
+            return output;
+        }
+
     }
 }
