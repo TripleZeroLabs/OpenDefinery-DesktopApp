@@ -57,7 +57,7 @@
                 <Label Content="PASSWORD" Margin="45,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
             </Grid>
             <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center" Width="540" d:IsHidden="True">
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="BrowseForTxtButton" Content="Browse" VerticalAlignment="Top" Height="24" Padding="16,0" Click="BrowseForTxtButton_Click" FontSize="12" Margin="0,64,20,0" HorizontalAlignment="Right" Width="75" Foreground="#FF673AB7"/>
+                <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="BrowseForTxtButton" Content="Browse" VerticalAlignment="Top" Height="24" Padding="16,0" Click="BrowseForTxtButton_Click" FontSize="12" Margin="0,64,20,0" HorizontalAlignment="Right" Width="75"/>
                 <Button x:Name="BttnUpload" Margin="0,0,20,31" Click="BttnUpload_Click" Height="41" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="207" Content="Batch Load All Parameters"/>
                 <TextBox x:Name="TxtBoxSpPath" Margin="20,64,100,0" Height="24" VerticalAlignment="Top" HorizontalContentAlignment="Left" IsReadOnly="True"/>
                 <Label Content="ADD TO A COLLECTION" Margin="20,121,20,0" FontSize="12" Height="26" VerticalAlignment="Top" Padding="0,4,4,4"/>
