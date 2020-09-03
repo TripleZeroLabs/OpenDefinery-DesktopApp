@@ -764,6 +764,7 @@ namespace OpenDefinery_DesktopApp
                 );
 
             // Update the GUI anytime data is loaded
+            UpdatePager(Pager, 0);
             RefreshUi();
         }
     }
