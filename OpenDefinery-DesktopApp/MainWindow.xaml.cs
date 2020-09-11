@@ -427,7 +427,7 @@ namespace OpenDefinery_DesktopApp
 
                 if (DataGridParameters.SelectedItems.Count > 0)
                 {
-                    // Add the Collections from the main Definery object
+                    // Add the Collections to the list from the main Definery object
                     AddToCollectionCombo.ItemsSource = Definery.Collections;
                     AddToCollectionCombo.SelectedIndex = 0;
 
@@ -483,8 +483,10 @@ namespace OpenDefinery_DesktopApp
                 // Get current Shared Parameter as a SharedParameter object
                 var selectedParam = i as SharedParameter;
 
-                // Add the Shared Parameter to the collection
-                SharedParameter.AddToCollection(Definery, selectedParam, SelectedCollection);
+                // Instantiate a list of Collections including any Collections already assigned
+
+                // Add the Shared Parameter to the Collection
+                SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
             }
 
             // Notify the user of the update

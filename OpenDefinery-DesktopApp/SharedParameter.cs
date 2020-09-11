@@ -24,10 +24,10 @@ namespace OpenDefinery
 
         [JsonProperty("guid")]
         public Guid Guid { get; set; }
-        
+
         [JsonProperty("name")]
         public string Name { get; set; }
-        
+
         [JsonProperty("description")]
         public string Description { get; set; }
 
@@ -44,7 +44,13 @@ namespace OpenDefinery
         public string UserModifiable { get; set; }
 
         [JsonProperty("visible")]
-        public string  Visible { get; set; }
+        public string Visible { get; set; }
+
+        [JsonProperty("author")]
+        public string Author { get; set; }
+
+        [JsonProperty("collections")]
+        public string CollectionsString { get; set; }
 
         public string BatchId { get; set; }
 
@@ -429,13 +435,48 @@ namespace OpenDefinery
         }
 
         /// <summary>
-        /// Add a SharedParameter to a Collection. Warning: This will overwrite any existing Collection values.
+        /// Add a Shared Parameter to a Collection.
         /// </summary>
         /// <param name="definery">The main Definery object provides the CSRF token</param>
         /// <param name="param">The SharedParameter object to add</param>
         /// <param name="collection">The Collection object to add the Shared Parameter to</param>
-        public static void AddToCollection(Definery definery, SharedParameter param, Collection collection)
+        public static void AddCollection(Definery definery, SharedParameter param, int newCollectionId)
         {
+            // Split the CollectionsString to get the ID of each collection already assigned to the Parameter
+            var collectionIds = new List<string>();
+
+            // Add any Collections that already exist
+            if (!string.IsNullOrEmpty(param.CollectionsString))
+            {
+                collectionIds = param.CollectionsString.Split(',').ToList();
+            }
+
+            // Add the new Collection to the list to be added
+            collectionIds.Add(newCollectionId.ToString());
+
+            // Instantiate a string to pass Collections to body of API call
+            var field_collections = ", \"field_collections\": [";
+            foreach (var id in collectionIds)
+            {
+                // Remove leading spaces if they exist from the string split
+                if (id.First() == ' ')
+                {
+                    id.Remove(0);
+                }
+
+                // Add the target to the string which will eventually pass to the API call
+                field_collections += "{\"target_id\":" + id + ", \"target_type\": \"node\"},";
+            }
+
+            // Remove trailing comma
+            if (field_collections.Last() == ',')
+            {
+                field_collections = field_collections.Remove(field_collections.Length - 1, 1);
+            }
+
+            // Add trailing bracket
+            field_collections += "]";
+
             var client = new RestClient(string.Format(Definery.BaseUrl + "node/{0}?_format=json", param.Id));
             client.Timeout = -1;
             var request = new RestRequest(Method.PATCH);
@@ -445,10 +486,8 @@ namespace OpenDefinery
             request.AddParameter("application/json", "{" +
                 "\"type\": [{" +
                         "\"target_id\": \"shared_parameter\"" +
-                    "}]," +
-                    "\"field_collections\": {" +
-                        "\"und\": " + "\"" + collection.Id + "\"" +
-                    "}" +
+                    "}]" +
+                    field_collections +
                 "}", 
                 ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
@@ -486,6 +525,5 @@ namespace OpenDefinery
 
             return output;
         }
-
     }
 }
