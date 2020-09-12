@@ -460,7 +460,7 @@ namespace OpenDefinery_DesktopApp
         private void AddToCollectionButton_Click(object sender, RoutedEventArgs e)
         {
             // Check if the current user has any Collections first
-            if (Definery.Collections.Count < 1)
+            if (Definery.Collections == null)
             {
                 MessageBox.Show("You do not have any Collections yet. Once you have created a collection, you may add Shared Parameters to it.");
             }
