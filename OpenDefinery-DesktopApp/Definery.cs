@@ -17,7 +17,8 @@ namespace OpenDefinery
         public string CsrfToken { get; set; }
         public string AuthCode { get; set; }
 
-        public List<Collection> Collections { get; set; }
+        public List<Collection> MyCollections { get; set; }
+        public List<Collection> AllCollections { get; set; }
         public List<SharedParameter> Parameters { get; set; }
         public List<DataType> DataTypes { get; set; }
         public List<Group> Groups { get; set; }

@@ -21,13 +21,60 @@ namespace OpenDefinery
         public string Name { get; set; }
 
         /// <summary>
-        /// Get all Collections from Drupal.
+        /// Retrieve the currently logged in user's Collections.
         /// </summary>
         /// <param name="definery">The main Definery object provides the CSRF token.</param>
         /// <returns>A list of Collection objects</returns>
-        public static List<Collection> GetAll(Definery definery)
+        public static List<Collection> ByCurrentUser(Definery definery)
         {
             var client = new RestClient(Definery.BaseUrl + "rest/collections?_format=json");
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+
+            // Return the data if the response was OK
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // If the user has no Collections, it returns an empty array
+                // Only process the response if it is not an empty array
+                if (response.Content != "[]")
+                {
+                    try
+                    {
+                        var collections = JsonConvert.DeserializeObject<List<Collection>>(response.Content);
+
+                        return collections;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                MessageBox.Show(response.StatusCode.ToString());
+
+                return null;
+            }
+
+        }
+
+        /// <summary>
+        /// Retrieve all published Collections.
+        /// </summary>
+        /// <param name="definery"></param>
+        /// <returns></returns>
+        public static List<Collection> AllPublished(Definery definery)
+        {
+            var client = new RestClient(Definery.BaseUrl + "rest/collections/published?_format=json");
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);

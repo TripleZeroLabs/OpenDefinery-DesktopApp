@@ -88,10 +88,14 @@ namespace OpenDefinery_DesktopApp
                     else return x.Name.CompareTo(y.Name);
                 });
 
-                // Display Collections in listbox
-                Definery.Collections = Collection.GetAll(Definery);
+                // Display Collections in listboxes
+                Definery.MyCollections = Collection.ByCurrentUser(Definery);
                 CollectionsList.DisplayMemberPath = "Name";
-                CollectionsList.ItemsSource = Definery.Collections;
+                CollectionsList.ItemsSource = Definery.MyCollections;
+
+                Definery.AllCollections = Collection.AllPublished(Definery);
+                CollectionsList_Published.DisplayMemberPath = "Name";
+                CollectionsList_Published.ItemsSource = Definery.AllCollections;
 
                 // Get the parameters of the logged in user by default and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByUser(
@@ -436,7 +440,7 @@ namespace OpenDefinery_DesktopApp
             TxtBoxSpPath.Text = string.Empty;
 
             // Populate the Collections combo
-            BatchUploadCollectionCombo.ItemsSource = Definery.Collections;
+            BatchUploadCollectionCombo.ItemsSource = Definery.MyCollections;
             BatchUploadCollectionCombo.DisplayMemberPath = "Name";
             BatchUploadCollectionCombo.SelectedIndex = 0;
 
@@ -460,7 +464,7 @@ namespace OpenDefinery_DesktopApp
         private void AddToCollectionButton_Click(object sender, RoutedEventArgs e)
         {
             // Check if the current user has any Collections first
-            if (Definery.Collections == null)
+            if (Definery.MyCollections == null)
             {
                 MessageBox.Show("You do not have any Collections yet. Once you have created a collection, you may add Shared Parameters to it.");
             }
@@ -472,7 +476,7 @@ namespace OpenDefinery_DesktopApp
                 if (DataGridParameters.SelectedItems.Count > 0)
                 {
                     // Add the Collections to the list from the main Definery object
-                    AddToCollectionCombo.ItemsSource = Definery.Collections;
+                    AddToCollectionCombo.ItemsSource = Definery.MyCollections;
                     AddToCollectionCombo.SelectedIndex = 0;
 
                     // Show the Add To Collection form
@@ -562,7 +566,7 @@ namespace OpenDefinery_DesktopApp
         private void NewParameterButton_Click(object sender, RoutedEventArgs e)
         {
             // Pass the Collections list to the combobox and configure
-            NewParamFormCombo.ItemsSource = Definery.Collections;
+            NewParamFormCombo.ItemsSource = Definery.MyCollections;
             NewParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
             NewParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
 
@@ -712,10 +716,10 @@ namespace OpenDefinery_DesktopApp
             {
                 MessageBox.Show("The collection was successfully created.");
 
-                Definery.Collections = Collection.GetAll(Definery);
+                Definery.MyCollections = Collection.ByCurrentUser(Definery);
 
                 // Refresh the sidebar list UI
-                CollectionsList.ItemsSource = Definery.Collections;
+                CollectionsList.ItemsSource = Definery.MyCollections;
             }
 
             // Hide the overlay
@@ -730,37 +734,19 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CollectionsList.SelectedItems.Count > 0)
-            {
-                // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
-                SelectedCollection = CollectionsList.SelectedItem as Collection;
-
-                // Get the parameters
-                Definery.Parameters = SharedParameter.ByCollection(Definery, SelectedCollection, Pager.ItemsPerPage, 0, true
-                    );
-
-                // Force the pager to page 0 and update
-                Pager.CurrentPage = 0;
-                UpdatePager(Pager, 0);
-
-                // Update the GUI anytime data is loaded
-                RefreshUi();
-
-                // Logic to execute if there are parameters within the collection
-                if (Definery.Parameters.Count() > 0)
-                {
-                    // Show the export button
-                    ExportCollectionButton.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    ExportCollectionButton.Visibility = Visibility.Collapsed;
-                }
-            }
-
-            // Hide the add to collection button because nothing will be selected
-            AddToCollectionButton.Visibility = Visibility.Hidden;
+            RefreshCollectionParameters(CollectionsList);
         }
+
+        /// <summary>
+        /// Method to execute when the Published Collections selection changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CollectionsList_Published_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshCollectionParameters(CollectionsList_Published);
+        }
+
 
         /// <summary>
         /// Method to execute when the Browse button is clicked on the Batch Upload form.
@@ -812,6 +798,44 @@ namespace OpenDefinery_DesktopApp
             // Update the GUI anytime data is loaded
             UpdatePager(Pager, 0);
             RefreshUi();
+        }
+
+        /// <summary>
+        /// Helper method to update the DataTable based on ListBox selections.
+        /// </summary>
+        /// <param name="listBox"></param>
+        private void RefreshCollectionParameters(ListBox listBox)
+        {
+            if (listBox.SelectedItems.Count > 0)
+            {
+                // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
+                SelectedCollection = listBox.SelectedItem as Collection;
+
+                // Get the parameters
+                Definery.Parameters = SharedParameter.ByCollection(Definery, SelectedCollection, Pager.ItemsPerPage, 0, true
+                    );
+
+                // Force the pager to page 0 and update
+                Pager.CurrentPage = 0;
+                UpdatePager(Pager, 0);
+
+                // Update the GUI anytime data is loaded
+                RefreshUi();
+
+                // Logic to execute if there are parameters within the collection
+                if (Definery.Parameters.Count() > 0)
+                {
+                    // Show the export button
+                    ExportCollectionButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    ExportCollectionButton.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            // Hide the add to collection button because nothing will be selected
+            AddToCollectionButton.Visibility = Visibility.Hidden;
         }
     }
 }
