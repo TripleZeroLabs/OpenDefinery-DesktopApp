@@ -48,13 +48,21 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+        <Grid x:Name="OverlayGrid" Background="#B2000000">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
                 <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,50" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
                 <Label Content="USERNAME" Margin="45,63,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
+            </Grid>
+            <Grid x:Name="ProgressGrid" Margin="0" VerticalAlignment="Top" Width="400" Background="White" Height="110">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Margin="0,25,0,0" TextWrapping="Wrap" Text="Uploading parameters..." VerticalAlignment="Top" TextAlignment="Center" Height="26" UseLayoutRounding="True"/>
+                <TextBlock x:Name="ProgressStatus" TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Center" Height="24" UseLayoutRounding="True" FontSize="9"/>
+                <ProgressBar x:Name="MainProgressBar" Height="20" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="370"/>
             </Grid>
             <Grid x:Name="BatchUploadGrid" Height="270" Margin="0" VerticalAlignment="Top" Background="White" HorizontalAlignment="Center" Width="540" d:IsHidden="True">
                 <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="BrowseForTxtButton" Content="Browse" VerticalAlignment="Top" Height="24" Padding="16,0" Click="BrowseForTxtButton_Click" FontSize="12" Margin="0,64,20,0" HorizontalAlignment="Right" Width="75"/>
