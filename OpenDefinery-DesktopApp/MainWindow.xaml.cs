@@ -54,6 +54,7 @@ namespace OpenDefinery_DesktopApp
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The Batch Upload form
             AddToCollectionButton.Visibility = Visibility.Hidden;  // Add to Collection button
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
+            CloneParameterButton.Visibility = Visibility.Collapsed;  // Clone Parameter button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
 
             PagerNextButton.IsEnabled = false;  // Pager
@@ -87,6 +88,11 @@ namespace OpenDefinery_DesktopApp
                     else if (y.Name == null) return 1;
                     else return x.Name.CompareTo(y.Name);
                 });
+
+                // Pass the DataType list to the combobox and configure
+                NewParamDataTypeCombo.ItemsSource = Definery.DataTypes;
+                NewParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
+                NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
 
                 // Display Collections in listboxes
                 Definery.MyCollections = Collection.ByCurrentUser(Definery);
@@ -498,9 +504,13 @@ namespace OpenDefinery_DesktopApp
         private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Show the Add to Collection button if something is selected.
-            if (DataGridParameters.Items.Count > 0)
+            if (DataGridParameters.SelectedItems.Count > 0)
             {
                 AddToCollectionButton.Visibility = Visibility.Visible;
+            }
+            if (DataGridParameters.SelectedItems.Count == 1)
+            {
+                CloneParameterButton.Visibility = Visibility.Visible;
             }
         }
 
@@ -565,6 +575,9 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void NewParameterButton_Click(object sender, RoutedEventArgs e)
         {
+            // Reset the form
+            InitializeParamForm();
+
             // Pass the Collections list to the combobox and configure
             NewParamFormCombo.ItemsSource = Definery.MyCollections;
             NewParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
@@ -572,11 +585,6 @@ namespace OpenDefinery_DesktopApp
 
             // Generate a GUID by default
             NewParamGuidTextBox.Text = Guid.NewGuid().ToString();
-
-            // Pass the DataType list to the combobox and configure
-            NewParamDataTypeCombo.ItemsSource = Definery.DataTypes;
-            NewParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
-            NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
 
             // Clear all values
             NewParamNameTextBox.Text = "";
@@ -653,6 +661,10 @@ namespace OpenDefinery_DesktopApp
                         MessageBox.Show("The parameter has been successfully created.");
 
                         Debug.Write(response);
+
+                        // Reset the form values and UI
+                        InitializeParamForm();
+
                     }
                     // Display a message if the text cannot be cast to a GUID
                     catch (Exception ex)
@@ -735,6 +747,9 @@ namespace OpenDefinery_DesktopApp
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RefreshCollectionParameters(CollectionsList);
+
+            // Deselect the other ListBox
+            CollectionsList_Published.SelectedItem = null;
         }
 
         /// <summary>
@@ -745,8 +760,10 @@ namespace OpenDefinery_DesktopApp
         private void CollectionsList_Published_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RefreshCollectionParameters(CollectionsList_Published);
-        }
 
+            // Deselect the other ListBox
+            CollectionsList.SelectedItem = null;
+        }
 
         /// <summary>
         /// Method to execute when the Browse button is clicked on the Batch Upload form.
@@ -808,6 +825,10 @@ namespace OpenDefinery_DesktopApp
         {
             if (listBox.SelectedItems.Count > 0)
             {
+                // Hide contextual UI since no parameters will be selected
+                AddToCollectionButton.Visibility = Visibility.Collapsed;
+                CloneParameterButton.Visibility = Visibility.Collapsed;
+
                 // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
                 SelectedCollection = listBox.SelectedItem as Collection;
 
@@ -836,6 +857,77 @@ namespace OpenDefinery_DesktopApp
 
             // Hide the add to collection button because nothing will be selected
             AddToCollectionButton.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Method to execute when Clone Parameter Button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CloneParameterButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Only execute if a single paramter is selected
+            if (DataGridParameters.SelectedItems.Count == 1)
+            {
+                // Toggle the UI
+                OverlayGrid.Visibility = Visibility.Visible;
+                NewParameterGrid.Visibility = Visibility.Visible;
+
+                // Add Collections to ComboBox
+                NewParamFormCombo.ItemsSource = Definery.MyCollections;
+                NewParamFormCombo.DisplayMemberPath = "Name";
+                NewParamFormCombo.SelectedIndex = 0;
+
+                // Disable editing of certain fields otherwise you are technically not cloning
+                NewParamGuidTextBox.IsEnabled = false;
+                NewParamDataTypeCombo.IsEnabled = false;
+                NewParamVisibleCheck.IsEnabled = false;
+                NewParamUserModCheckbox.IsEnabled = false;
+
+                var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+
+                // Prepopulate the fields based on the selected parameter
+                NewParamNameTextBox.Text = selectedParam.Name;
+                NewParamGuidTextBox.Text = selectedParam.Guid.ToString();
+                NewParamDescTextBox.Text = selectedParam.Description;
+                var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
+                NewParamDataTypeCombo.SelectedItem = paramDataType;
+
+                if (selectedParam.Visible == "1")
+                {
+                    NewParamVisibleCheck.IsChecked = true;
+                }
+                else
+                {
+                    NewParamVisibleCheck.IsChecked = false;
+                }
+
+                if (selectedParam.UserModifiable == "1")
+                {
+                    NewParamUserModCheckbox.IsChecked = true;
+                }
+                else
+                {
+                    NewParamUserModCheckbox.IsChecked = false;
+                }
+
+            }
+            if (DataGridParameters.SelectedItems.Count > 1)
+            {
+                MessageBox.Show("You may only clone one Shared Parameter at a time... For now.");
+            }
+        }
+
+        /// <summary>
+        /// Helper method to clear the New Parameter form.
+        /// </summary>
+        private void InitializeParamForm()
+        {
+            // Enable editing of certain fields just in case this method was triggered from cloning
+            NewParamGuidTextBox.IsEnabled = true;
+            NewParamDataTypeCombo.IsEnabled = true;
+            NewParamVisibleCheck.IsEnabled = true;
+            NewParamUserModCheckbox.IsEnabled = true;
         }
     }
 }

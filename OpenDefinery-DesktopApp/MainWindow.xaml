@@ -31,15 +31,16 @@
             </Grid>
             <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0,0,-0.4,0" Height="907" VerticalAlignment="Top">
                 <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED">
-                    <Label Content="MY COLLECTIONS" Padding="10,4,4,4" Margin="0,10,0,0"/>
+                    <Label Content="MY COLLECTIONS" Padding="17,4,4,4" Margin="0,10,0,0" FontSize="11" FontWeight="Bold"/>
                     <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
-                    <Label Content="PUBLISHED COLLECTIONS" Padding="10,4,4,4" Margin="0,10,0,0"/>
+                    <Label Content="PUBLISHED COLLECTIONS" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold"/>
                     <ListBox x:Name="CollectionsList_Published" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_Published_SelectionChanged" />
                 </StackPanel>
                 <StackPanel Margin="0,0,0,-0.2" DockPanel.Dock="Right">
                     <StackPanel Orientation="Horizontal">
                         <Button x:Name="ExportCollectionButton" Content="Export To File" HorizontalAlignment="Center" Height="32" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0"/>
                         <Button x:Name="AddToCollectionButton" Content="Add To Collection" HorizontalAlignment="Left" Margin="10,10,0,10" Foreground="White" Click="AddToCollectionButton_Click" Padding="10,4"/>
+                        <Button x:Name="CloneParameterButton" Content="Clone Parameter" HorizontalAlignment="Left" Margin="10,10,0,10" Foreground="White" Padding="10,4" Click="CloneParameterButton_Click"/>
                     </StackPanel>
                     <DataGrid x:Name="DataGridParameters" Height="795" Margin="10,0" IsReadOnly="True" SelectionUnit="FullRow" SelectionChanged="DataGridParameters_SelectionChanged"/>
                     <StackPanel Height="45" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Right">
@@ -50,7 +51,7 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+        <Grid x:Name="OverlayGrid" Background="#B2000000">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
@@ -58,7 +59,7 @@
                 <Label Content="USERNAME" Margin="45,63,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
             </Grid>
-            <Grid x:Name="ProgressGrid" Margin="0" VerticalAlignment="Top" Width="400" Background="White" Height="110">
+            <Grid x:Name="ProgressGrid" Margin="0" VerticalAlignment="Top" Width="400" Background="White" Height="110" d:IsHidden="True">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
@@ -81,7 +82,7 @@
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
             </Grid>
-            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top" d:IsHidden="True">
+            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top">
                 <StackPanel Margin="0">
                     <Label Content="CHOOSE A COLLECTION" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <ComboBox x:Name="NewParamFormCombo" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
