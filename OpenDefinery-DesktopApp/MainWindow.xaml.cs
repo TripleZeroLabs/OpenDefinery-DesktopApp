@@ -929,5 +929,18 @@ namespace OpenDefinery_DesktopApp
             NewParamVisibleCheck.IsEnabled = true;
             NewParamUserModCheckbox.IsEnabled = true;
         }
+
+        /// <summary>
+        /// Helper method to handle text links opening in an external browser.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void HandleLinkClick(object sender, RoutedEventArgs e)
+        {
+            Hyperlink hl = (Hyperlink)sender;
+            string navigateUri = hl.NavigateUri.ToString();
+            Process.Start(new ProcessStartInfo(navigateUri));
+            e.Handled = true;
+        }
     }
 }

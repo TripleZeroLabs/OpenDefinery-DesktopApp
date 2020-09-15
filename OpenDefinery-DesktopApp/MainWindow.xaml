@@ -51,13 +51,20 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <Grid x:Name="OverlayGrid" Background="#B2000000">
-            <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="346" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
-                <PasswordBox x:Name="PasswordPasswordBox" Margin="50,152,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
-                <TextBox x:Name="UsernameTextBox" Margin="50,78,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
-                <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,50" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
-                <Label Content="USERNAME" Margin="45,63,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
-                <Label Content="PASSWORD" Margin="45,137,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
+        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+            <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="350" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
+                <PasswordBox x:Name="PasswordPasswordBox" Margin="50,150,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
+                <TextBox x:Name="UsernameTextBox" Margin="50,50,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
+                <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,75" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
+                <Label Content="USERNAME" Margin="45,25,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
+                <Label Content="PASSWORD" Margin="45,125,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
+                <TextBlock HorizontalAlignment="Center" Margin="0,0,0,25" TextWrapping="Wrap" VerticalAlignment="Bottom"><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/password"><InlineUIContainer>  
+                            <TextBlock Text="Forgot Password"/>  
+                        </InlineUIContainer></Hyperlink><Run Text=" "/><InlineUIContainer>
+                        <TextBlock Text="|" Margin="15,0" Foreground="#DDA0A0A0"/>  
+                    </InlineUIContainer><Run Text=" "/><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/register"><InlineUIContainer>  
+                            <TextBlock Text="Register for an Account"/>  
+                        </InlineUIContainer></Hyperlink></TextBlock>
             </Grid>
             <Grid x:Name="ProgressGrid" Margin="0" VerticalAlignment="Top" Width="400" Background="White" Height="110" d:IsHidden="True">
                 <Grid.ColumnDefinitions>
@@ -82,7 +89,7 @@
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
             </Grid>
-            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top">
+            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" Height="737" VerticalAlignment="Top" d:IsHidden="True">
                 <StackPanel Margin="0">
                     <Label Content="CHOOSE A COLLECTION" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <ComboBox x:Name="NewParamFormCombo" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
