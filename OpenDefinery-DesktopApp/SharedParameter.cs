@@ -5,6 +5,7 @@ using OpenDefinery_DesktopApp;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -94,7 +95,7 @@ namespace OpenDefinery
         /// <param name="definery">The main Definery object provides the basic authorization code</param>
         /// <param name="guid">The GUID of the SharedParameters to retrieve</param>
         /// <returns>A list of SharedParameter objects</returns>
-        public static List<SharedParameter> FromGuid(Definery definery, Guid guid)
+        public static ObservableCollection<SharedParameter> FromGuid(Definery definery, Guid guid)
         {
             var client = new RestClient(Definery.BaseUrl + "rest/params?_format=json&guid=" + guid);
             client.Timeout = -1;
@@ -110,7 +111,7 @@ namespace OpenDefinery
             {
                 var parameters = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
 
-                return parameters;
+                return new ObservableCollection<SharedParameter>(parameters);
             }
             else
             {
@@ -172,7 +173,7 @@ namespace OpenDefinery
         /// <param name="offset">The offset of items from zero (i.e., to start page two at 50 items per page, this should be set to 50).</param>
         /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
         /// <returns>A list of SharedParameters</returns>
-        public static List<SharedParameter> GetPage(Definery definery, int itemsPerPage, int offset, bool resetTotals)
+        public static ObservableCollection<SharedParameter> GetPage(Definery definery, int itemsPerPage, int offset, bool resetTotals)
         {
             var client = new RestClient(Definery.BaseUrl + 
                 string.Format("rest/params?_format=json&items_per_page={0}&offset={1}", itemsPerPage, offset));
@@ -186,14 +187,15 @@ namespace OpenDefinery
             {
 
                 // Set the Pager object on the Main Window
-                MainWindow.Pager = Pager.SetFromParamReponse(response.Content, resetTotals);
+                MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
 
-                return JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+                var parameters = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
 
+                return new ObservableCollection<SharedParameter>(parameters);
             }
             else
             {
@@ -212,7 +214,7 @@ namespace OpenDefinery
         /// <param name="offset">The offset of items to skip pages</param>
         /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
         /// <returns>A list of SharedParameter objects</returns>
-        public static List<SharedParameter> ByUser(Definery definery, string userName, int itemsPerPage, int offset, bool resetTotals)
+        public static ObservableCollection<SharedParameter> ByUser(Definery definery, string userName, int itemsPerPage, int offset, bool resetTotals)
         {
             var client = new RestClient(Definery.BaseUrl + string.Format(
                 "rest/params/user/{0}?_format=json&items_per_page={1}&offset={2}", userName, itemsPerPage, offset)
@@ -226,13 +228,15 @@ namespace OpenDefinery
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // Set the Pager object on the Main Window
-                MainWindow.Pager = Pager.SetFromParamReponse(response.Content, resetTotals);
+                MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
 
-                return JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+                var parameters = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+
+                return new ObservableCollection<SharedParameter>(parameters);
             }
             else
             {
@@ -251,7 +255,7 @@ namespace OpenDefinery
         /// <param name="offset">The offset of items to skip pages</param>
         /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
         /// <returns>A list of SharedParameter objects</returns>
-        public static List<SharedParameter> ByCollection(Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
+        public static ObservableCollection<SharedParameter> ByCollection(Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
         {
             // Get the current instance of the application window
             MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
@@ -266,11 +270,14 @@ namespace OpenDefinery
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);
             IRestResponse response = client.Execute(request);
 
+            // Set the pager
+            MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+
             // Logic if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // Set the Pager object on the Main Window
-                MainWindow.Pager = Pager.SetFromParamReponse(response.Content, resetTotals);
+                //MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
@@ -291,7 +298,7 @@ namespace OpenDefinery
                 MessageBox.Show("There was an error getting the parameters.");
             }
 
-            return listOfParams;
+            return new ObservableCollection<SharedParameter>(listOfParams);
         }
 
         /// <summary>
@@ -300,10 +307,10 @@ namespace OpenDefinery
         /// <param name="definery">The main Definery object</param>
         /// <param name="collection">The Collection to retrieve the parameters from</param>
         /// <returns>A List of all SharedParameters in the Collection</returns>
-        public static List<SharedParameter> GetAllFromCollection(Definery definery, Collection collection)
+        public static ObservableCollection<SharedParameter> GetAllFromCollection(Definery definery, Collection collection)
         {
             // Get the first page of SharedParameters
-            var allParams = ByCollection(definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true);
+            var allParams = ByCollection(definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true).ToList();
 
             // Update the pager since it is not the last page
             MainWindow.UpdatePager(MainWindow.Pager, 1);
@@ -322,7 +329,7 @@ namespace OpenDefinery
 
             Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), collection.Name));
 
-            return allParams;
+            return new ObservableCollection<SharedParameter>(allParams);
         }
 
         /// <summary>
@@ -442,7 +449,7 @@ namespace OpenDefinery
         /// <param name="collection">The Collection object to add the Shared Parameter to</param>
         public static void AddCollection(Definery definery, SharedParameter param, int newCollectionId)
         {
-            // Split the CollectionsString to get the ID of each collection already assigned to the Parameter
+            // Instantiate a list of Collection IDs as strings
             var collectionIds = new List<string>();
 
             // Add any Collections that already exist
@@ -493,6 +500,83 @@ namespace OpenDefinery
             IRestResponse response = client.Execute(request);
 
             Debug.WriteLine(response.Content);
+        }
+
+        /// <summary>
+        /// Removes a Shared Parameter from a Collection.
+        /// </summary>
+        /// <param name="definery">The main Definery object provides the CSRF token</param>
+        /// <param name="param">The SharedParameter object to add</param>
+        /// <param name="collection">The Collection object to remove the Shared Parameter from</param>
+        public static bool RemoveCollection(Definery definery, SharedParameter param, int removedCollectionId)
+        {
+            // Instantiate a list of Collection IDs as strings
+            var collectionIds = new List<string>();
+
+            // Add any Collections that already exist
+            if (!string.IsNullOrEmpty(param.CollectionsString))
+            {
+                collectionIds = param.CollectionsString.Split(',').ToList();
+            }
+
+            // Clean up strings
+            for (int i = 0; i < collectionIds.Count; i++)
+            {
+                collectionIds[i] = collectionIds[i].Replace(" ", "");
+            }
+
+            // Remove the new Collection frome the list to be removed
+            collectionIds.Remove(removedCollectionId.ToString());
+
+            // Instantiate a string to pass Collections to body of API call
+            var field_collections = ", \"field_collections\": [";
+            foreach (var id in collectionIds)
+            {
+                // Remove leading spaces if they exist from the string split
+                if (id.First() == ' ')
+                {
+                    id.Remove(0);
+                }
+
+                // Add the target to the string which will eventually pass to the API call
+                field_collections += "{\"target_id\":" + id + ", \"target_type\": \"node\"},";
+            }
+
+            // Remove trailing comma
+            if (field_collections.Last() == ',')
+            {
+                field_collections = field_collections.Remove(field_collections.Length - 1, 1);
+            }
+
+            // Add trailing bracket
+            field_collections += "]";
+
+            var client = new RestClient(string.Format(Definery.BaseUrl + "node/{0}?_format=json", param.Id));
+            client.Timeout = -1;
+            var request = new RestRequest(Method.PATCH);
+            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            request.AddParameter("application/json", "{" +
+                "\"type\": [{" +
+                        "\"target_id\": \"shared_parameter\"" +
+                    "}]" +
+                    field_collections +
+                "}",
+                ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+
+            Debug.WriteLine(response.Content);
+
+            // Remove the selected DataGrid Items if the reponse was OK
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>

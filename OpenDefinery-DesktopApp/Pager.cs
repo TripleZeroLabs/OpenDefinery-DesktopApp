@@ -35,13 +35,13 @@ namespace OpenDefinery
         /// </summary>
         /// <param name="responseContent">The IRestResponse.Content value as a string</param>
         /// <returns>The new Pager object</returns>
-        public static Pager SetFromParamReponse(string responseContent, bool resetTotals)
+        public static Pager SetFromParamReponse(IRestResponse response, bool resetTotals)
         {
             // Instantiate a new pager
             var pager = new Pager();
 
             // Cast the rows from the reponse to a generic JSON object
-            JObject json = JObject.Parse(responseContent);
+            JObject json = JObject.Parse(response.Content);
 
             // Add the Drupal pager data to the Pager object
             var pagerResponse = json.SelectToken("pager");

@@ -52,10 +52,12 @@ namespace OpenDefinery_DesktopApp
             NewParameterGrid.Visibility = Visibility.Hidden;  // The New Parameter form
             NewCollectionGrid.Visibility = Visibility.Hidden;  // The New Collection form
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The Batch Upload form
-            AddToCollectionButton.Visibility = Visibility.Hidden;  // Add to Collection button
+            AddToCollectionButton.Visibility = Visibility.Collapsed;  // Add to Collection button
+            RemoveFromCollectionButton.Visibility = Visibility.Collapsed;  // Remove from Collection button
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
             CloneParameterButton.Visibility = Visibility.Collapsed;  // Clone Parameter button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
+            PagerPanel.Visibility = Visibility.Hidden;  // Pager
 
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
@@ -103,11 +105,6 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList_Published.DisplayMemberPath = "Name";
                 CollectionsList_Published.ItemsSource = Definery.AllCollections;
 
-                // Get the parameters of the logged in user by default and display in the DataGrid
-                Definery.Parameters = SharedParameter.ByUser(
-                    Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, true
-                    );
-
                 // Update the main Pager object
                 Pager.CurrentPage = 0;
                 UpdatePager(Pager, 0);
@@ -142,6 +139,10 @@ namespace OpenDefinery_DesktopApp
 
                 // Set the new offset to 0
                 pager.Offset = 0;
+
+                // Toggle the UI
+                mw.PagerNextButton.IsEnabled = true;
+                mw.PagerPreviousButton.IsEnabled = false;
             }
             if (pager.CurrentPage >= 1)
             {
@@ -389,22 +390,12 @@ namespace OpenDefinery_DesktopApp
             // Upate the pager data and UI
             UpdatePager(Pager, 1);
 
-            if (CollectionsList.SelectedItems.Count > 0)
-            {
-                // Load the data based on selected Collection and display in the DataGrid
-                Definery.Parameters = SharedParameter.ByCollection(
-                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
-                    );
-                DataGridParameters.ItemsSource = Definery.Parameters;
-            }
-            else
-            {
-                // Load the data based on the logged in user and display in the DataGrid
-                Definery.Parameters = SharedParameter.ByUser(
-                    Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, false
-                    );
-                DataGridParameters.ItemsSource = Definery.Parameters;
-            }
+            // Load the data based on selected Collection and display in the DataGrid
+            Definery.Parameters = SharedParameter.ByCollection(
+                Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
+                );
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -511,19 +502,17 @@ namespace OpenDefinery_DesktopApp
             if (DataGridParameters.SelectedItems.Count == 1)
             {
                 CloneParameterButton.Visibility = Visibility.Visible;
+                RemoveFromCollectionButton.Visibility = Visibility.Visible;
             }
         }
 
         /// <summary>
         /// Helper method to refresh all UI elements after a new payload.
         /// </summary>
-        private void RefreshUi()
+        public void RefreshUi()
         {
+            // Update the data grid
             DataGridParameters.ItemsSource = Definery.Parameters;
-
-            // Update the pager UI elements
-            //Pagination = Pager.LoadData(Definery, Pagination.ItemsPerPage, Pagination.Offset);
-            //UpdatePager(Pagination, 0);
         }
 
         /// <summary>
@@ -800,7 +789,7 @@ namespace OpenDefinery_DesktopApp
             var allParams = SharedParameter.GetAllFromCollection(Definery, SelectedCollection);
 
             // Generate the text file
-            Exporter.ToRevitTxt(Definery, allParams);
+            Exporter.ToRevitTxt(Definery, allParams.ToList());
 
             // Refresh the data
             Pager.CurrentPage = 0;
@@ -827,6 +816,7 @@ namespace OpenDefinery_DesktopApp
             {
                 // Hide contextual UI since no parameters will be selected
                 AddToCollectionButton.Visibility = Visibility.Collapsed;
+                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                 CloneParameterButton.Visibility = Visibility.Collapsed;
 
                 // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
@@ -841,6 +831,7 @@ namespace OpenDefinery_DesktopApp
                 UpdatePager(Pager, 0);
 
                 // Update the GUI anytime data is loaded
+                PagerPanel.Visibility = Visibility.Visible;
                 RefreshUi();
 
                 // Logic to execute if there are parameters within the collection
@@ -941,6 +932,48 @@ namespace OpenDefinery_DesktopApp
             string navigateUri = hl.NavigateUri.ToString();
             Process.Start(new ProcessStartInfo(navigateUri));
             e.Handled = true;
+        }
+
+        /// <summary>
+        /// Method to execute when Remove From Collection button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RemoveFromCollectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Instantiate a list of SharedParameters
+            var sharedParameters = new List<SharedParameter>();
+
+            foreach (var i in DataGridParameters.SelectedItems)
+            {
+                var param = i as SharedParameter;
+
+                sharedParameters.Add(param);
+            }
+
+            // Process selected items
+            foreach (var param in sharedParameters)
+            {
+                var response = SharedParameter.RemoveCollection(Definery, param, SelectedCollection.Id);
+
+                if (response)
+                {
+                    // Instantiate a new Pager
+                    // TODO: Make it so that the user stays on the same page after deleting a SharedParameter
+                    // from the Collection
+                    Pager.CurrentPage = 0;
+
+                    // Update the Pager UI
+                    UpdatePager(Pager, 0);
+
+                    // Load the data based on selected Collection and display in the DataGrid
+                    Definery.Parameters = SharedParameter.ByCollection(
+                        Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
+                        );
+
+                    RefreshUi();
+                }
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
@@ -19,7 +20,7 @@ namespace OpenDefinery
 
         public List<Collection> MyCollections { get; set; }
         public List<Collection> AllCollections { get; set; }
-        public List<SharedParameter> Parameters { get; set; }
+        public ObservableCollection<SharedParameter> Parameters { get; set; }
         public List<DataType> DataTypes { get; set; }
         public List<Group> Groups { get; set; }
         public static User CurrentUser { get; set; }
