@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using RestSharp;
 
 namespace OpenDefinery_DesktopApp
 {
@@ -31,6 +32,7 @@ namespace OpenDefinery_DesktopApp
         public Definery Definery { get; set; }
         public static Pager Pager { get; set; }
         public static Collection SelectedCollection { get; set; }
+        ParameterSource ParameterSource { get; set; }
 
         public MainWindow()
         {
@@ -61,6 +63,8 @@ namespace OpenDefinery_DesktopApp
             PagerPanel.Visibility = Visibility.Hidden;  // Pager
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
+
+            ParameterSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
 
             if (string.IsNullOrEmpty(Definery.AuthCode) | string.IsNullOrEmpty(Definery.CsrfToken))
             {
@@ -390,10 +394,19 @@ namespace OpenDefinery_DesktopApp
             // Upate the pager data and UI
             UpdatePager(Pager, 1);
 
-            // Load the data based on selected Collection and display in the DataGrid
-            Definery.Parameters = SharedParameter.ByCollection(
-                Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
-                );
+            // Load the data based on the current source and display in the DataGrid
+            if (ParameterSource == ParameterSource.Collection)
+            {
+                Definery.Parameters = SharedParameter.ByCollection(
+                  Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
+                  );
+            }
+            if (ParameterSource == ParameterSource.Search)
+            {
+                Definery.Parameters = SharedParameter.Search(
+                  Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, false
+                  );
+            }
 
             RefreshUi();
         }
@@ -408,7 +421,7 @@ namespace OpenDefinery_DesktopApp
             // Upate the pager data and UI
             UpdatePager(Pager, -1);
 
-            if (CollectionsList.SelectedItems.Count > 0)
+            if (CollectionsList.SelectedItems.Count > 0 && ParameterSource == ParameterSource.Collection)
             {
                 // Load the data based on selected Collection and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByCollection(
@@ -416,14 +429,14 @@ namespace OpenDefinery_DesktopApp
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
-            else
+            if (ParameterSource == ParameterSource.Search)
             {
-                // Load the data based on the logged in user and display in the DataGrid
-                Definery.Parameters = SharedParameter.ByUser(
-                    Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, false
-                    );
-                DataGridParameters.ItemsSource = Definery.Parameters;
+                Definery.Parameters = SharedParameter.Search(
+                  Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, false
+                  );
             }
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -498,12 +511,23 @@ namespace OpenDefinery_DesktopApp
             if (DataGridParameters.SelectedItems.Count > 0)
             {
                 AddToCollectionButton.Visibility = Visibility.Visible;
+
+                // Toggle UI based on the ParameterSource
+                if (DataGridParameters.SelectedItems.Count > 0 && ParameterSource == ParameterSource.Collection)
+                {
+                    RemoveFromCollectionButton.Visibility = Visibility.Visible;
+                }
+                if (ParameterSource == ParameterSource.Search)
+                {
+                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                }
             }
             if (DataGridParameters.SelectedItems.Count == 1)
             {
                 CloneParameterButton.Visibility = Visibility.Visible;
-                RemoveFromCollectionButton.Visibility = Visibility.Visible;
             }
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -513,6 +537,16 @@ namespace OpenDefinery_DesktopApp
         {
             // Update the data grid
             DataGridParameters.ItemsSource = Definery.Parameters;
+
+            // Manage contextual UI
+            if (ParameterSource == ParameterSource.Search)
+            {
+                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+            }
+            if (DataGridParameters.SelectedItems.Count == 0)
+            {
+                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+            }
         }
 
         /// <summary>
@@ -739,6 +773,9 @@ namespace OpenDefinery_DesktopApp
 
             // Deselect the other ListBox
             CollectionsList_Published.SelectedItem = null;
+
+            // Set enum for UI purposes
+            ParameterSource = ParameterSource.Collection;
         }
 
         /// <summary>
@@ -752,6 +789,9 @@ namespace OpenDefinery_DesktopApp
 
             // Deselect the other ListBox
             CollectionsList.SelectedItem = null;
+
+            // Set enum for UI purposes
+            ParameterSource = ParameterSource.Collection;
         }
 
         /// <summary>
@@ -995,10 +1035,37 @@ namespace OpenDefinery_DesktopApp
             Pager.CurrentPage = 0;
             UpdatePager(Pager, 0);
 
+            // Set enum for UI purposes
+            ParameterSource = ParameterSource.Search;
+
             // Update the GUI anytime data is loaded
             PagerPanel.Visibility = Visibility.Visible;
             ExportCollectionButton.Visibility = Visibility.Collapsed;
             RefreshUi();
+
         }
+
+        /// <summary>
+        /// Helper method to catch when a user presses enter to search.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PressEnterToSearch(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                SearchButton_Click(sender, e);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Identifies the source of the current list of SharedParameters
+    /// </summary>
+    enum ParameterSource
+    {
+        None,
+        Collection,
+        Search
     }
 }
