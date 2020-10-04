@@ -57,8 +57,8 @@ namespace OpenDefinery_DesktopApp
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
             CloneParameterButton.Visibility = Visibility.Collapsed;  // Clone Parameter button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
-            PagerPanel.Visibility = Visibility.Hidden;  // Pager
 
+            PagerPanel.Visibility = Visibility.Hidden;  // Pager
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
 
@@ -974,6 +974,31 @@ namespace OpenDefinery_DesktopApp
                     RefreshUi();
                 }
             }
+        }
+
+        /// <summary>
+        /// Method to execute when Search Button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Hide contextual UI since no parameters will be selected
+            AddToCollectionButton.Visibility = Visibility.Collapsed;
+            RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+            CloneParameterButton.Visibility = Visibility.Collapsed;
+
+            // Get the parameters
+            Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
+
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
+
+            // Update the GUI anytime data is loaded
+            PagerPanel.Visibility = Visibility.Visible;
+            ExportCollectionButton.Visibility = Visibility.Collapsed;
+            RefreshUi();
         }
     }
 }

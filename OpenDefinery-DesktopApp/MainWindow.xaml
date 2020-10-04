@@ -28,6 +28,8 @@
                     <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewCollectionButton" Content="New Collection" Margin="20,0,0,0" Click="NewCollectionButton_Click" Height="Auto" Foreground="#FFFFFCFC" HorizontalAlignment="Left"/>
                     <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="BatchUploadOverlayButton" Content="Batch Upload" Height="Auto" Click="BatchUploadOverlayButton_Click" Margin="20,0,0,0" HorizontalContentAlignment="Right" Foreground="White" Padding="4" HorizontalAlignment="Right"/>
                 </StackPanel>
+                <TextBox x:Name="SearchTxtBox" Style="{DynamicResource MaterialDesignOutlinedTextFieldTextBox}" HorizontalAlignment="Right" Margin="0,6,91,7" TextWrapping="Wrap" VerticalAlignment="Center" Background="White" Padding="0" TabIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="302" Height="44"/>
+                <Button Style="{DynamicResource MaterialDesignFlatLightBgButton}" x:Name="SearchButton" Content="Find" HorizontalAlignment="Right" Margin="0,6,20,7" VerticalAlignment="Center" Height="44" IsCancel="True" Width="66" Click="SearchButton_Click"/>
             </Grid>
             <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0,0,-0.4,0" Height="907" VerticalAlignment="Top">
                 <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED">

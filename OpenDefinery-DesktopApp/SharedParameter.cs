@@ -255,7 +255,8 @@ namespace OpenDefinery
         /// <param name="offset">The offset of items to skip pages</param>
         /// <param name="resetTotals">Clear the total pages and items from the pager to start over?</param>
         /// <returns>A list of SharedParameter objects</returns>
-        public static ObservableCollection<SharedParameter> ByCollection(Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
+        public static ObservableCollection<SharedParameter> ByCollection(
+            Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
         {
             // Get the current instance of the application window
             MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
@@ -330,6 +331,54 @@ namespace OpenDefinery
             Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), collection.Name));
 
             return new ObservableCollection<SharedParameter>(allParams);
+        }
+
+        /// <summary>
+        /// Search for Shared Parmeters by keyword, GUID, or data type.
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="searchQuery">The term(s) to search for</param>
+        /// <returns></returns>
+        public static ObservableCollection<SharedParameter> Search(Definery definery, string searchQuery, int itemsPerPage, int offset, bool resetTotals)
+        {
+            var listOfParams = new List<SharedParameter>();
+
+            var client = new RestClient(Definery.BaseUrl + 
+                string.Format("rest/params/search?_format=json&keys={0}&items_per_page={1}&offset={2}", searchQuery, itemsPerPage, offset));
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+
+            // Set the pager
+            MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+
+            // Logic if the response was OK
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // Set the Pager object on the Main Window
+                //MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+
+                // Get the SharedParameters as JToken
+                JObject json = JObject.Parse(response.Content);
+                var paramResponse = json.SelectToken("rows");
+
+                if (paramResponse.Count() == 0)
+                {
+                    MessageBox.Show("There were no Shared Parameters found that match that search query.");
+                }
+                else
+                {
+                    // Cast the rows from the reponse to a List of Shared Parameters
+                    listOfParams = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+                }
+            }
+            else
+            {
+                MessageBox.Show("There was an error getting the parameters.");
+            }
+
+            return new ObservableCollection<SharedParameter>(listOfParams);
         }
 
         /// <summary>
