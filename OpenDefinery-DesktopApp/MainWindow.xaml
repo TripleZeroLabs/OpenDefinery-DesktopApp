@@ -19,41 +19,103 @@
 
 
     </Window.Resources>
-
     <Grid x:Name="MainGrid" Margin="0">
-        <StackPanel VerticalAlignment="Stretch" Margin="0,0,-0.4,0.4">
-            <Grid x:Name="ToolbarGrid" Height="57" VerticalAlignment="Top" Margin="0,0,-0.4,0" Background="#FF2E3742">
+        <Grid x:Name="MainUiGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="57"></RowDefinition>
+                <RowDefinition/>
+                <RowDefinition Height="62.4"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "*" />
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="ToolbarGrid" Height="57" VerticalAlignment="Top" Margin="0,0,-0.4,0" Background="#FF2E3742" Grid.Row="0" Grid.RowSpan="2">
                 <StackPanel Margin="0" Orientation="Horizontal">
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewParameterButton" Content="New Parameter" HorizontalAlignment="Left" Margin="20,0,0,0" Click="NewParameterButton_Click" Height="Auto" Foreground="White" Padding="0,4,4,4" />
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewCollectionButton" Content="New Collection" Margin="20,0,0,0" Click="NewCollectionButton_Click" Height="Auto" Foreground="#FFFFFCFC" HorizontalAlignment="Left"/>
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="BatchUploadOverlayButton" Content="Batch Upload" Height="Auto" Click="BatchUploadOverlayButton_Click" Margin="20,0,0,0" HorizontalContentAlignment="Right" Foreground="White" Padding="4" HorizontalAlignment="Right"/>
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewParameterButton" Content="New Parameter" HorizontalAlignment="Left" Margin="20,0,0,0" Click="NewParameterButton_Click" Height="Auto" Foreground="White" Padding="0,4,4,4" ToolTip="Create a new Shared Parameter" />
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewCollectionButton" Content="New Collection" Margin="20,0,0,0" Click="NewCollectionButton_Click" Height="Auto" Foreground="#FFFFFCFC" HorizontalAlignment="Left" ToolTip="Collections are used to group Shared Parameters."/>
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="BatchUploadOverlayButton" Content="Batch Upload" Height="Auto" Click="BatchUploadOverlayButton_Click" Margin="20,0,0,0" HorizontalContentAlignment="Right" Foreground="White" Padding="4" HorizontalAlignment="Right" ToolTip="Import a Shared Parameter text file"/>
                 </StackPanel>
-                <TextBox x:Name="SearchTxtBox" Style="{DynamicResource MaterialDesignOutlinedTextFieldTextBox}" HorizontalAlignment="Right" Margin="0,6,91,7" TextWrapping="Wrap" VerticalAlignment="Center" Background="White" Padding="0" TabIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="302" Height="44" KeyDown="PressEnterToSearch"/>
-                <Button Style="{DynamicResource MaterialDesignFlatLightBgButton}" x:Name="SearchButton" Content="Find" HorizontalAlignment="Right" Margin="0,6,20,7" VerticalAlignment="Center" Height="44" IsCancel="True" Width="66" Click="SearchButton_Click"/>
+                <TextBox x:Name="SearchTxtBox" Style="{DynamicResource MaterialDesignTextBox}" HorizontalAlignment="Right" Margin="0,0,69,0" TextWrapping="Wrap" VerticalAlignment="Center" Padding="4,0.25,0,0" TabIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="231" Height="25" KeyDown="PressEnterToSearch" FontSize="11" ToolTip="Search by keyword, data type, or GUID...">
+                    <TextBox.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="12"/>
+                            <Setter Property="Background" Value="White"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+                <Button x:Name="SearchButton" Content="Find" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" Height="25" IsCancel="True" Width="64" Click="SearchButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" ToolTip="Search by keyword, data type, or GUID...">
+                    <Button.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="10"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
             </Grid>
-            <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0,0,-0.4,0" Height="907" VerticalAlignment="Top">
-                <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED">
-                    <Label Content="MY COLLECTIONS" Padding="17,4,4,4" Margin="0,10,0,0" FontSize="11" FontWeight="Bold"/>
-                    <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
-                    <Label Content="PUBLISHED COLLECTIONS" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold"/>
-                    <ListBox x:Name="CollectionsList_Published" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_Published_SelectionChanged" />
-                </StackPanel>
-                <StackPanel Margin="0,0,0,-0.2" DockPanel.Dock="Right">
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="ExportCollectionButton" Content="Export Collection (txt)" HorizontalAlignment="Center" Height="32" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0"/>
-                        <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="AddToCollectionButton" Content="Add To Another Collection" HorizontalAlignment="Left" Margin="10,10,0,10" Click="AddToCollectionButton_Click" Padding="10,4"/>
-                        <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="RemoveFromCollectionButton" Content="Remove From Collection" HorizontalAlignment="Left" Margin="10,10,0,10" Padding="10,4" Click="RemoveFromCollectionButton_Click"/>
-                        <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="CloneParameterButton" Content="Clone Parameter" HorizontalAlignment="Left" Margin="10,10,0,10" Padding="10,4" Click="CloneParameterButton_Click"/>
+            <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0" Grid.Row="1">
+                <ScrollViewer Height="Auto" Background="Transparent">
+                    <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED" CanVerticallyScroll="True">
+                        <Label Content="MY COLLECTIONS" Padding="17,4,4,4" Margin="0,10,0,0" FontSize="11" FontWeight="Bold"/>
+                        <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
+                        <Label Content="PUBLISHED COLLECTIONS" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold"/>
+                        <ListBox x:Name="CollectionsList_Published" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_Published_SelectionChanged" />
                     </StackPanel>
-                    <DataGrid x:Name="DataGridParameters" Height="795" Margin="10,0" IsReadOnly="True" SelectionUnit="FullRow" SelectionChanged="DataGridParameters_SelectionChanged"/>
-                    <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Right">
-                        <TextBox x:Name="PagerTextBox" HorizontalAlignment="Right" TextWrapping="Wrap" Width="378" Margin="0,0,20,0" IsReadOnly="True" BorderBrush="{x:Null}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                        <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="36"/>
-                        <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Click="PagerNextButton_Click" Margin="0,0,20,0" Height="36" HorizontalContentAlignment="Center"/>
-                    </StackPanel>
-                </StackPanel>
+                </ScrollViewer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <StackPanel Orientation="Horizontal" Height="Auto">
+                            <Button x:Name="ExportCollectionButton" Content="Export Collection (txt)" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file"/>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="AddToCollectionButton" Content="Add To Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Click="AddToCollectionButton_Click" Padding="10,4" ToolTip="Add the selected Shared Parameters to a Collection"/>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="RemoveFromCollectionButton" Content="Remove From Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="RemoveFromCollectionButton_Click" ToolTip="Remove the selected Shared Parameters from the current Collection"/>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="CloneParameterButton" Content="Clone Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="CloneParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection"/>
+                        </StackPanel>
+                    </Grid>
+                    <DataGrid 
+                        Grid.Row="1"
+                        x:Name="DataGridParameters" Margin="10,0" 
+                        IsReadOnly="True" 
+                        SelectionUnit="FullRow" 
+                        SelectionChanged="DataGridParameters_SelectionChanged"
+                        AutoGenerateColumns="False" CanUserSortColumns="False"
+                        >
+                        <DataGrid.RowDetailsTemplate>
+                            <DataTemplate>
+                                <TextBlock 
+                                    Background="#f1f1f1"
+                                    Foreground="#777777"
+                                    Text="{Binding Guid}" 
+                                    TextWrapping="Wrap"
+                                    HorizontalAlignment="Stretch" 
+                                    VerticalAlignment="Center" 
+                                    Padding="40,10,0,0"
+                                    Height="40"
+                                    />
+                            </DataTemplate>
+                        </DataGrid.RowDetailsTemplate>
+                        <DataGrid.Columns>
+                                <DataGridTextColumn Header="Param" Binding="{Binding Name}" Width="300"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="500">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style>
+                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="DataType" Binding="{Binding DataType}" Width="100"></DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
             </DockPanel>
-        </StackPanel>
+            <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="0,0,14.6,10.4" HorizontalAlignment="Right" Grid.Row="2" Width="556">
+                <TextBox x:Name="PagerTextBox" HorizontalAlignment="Right" TextWrapping="Wrap" Width="378" Margin="0,0,20,0" IsReadOnly="True" BorderBrush="{x:Null}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="36"/>
+                <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Click="PagerNextButton_Click" Margin="0" Height="36" HorizontalContentAlignment="Center"/>
+            </StackPanel>
+        </Grid>
         <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="350" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,150,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>

@@ -537,6 +537,10 @@ namespace OpenDefinery_DesktopApp
         {
             // Update the data grid
             DataGridParameters.ItemsSource = Definery.Parameters;
+            if (DataGridParameters.Items.Count > 0)
+            {
+                DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
+            }
 
             // Manage contextual UI
             if (ParameterSource == ParameterSource.Search)
