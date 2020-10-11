@@ -32,7 +32,7 @@ namespace OpenDefinery_DesktopApp
         public Definery Definery { get; set; }
         public static Pager Pager { get; set; }
         public static Collection SelectedCollection { get; set; }
-        ParameterSource ParameterSource { get; set; }
+        ParameterSource ParamSource { get; set; }
 
         public MainWindow()
         {
@@ -64,7 +64,7 @@ namespace OpenDefinery_DesktopApp
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
 
-            ParameterSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
+            ParamSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
 
             if (string.IsNullOrEmpty(Definery.AuthCode) | string.IsNullOrEmpty(Definery.CsrfToken))
             {
@@ -182,7 +182,7 @@ namespace OpenDefinery_DesktopApp
             {
                 mw.PagerNextButton.IsEnabled = false;
                 mw.PagerPreviousButton.IsEnabled = false;
-                
+
                 // First and last page are both true when there is only one page
                 pager.IsFirstPage = true;
                 pager.IsLastPage = true;
@@ -285,9 +285,10 @@ namespace OpenDefinery_DesktopApp
 
                                     Application.Current.Dispatcher.BeginInvoke(
                                       DispatcherPriority.Background,
-                                      new Action(() => {
+                                      new Action(() =>
+                                      {
                                           ProgressStatus.Text += " Already exists. Skipping.";
-                                    }));
+                                      }));
                                 }
                                 else
                                 {
@@ -300,15 +301,16 @@ namespace OpenDefinery_DesktopApp
 
                                         // Create the SharedParameter
                                         var response = SharedParameter.Create(Definery, newParameter, sollection.Id);
-                                        
+
                                         Debug.WriteLine(response);
                                     });
 
                                     Application.Current.Dispatcher.BeginInvoke(
                                       DispatcherPriority.Background,
-                                      new Action(() => {
+                                      new Action(() =>
+                                      {
                                           ProgressStatus.Text += "Done.";
-                                    }));
+                                      }));
                                 }
                             }
 
@@ -362,7 +364,7 @@ namespace OpenDefinery_DesktopApp
                 OverlayGrid.Visibility = Visibility.Hidden;
                 LoginGrid.Visibility = Visibility.Hidden;
             }
-            
+
             // Load all of the things!!!
             LoadData();
         }
@@ -395,13 +397,13 @@ namespace OpenDefinery_DesktopApp
             UpdatePager(Pager, 1);
 
             // Load the data based on the current source and display in the DataGrid
-            if (ParameterSource == ParameterSource.Collection)
+            if (ParamSource == ParameterSource.Collection)
             {
                 Definery.Parameters = SharedParameter.ByCollection(
                   Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
                   );
             }
-            if (ParameterSource == ParameterSource.Search)
+            if (ParamSource == ParameterSource.Search)
             {
                 Definery.Parameters = SharedParameter.Search(
                   Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, false
@@ -421,7 +423,7 @@ namespace OpenDefinery_DesktopApp
             // Upate the pager data and UI
             UpdatePager(Pager, -1);
 
-            if (CollectionsList.SelectedItems.Count > 0 && ParameterSource == ParameterSource.Collection)
+            if (CollectionsList.SelectedItems.Count > 0 && ParamSource == ParameterSource.Collection)
             {
                 // Load the data based on selected Collection and display in the DataGrid
                 Definery.Parameters = SharedParameter.ByCollection(
@@ -429,7 +431,7 @@ namespace OpenDefinery_DesktopApp
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
-            if (ParameterSource == ParameterSource.Search)
+            if (ParamSource == ParameterSource.Search)
             {
                 Definery.Parameters = SharedParameter.Search(
                   Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, false
@@ -513,11 +515,11 @@ namespace OpenDefinery_DesktopApp
                 AddToCollectionButton.Visibility = Visibility.Visible;
 
                 // Toggle UI based on the ParameterSource
-                if (DataGridParameters.SelectedItems.Count > 0 && ParameterSource == ParameterSource.Collection)
+                if (DataGridParameters.SelectedItems.Count > 0 && ParamSource == ParameterSource.Collection)
                 {
                     RemoveFromCollectionButton.Visibility = Visibility.Visible;
                 }
-                if (ParameterSource == ParameterSource.Search)
+                if (ParamSource == ParameterSource.Search)
                 {
                     RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                 }
@@ -543,7 +545,7 @@ namespace OpenDefinery_DesktopApp
             }
 
             // Manage contextual UI
-            if (ParameterSource == ParameterSource.Search)
+            if (ParamSource == ParameterSource.Search)
             {
                 RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
             }
@@ -659,7 +661,7 @@ namespace OpenDefinery_DesktopApp
             {
                 MessageBox.Show("The parameter name must be longer than four characters.");
             }
-            else 
+            else
             {
                 // Assign the name from the form
                 param.Name = NewParamNameTextBox.Text;
@@ -779,7 +781,7 @@ namespace OpenDefinery_DesktopApp
             CollectionsList_Published.SelectedItem = null;
 
             // Set enum for UI purposes
-            ParameterSource = ParameterSource.Collection;
+            ParamSource = ParameterSource.Collection;
         }
 
         /// <summary>
@@ -795,7 +797,7 @@ namespace OpenDefinery_DesktopApp
             CollectionsList.SelectedItem = null;
 
             // Set enum for UI purposes
-            ParameterSource = ParameterSource.Collection;
+            ParamSource = ParameterSource.Collection;
         }
 
         /// <summary>
@@ -1040,7 +1042,7 @@ namespace OpenDefinery_DesktopApp
             UpdatePager(Pager, 0);
 
             // Set enum for UI purposes
-            ParameterSource = ParameterSource.Search;
+            ParamSource = ParameterSource.Search;
 
             // Update the GUI anytime data is loaded
             PagerPanel.Visibility = Visibility.Visible;
@@ -1061,15 +1063,15 @@ namespace OpenDefinery_DesktopApp
                 SearchButton_Click(sender, e);
             }
         }
-    }
 
-    /// <summary>
-    /// Identifies the source of the current list of SharedParameters
-    /// </summary>
-    enum ParameterSource
-    {
-        None,
-        Collection,
-        Search
+        /// <summary>
+        /// Identifies the source of the current list of SharedParameters
+        /// </summary>
+        enum ParameterSource
+        {
+            None,
+            Collection,
+            Search
+        }
     }
 }
