@@ -334,6 +334,59 @@ namespace OpenDefinery
         }
 
         /// <summary>
+        /// Retrieve the Shared Parameters that don't belong to any Collections
+        /// </summary>
+        /// <param name="definery"></param>
+        /// <param name="collection"></param>
+        /// <returns></returns>
+        public static ObservableCollection<SharedParameter> GetOrphaned(
+            Definery definery, int itemsPerPage, int offset, bool resetTotals)
+        {
+            // Get the current instance of the application window
+            MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+
+            var listOfParams = new List<SharedParameter>();
+
+            var client = new RestClient(Definery.BaseUrl + string.Format(
+                "rest/params/orphaned?_format=json&items_per_page={0}&offset={1}", itemsPerPage, offset)
+                );
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+
+            // Set the pager
+            MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+
+            // Logic if the response was OK
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // Set the Pager object on the Main Window
+                //MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+
+                // Get the SharedParameters as JToken
+                JObject json = JObject.Parse(response.Content);
+                var paramResponse = json.SelectToken("rows");
+
+                if (paramResponse.Count() == 0)
+                {
+                    MessageBox.Show("There are no orphaned Shared Parameters.");
+                }
+                else
+                {
+                    // Cast the rows from the reponse to a List of Shared Parameters
+                    listOfParams = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+                }
+            }
+            else
+            {
+                MessageBox.Show("There was an error getting the parameters.");
+            }
+
+            return new ObservableCollection<SharedParameter>(listOfParams);
+        }
+
+        /// <summary>
         /// Search for Shared Parmeters by keyword, GUID, or data type.
         /// </summary>
         /// <param name="definery">The main Definery object</param>
@@ -496,7 +549,7 @@ namespace OpenDefinery
         /// <param name="definery">The main Definery object provides the CSRF token</param>
         /// <param name="param">The SharedParameter object to add</param>
         /// <param name="collection">The Collection object to add the Shared Parameter to</param>
-        public static void AddCollection(Definery definery, SharedParameter param, int newCollectionId)
+        public static IRestResponse AddCollection(Definery definery, SharedParameter param, int newCollectionId)
         {
             // Instantiate a list of Collection IDs as strings
             var collectionIds = new List<string>();
@@ -549,6 +602,8 @@ namespace OpenDefinery
             IRestResponse response = client.Execute(request);
 
             Debug.WriteLine(response.Content);
+
+            return response;
         }
 
         /// <summary>

@@ -484,7 +484,7 @@ namespace OpenDefinery_DesktopApp
             {
                 AddToCollectionCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the Add to Collections combobox
                 AddToCollectionCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
-
+                
                 if (DataGridParameters.SelectedItems.Count > 0)
                 {
                     // Add the Collections to the list from the main Definery object
@@ -539,10 +539,12 @@ namespace OpenDefinery_DesktopApp
         {
             // Update the data grid
             DataGridParameters.ItemsSource = Definery.Parameters;
-            if (DataGridParameters.Items.Count > 0)
-            {
-                DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
-            }
+            DataGridParameters.Items.Refresh();
+
+            //if (DataGridParameters.Items.Count > 0)
+            //{
+            //    DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
+            //}
 
             // Manage contextual UI
             if (ParamSource == ParameterSource.Search)
@@ -565,15 +567,33 @@ namespace OpenDefinery_DesktopApp
             // Get the selected Collection as a Collection object
             SelectedCollection = AddToCollectionCombo.SelectedItem as Collection;
 
-            foreach (var i in DataGridParameters.SelectedItems)
+            if (ParamSource == ParameterSource.Search | ParamSource == ParameterSource.Collection)
             {
-                // Get current Shared Parameter as a SharedParameter object
-                var selectedParam = i as SharedParameter;
+                foreach (var p in DataGridParameters.SelectedItems)
+                {
+                    // Get current Shared Parameter as a SharedParameter object
+                    var selectedParam = p as SharedParameter;
 
-                // Instantiate a list of Collections including any Collections already assigned
+                    // Add the Shared Parameter to the Collection
+                    SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                }
+            }
+            else  // Logic to execute if the current source is the Orphaned list
+            {
+                foreach (var p in DataGridParameters.SelectedItems)
+                {
+                    // Get current Shared Parameter as a SharedParameter object
+                    var selectedParam = p as SharedParameter;
 
-                // Add the Shared Parameter to the Collection
-                SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                    var response = SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                }
+
+                // Load the data based on selected Collection and display in the DataGrid
+                Definery.Parameters = SharedParameter.GetOrphaned(
+                    Definery, Pager.ItemsPerPage, Pager.Offset, true
+                    );
+
+                RefreshUi();
             }
 
             // Notify the user of the update
@@ -777,8 +797,9 @@ namespace OpenDefinery_DesktopApp
         {
             RefreshCollectionParameters(CollectionsList);
 
-            // Deselect the other ListBox
+            // Deselect the other ListBoxes
             CollectionsList_Published.SelectedItem = null;
+            OrphanedList.SelectedItem = null;
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Collection;
@@ -793,11 +814,50 @@ namespace OpenDefinery_DesktopApp
         {
             RefreshCollectionParameters(CollectionsList_Published);
 
-            // Deselect the other ListBox
+            // Deselect the other ListBoxes
             CollectionsList.SelectedItem = null;
+            OrphanedList.SelectedItem = null;
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Collection;
+        }
+
+        /// <summary>
+        /// Method to execute when the Orphaned item is selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OrphanedListBox_Selected(object sender, RoutedEventArgs e)
+        {
+            // Deselect the other ListBoxes
+            CollectionsList_Published.SelectedItem = null;
+            CollectionsList.SelectedItem = null;
+
+            // Hide contextual UI since no parameters will be selected
+            AddToCollectionButton.Visibility = Visibility.Collapsed;
+            RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+            CloneParameterButton.Visibility = Visibility.Collapsed;
+
+            // Get the parameters
+            Definery.Parameters = SharedParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 0, true);
+
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
+
+            // Update the GUI anytime data is loaded
+            PagerPanel.Visibility = Visibility.Visible;
+
+            RefreshUi();
+
+            // Hide the export button because this is not a Collection
+            ExportCollectionButton.Visibility = Visibility.Collapsed;
+
+            // Hide the add to collection button because nothing will be selected
+            AddToCollectionButton.Visibility = Visibility.Hidden;
+
+            // Set enum for UI purposes
+            ParamSource = ParameterSource.Orphaned;
         }
 
         /// <summary>
@@ -1071,7 +1131,8 @@ namespace OpenDefinery_DesktopApp
         {
             None,
             Collection,
-            Search
+            Search,
+            Orphaned
         }
     }
 }

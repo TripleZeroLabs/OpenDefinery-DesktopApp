@@ -58,6 +58,12 @@
                         <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
                         <Label Content="PUBLISHED COLLECTIONS" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold"/>
                         <ListBox x:Name="CollectionsList_Published" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_Published_SelectionChanged" />
+                        <Label Content="OTHER" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold" Height="21"/>
+                        <ListBox x:Name="OrphanedList" Margin="10,0,9.8,0">
+                            <ListBoxItem x:Name="OrphanedListItem" Selected="OrphanedListBox_Selected">
+                                Orphaned Params
+                            </ListBoxItem>
+                        </ListBox>
                     </StackPanel>
                 </ScrollViewer>
                 <Grid>
@@ -96,19 +102,19 @@
                             </DataTemplate>
                         </DataGrid.RowDetailsTemplate>
                         <DataGrid.Columns>
-                                <DataGridTextColumn Header="Param" Binding="{Binding Name}" Width="300"/>
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="500">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style>
-                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
-                                            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="DataType" Binding="{Binding DataType}" Width="100"></DataGridTextColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
+                            <DataGridTextColumn Header="Param" Binding="{Binding Name}" Width="300"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="500">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                        <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="DataType" Binding="{Binding DataType}" Width="200"></DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </DockPanel>
             <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="0,0,14.6,10.4" HorizontalAlignment="Right" Grid.Row="2" Width="556">
                 <TextBox x:Name="PagerTextBox" HorizontalAlignment="Right" TextWrapping="Wrap" Width="378" Margin="0,0,20,0" IsReadOnly="True" BorderBrush="{x:Null}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
