@@ -575,6 +575,9 @@ namespace OpenDefinery_DesktopApp
                     // Add the Shared Parameter to the Collection
                     SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
                 }
+
+                // Notify the user of the update
+                MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
             }
             else  // Logic to execute if the current source is the Orphaned list
             {
@@ -591,11 +594,11 @@ namespace OpenDefinery_DesktopApp
                     Definery, Pager.ItemsPerPage, Pager.Offset, true
                     );
 
+                // Notify the user of the update
+                MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
+
                 RefreshUi();
             }
-
-            // Notify the user of the update
-            MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
 
             // Hide the overlay
             AddToCollectionGrid.Visibility = Visibility.Hidden;
@@ -1074,6 +1077,10 @@ namespace OpenDefinery_DesktopApp
                     Definery.Parameters = SharedParameter.ByCollection(
                         Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
                         );
+
+                    // Toggle UI
+                    CloneParameterButton.Visibility = Visibility.Collapsed;
+                    AddToCollectionButton.Visibility = Visibility.Collapsed;
 
                     RefreshUi();
                 }
