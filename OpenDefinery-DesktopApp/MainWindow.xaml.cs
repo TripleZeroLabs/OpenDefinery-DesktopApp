@@ -64,6 +64,8 @@ namespace OpenDefinery_DesktopApp
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
 
+            PropertiesSideBar.Visibility = Visibility.Collapsed;
+
             ParamSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
 
             if (string.IsNullOrEmpty(Definery.AuthCode) | string.IsNullOrEmpty(Definery.CsrfToken))
@@ -95,10 +97,12 @@ namespace OpenDefinery_DesktopApp
                     else return x.Name.CompareTo(y.Name);
                 });
 
-                // Pass the DataType list to the combobox and configure
+                // Pass the DataType list to the comboboxes and configure
                 NewParamDataTypeCombo.ItemsSource = Definery.DataTypes;
                 NewParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
                 NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+                PropComboDataType.ItemsSource = Definery.DataTypes;
+                PropComboDataType.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
 
                 // Display Collections in listboxes
                 Definery.MyCollections = Collection.ByCurrentUser(Definery);
@@ -524,9 +528,41 @@ namespace OpenDefinery_DesktopApp
                     RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                 }
             }
+            // Toggle sidebar UI
             if (DataGridParameters.SelectedItems.Count == 1)
             {
+                var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+
                 CloneParameterButton.Visibility = Visibility.Visible;
+                PropertiesSideBar.Visibility = Visibility.Visible;
+
+                // Update Properties
+                PropTextGuid.Text = selectedParam.Guid.ToString();
+                
+                var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
+                PropComboDataType.SelectedItem = paramDataType;
+
+                if (selectedParam.Visible == "1")
+                {
+                    PropCheckVisible.IsChecked = true;
+                }
+                else
+                {
+                    PropCheckVisible.IsChecked = false;
+                }
+                
+                if (selectedParam.UserModifiable == "1")
+                {
+                    PropCheckUserMod.IsChecked = true;
+                }
+                else
+                {
+                    PropCheckUserMod.IsChecked = false;
+                }
+            }
+            if (DataGridParameters.SelectedItems.Count > 1)
+            {
+                PropertiesSideBar.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -544,12 +580,22 @@ namespace OpenDefinery_DesktopApp
                 DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
             }
 
-            // Manage contextual UI
-            if (ParamSource == ParameterSource.Search)
+            // Toggle UI based on DataGrid selection
+            if (DataGridParameters.SelectedItems.Count == 0)
             {
                 RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
             }
-            if (DataGridParameters.SelectedItems.Count == 0)
+            if (DataGridParameters.Items.Count == 1)
+            {
+                PropertiesSideBar.Visibility = Visibility.Visible;
+            }
+            if (DataGridParameters.Items.Count > 1)
+            {
+                PropertiesSideBar.Visibility = Visibility.Collapsed;
+            }
+
+            // Manage contextual UI
+            if (ParamSource == ParameterSource.Search)
             {
                 RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
             }

@@ -52,7 +52,7 @@
                 </Button>
             </Grid>
             <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0" Grid.Row="1">
-                <ScrollViewer Height="Auto" Background="Transparent">
+                <ScrollViewer Height="Auto" Background="Transparent" VerticalScrollBarVisibility="Auto">
                     <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED" CanVerticallyScroll="True">
                         <Label Content="MY COLLECTIONS" Padding="17,4,4,4" Margin="0,10,0,0" FontSize="11" FontWeight="Bold"/>
                         <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
@@ -79,41 +79,54 @@
                             <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="CloneParameterButton" Content="Clone Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="CloneParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection"/>
                         </StackPanel>
                     </Grid>
-                    <DataGrid 
-                        Grid.Row="1"
-                        x:Name="DataGridParameters" Margin="10,0" 
-                        IsReadOnly="True" 
-                        SelectionUnit="FullRow" 
-                        SelectionChanged="DataGridParameters_SelectionChanged"
-                        AutoGenerateColumns="False" CanUserSortColumns="False"
-                        >
-                        <DataGrid.RowDetailsTemplate>
-                            <DataTemplate>
-                                <TextBlock 
-                                    Background="#f1f1f1"
-                                    Foreground="#777777"
-                                    Text="{Binding Guid}" 
-                                    TextWrapping="Wrap"
-                                    HorizontalAlignment="Stretch" 
-                                    VerticalAlignment="Center" 
-                                    Padding="40,10,0,0"
-                                    Height="40"
-                                    />
-                            </DataTemplate>
-                        </DataGrid.RowDetailsTemplate>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Param" Binding="{Binding Name}" Width="300"/>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="500">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style>
-                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
-                                        <Setter Property="TextBlock.TextAlignment" Value="Left"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="DataType" Binding="{Binding DataType}" Width="200"></DataGridTextColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <DataGrid
+                            x:Name="DataGridParameters" 
+                            Margin="10,0" 
+                            IsReadOnly="True" 
+                            SelectionUnit="FullRow" 
+                            SelectionChanged="DataGridParameters_SelectionChanged"
+                            AutoGenerateColumns="False"
+                            CanUserSortColumns="False"
+                            Grid.Column="0">
+                            <DataGrid.CellStyle>
+                                <Style
+                                BasedOn="{StaticResource MaterialDesignDataGridCell}"
+                                TargetType="{x:Type DataGridCell}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Param" Binding="{Binding Name}" Width="300"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" MaxWidth="400">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style>
+                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Grid x:Name="PropertiesSideBar"  Width="300" Grid.Column="1">
+                            <StackPanel Margin="20,20,20,20">
+                                <Label Content="GUID" Margin="0" Padding="0,4,4,4"/>
+                                <TextBox x:Name="PropTextGuid" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0" IsEnabled="False"/>
+                                <Label Content="DataType" Margin="0,20,0,0" Padding="0,4,4,4"/>
+                                <ComboBox x:Name="PropComboDataType" VerticalAlignment="Stretch" IsEnabled="False"/>
+                                <CheckBox x:Name="PropCheckVisible" Content="Visible" Margin="0,20,0,0" IsEnabled="False"/>
+                                <CheckBox x:Name="PropCheckUserMod" Content="User Modifiable" Margin="0,10,0,0" IsEnabled="False"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </DockPanel>
             <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="0,0,14.6,10.4" HorizontalAlignment="Right" Grid.Row="2" Width="556">
