@@ -528,8 +528,6 @@ namespace OpenDefinery_DesktopApp
             {
                 CloneParameterButton.Visibility = Visibility.Visible;
             }
-
-            RefreshUi();
         }
 
         /// <summary>
@@ -541,10 +539,10 @@ namespace OpenDefinery_DesktopApp
             DataGridParameters.ItemsSource = Definery.Parameters;
             DataGridParameters.Items.Refresh();
 
-            //if (DataGridParameters.Items.Count > 0)
-            //{
-            //    DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
-            //}
+            if (DataGridParameters.Items.Count > 0)
+            {
+                DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
+            }
 
             // Manage contextual UI
             if (ParamSource == ParameterSource.Search)
