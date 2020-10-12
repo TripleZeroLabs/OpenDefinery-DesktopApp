@@ -267,54 +267,57 @@ namespace OpenDefinery_DesktopApp
                                 // Cast tab delimited line from shared parameter text file to SharedParameter object
                                 var newParameter = SharedParameter.FromTxt(line);
 
-                                // Update the UI
-                                currentProgress += 1;
-                                ((IProgress<int>)progress).Report(currentProgress);
-                                Dispatcher.Invoke(() =>
+                                if (newParameter != null)
                                 {
-                                    ProgressStatus.Text = "Uploading " + newParameter.Name + "...";
-                                });
-
-                                // Get the name of the group and assign this to the property rather than the ID 
-                                // This name will be passed to the Create() method to add as the tag
-                                var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
-                                newParameter.Group = groupName;
-
-                                // Check if the parameter exists
-                                if (SharedParameter.HasExactMatch(Definery, newParameter))
-                                {
-                                    // Do nothing for now
-                                    // TODO: Add existing SharedParameters to a log or report of some kind.
-                                    Debug.WriteLine(newParameter.Name + " exists. Skipping");
-
-                                    Application.Current.Dispatcher.BeginInvoke(
-                                      DispatcherPriority.Background,
-                                      new Action(() =>
-                                      {
-                                          ProgressStatus.Text += " Already exists. Skipping.";
-                                      }));
-                                }
-                                else
-                                {
-                                    newParameter.BatchId = batchId;
-
-                                    // Instantiate the selected item as a Collection
-                                    this.Dispatcher.Invoke(() =>
+                                    // Update the UI
+                                    currentProgress += 1;
+                                    ((IProgress<int>)progress).Report(currentProgress);
+                                    Dispatcher.Invoke(() =>
                                     {
-                                        var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
+                                        ProgressStatus.Text = "Uploading " + newParameter.Name + "...";
+                                    });
+
+                                    // Get the name of the group and assign this to the property rather than the ID 
+                                    // This name will be passed to the Create() method to add as the tag
+                                    var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
+                                    newParameter.Group = groupName;
+
+                                    // Check if the parameter exists
+                                    if (SharedParameter.HasExactMatch(Definery, newParameter))
+                                    {
+                                        // Do nothing for now
+                                        // TODO: Add existing SharedParameters to a log or report of some kind.
+                                        Debug.WriteLine(newParameter.Name + " exists. Skipping");
+
+                                        Application.Current.Dispatcher.BeginInvoke(
+                                          DispatcherPriority.Background,
+                                          new Action(() =>
+                                          {
+                                              ProgressStatus.Text += " Already exists. Skipping.";
+                                          }));
+                                    }
+                                    else
+                                    {
+                                        newParameter.BatchId = batchId;
+
+                                        // Instantiate the selected item as a Collection
+                                        this.Dispatcher.Invoke(() =>
+                                        {
+                                            var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
 
                                         // Create the SharedParameter
                                         var response = SharedParameter.Create(Definery, newParameter, sollection.Id);
 
-                                        Debug.WriteLine(response);
-                                    });
+                                            Debug.WriteLine(response);
+                                        });
 
-                                    Application.Current.Dispatcher.BeginInvoke(
-                                      DispatcherPriority.Background,
-                                      new Action(() =>
-                                      {
-                                          ProgressStatus.Text += "Done.";
-                                      }));
+                                        Application.Current.Dispatcher.BeginInvoke(
+                                          DispatcherPriority.Background,
+                                          new Action(() =>
+                                          {
+                                              ProgressStatus.Text += "Done.";
+                                          }));
+                                    }
                                 }
                             }
 

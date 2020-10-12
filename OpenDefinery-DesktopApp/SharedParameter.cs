@@ -64,29 +64,33 @@ namespace OpenDefinery
         {
             var parameter = new SharedParameter();
 
-            var values = txtLine.Split('\t');
-
-            parameter.Guid = new Guid(values[1]);
-            parameter.Name = values[2];
-            parameter.DataType = values[3];
-            parameter.DataCategory = values[4];
-            parameter.Group = values[5];
-            parameter.Visible = values[6];
-
-            // Older shared parmater text files do not have the DESCRIPTION and USERMODIFIABLE columns
-            if (values.Count() == 9)
+            if (txtLine[0] != '#')  // Ignore the comment lines
             {
-                parameter.Description = values[7];
-                parameter.UserModifiable = values[8];
-            }
-            // Add the default values if these columns do not exist
-            else
-            {
-                parameter.Description = string.Empty;
-                parameter.UserModifiable = "1";
+                var values = txtLine.Split('\t');
+
+                parameter.Guid = new Guid(values[1]);
+                parameter.Name = values[2];
+                parameter.DataType = values[3];
+                parameter.DataCategory = values[4];
+                parameter.Group = values[5];
+                parameter.Visible = values[6];
+
+                // Older shared parmater text files do not have the DESCRIPTION column
+                if (values.Count() == 9)
+                {
+                    parameter.Description = values[7];
+                    parameter.UserModifiable = values[8];
+                }
+                if (values.Count() == 8)
+                {
+                    parameter.Description = string.Empty;
+                    parameter.UserModifiable = values[7];
+                }
+
+                return parameter;
             }
 
-            return parameter;
+            return null;
         }
 
         /// <summary>
