@@ -1163,6 +1163,10 @@ namespace OpenDefinery_DesktopApp
             ExportCollectionButton.Visibility = Visibility.Collapsed;
             RefreshUi();
 
+            // Deselect all other items
+            CollectionsList.SelectedItem = null;
+            CollectionsList_Published.SelectedItem = null;
+            OrphanedList.SelectedItem = null;
         }
 
         /// <summary>

@@ -192,6 +192,7 @@ namespace OpenDefinery
 
                 // Set the Pager object on the Main Window
                 MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+                MainWindow.Pager.ItemsPerPage = MainWindow.Pager.ItemsPerPage;
 
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
@@ -281,9 +282,6 @@ namespace OpenDefinery
             // Logic if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                // Set the Pager object on the Main Window
-                //MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
-
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
@@ -361,13 +359,11 @@ namespace OpenDefinery
 
             // Set the pager
             MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+            MainWindow.Pager.ItemsPerPage = MainWindow.Pager.ItemsPerPage;
 
             // Logic if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                // Set the Pager object on the Main Window
-                //MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
-
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
@@ -409,13 +405,11 @@ namespace OpenDefinery
 
             // Set the pager
             MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+            MainWindow.Pager.ItemsPerPage = MainWindow.Pager.ItemsPerPage;
 
             // Logic if the response was OK
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                // Set the Pager object on the Main Window
-                //MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
-
                 // Get the SharedParameters as JToken
                 JObject json = JObject.Parse(response.Content);
                 var paramResponse = json.SelectToken("rows");
