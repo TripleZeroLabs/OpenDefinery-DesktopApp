@@ -4,11 +4,12 @@ The OpenDefinery desktop application seeks to replace Revit's antiquated out-of-
 ![Current Screenshot](OpenDefinery-DesktopApp/assets/screenshot-1.png)
 
 ### What is OpenDefinery?
-OpenDefinery is a cloud-based data warehouse of Revit Shared Parameters. This database includes the parameter definitions from Revit users throughout the industry who seek to decentralize their data standard.
+OpenDefinery is a cloud-based data warehouse of Revit Shared Parameters. This database includes the parameter definitions from Revit users throughout the industry who seek to decentralize their data standard. For more information, visit us at http://OpenDefinery.com.
 
-For more information, visit us at http://OpenDefinery.com.
+Note that the platform is currently in private beta and an account is required to use this application. Reach out to i@opendefinery.com to request an account.
 
 ## Desktop App Overview
+
 In its current state, the desktop application provides improved methods to manage and organize Revit Shared Parameters stored in the OpenDefinery repository.
 
 ### Features
