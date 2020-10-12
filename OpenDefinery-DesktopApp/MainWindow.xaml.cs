@@ -57,7 +57,7 @@ namespace OpenDefinery_DesktopApp
             AddToCollectionButton.Visibility = Visibility.Collapsed;  // Add to Collection button
             RemoveFromCollectionButton.Visibility = Visibility.Collapsed;  // Remove from Collection button
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
-            CloneParameterButton.Visibility = Visibility.Collapsed;  // Clone Parameter button
+            ForkParameterButton.Visibility = Visibility.Collapsed;  // Fork Parameter button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
 
             PagerPanel.Visibility = Visibility.Hidden;  // Pager
@@ -533,7 +533,7 @@ namespace OpenDefinery_DesktopApp
             {
                 var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
 
-                CloneParameterButton.Visibility = Visibility.Visible;
+                ForkParameterButton.Visibility = Visibility.Visible;
                 PropertiesSideBar.Visibility = Visibility.Visible;
 
                 // Update Properties
@@ -883,7 +883,7 @@ namespace OpenDefinery_DesktopApp
             // Hide contextual UI since no parameters will be selected
             AddToCollectionButton.Visibility = Visibility.Collapsed;
             RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            CloneParameterButton.Visibility = Visibility.Collapsed;
+            ForkParameterButton.Visibility = Visibility.Collapsed;
 
             // Get the parameters
             Definery.Parameters = SharedParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 0, true);
@@ -970,7 +970,7 @@ namespace OpenDefinery_DesktopApp
                 // Hide contextual UI since no parameters will be selected
                 AddToCollectionButton.Visibility = Visibility.Collapsed;
                 RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                CloneParameterButton.Visibility = Visibility.Collapsed;
+                ForkParameterButton.Visibility = Visibility.Collapsed;
 
                 // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
                 SelectedCollection = listBox.SelectedItem as Collection;
@@ -1004,11 +1004,11 @@ namespace OpenDefinery_DesktopApp
         }
 
         /// <summary>
-        /// Method to execute when Clone Parameter Button is clicked.
+        /// Method to execute when Fork Parameter Button is clicked.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CloneParameterButton_Click(object sender, RoutedEventArgs e)
+        private void ForkParameterButton_Click(object sender, RoutedEventArgs e)
         {
             // Only execute if a single paramter is selected
             if (DataGridParameters.SelectedItems.Count == 1)
@@ -1022,7 +1022,7 @@ namespace OpenDefinery_DesktopApp
                 NewParamFormCombo.DisplayMemberPath = "Name";
                 NewParamFormCombo.SelectedIndex = 0;
 
-                // Disable editing of certain fields otherwise you are technically not cloning
+                // Disable editing of certain fields otherwise you are technically not forking
                 NewParamGuidTextBox.IsEnabled = false;
                 NewParamDataTypeCombo.IsEnabled = false;
                 NewParamVisibleCheck.IsEnabled = false;
@@ -1058,7 +1058,7 @@ namespace OpenDefinery_DesktopApp
             }
             if (DataGridParameters.SelectedItems.Count > 1)
             {
-                MessageBox.Show("You may only clone one Shared Parameter at a time... For now.");
+                MessageBox.Show("You may only fork one Shared Parameter at a time... For now.");
             }
         }
 
@@ -1067,7 +1067,7 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         private void InitializeParamForm()
         {
-            // Enable editing of certain fields just in case this method was triggered from cloning
+            // Enable editing of certain fields just in case this method was triggered from forking
             NewParamGuidTextBox.IsEnabled = true;
             NewParamDataTypeCombo.IsEnabled = true;
             NewParamVisibleCheck.IsEnabled = true;
@@ -1125,7 +1125,7 @@ namespace OpenDefinery_DesktopApp
                         );
 
                     // Toggle UI
-                    CloneParameterButton.Visibility = Visibility.Collapsed;
+                    ForkParameterButton.Visibility = Visibility.Collapsed;
                     AddToCollectionButton.Visibility = Visibility.Collapsed;
 
                     RefreshUi();
@@ -1143,7 +1143,7 @@ namespace OpenDefinery_DesktopApp
             // Hide contextual UI since no parameters will be selected
             AddToCollectionButton.Visibility = Visibility.Collapsed;
             RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            CloneParameterButton.Visibility = Visibility.Collapsed;
+            ForkParameterButton.Visibility = Visibility.Collapsed;
 
             // Get the parameters
             Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);

@@ -76,7 +76,7 @@
                             <Button x:Name="ExportCollectionButton" Content="Export Collection (txt)" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file"/>
                             <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="AddToCollectionButton" Content="Add To Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Click="AddToCollectionButton_Click" Padding="10,4" ToolTip="Add the selected Shared Parameters to a Collection"/>
                             <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="RemoveFromCollectionButton" Content="Remove From Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="RemoveFromCollectionButton_Click" ToolTip="Remove the selected Shared Parameters from the current Collection"/>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="CloneParameterButton" Content="Clone Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="CloneParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection"/>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="ForkParameterButton" Content="Fork Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="ForkParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection"/>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="1">
