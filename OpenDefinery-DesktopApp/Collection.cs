@@ -20,6 +20,9 @@ namespace OpenDefinery
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("author")]
+        public string Author { get; set; }
+
         /// <summary>
         /// Retrieve the currently logged in user's Collections.
         /// </summary>
@@ -68,11 +71,11 @@ namespace OpenDefinery
         }
 
         /// <summary>
-        /// Retrieve all published Collections.
+        /// Retrieve all published Collections excluding the current user's Collections.
         /// </summary>
         /// <param name="definery"></param>
         /// <returns></returns>
-        public static List<Collection> AllPublished(Definery definery)
+        public static List<Collection> GetPublished(Definery definery)
         {
             var client = new RestClient(Definery.BaseUrl + "rest/collections/published?_format=json");
             client.Timeout = -1;
@@ -90,8 +93,18 @@ namespace OpenDefinery
                     try
                     {
                         var collections = JsonConvert.DeserializeObject<List<Collection>>(response.Content);
+                        var filteredCollections = new List<Collection>();
 
-                        return collections;
+                        // Add Collection to filtered list only if it isn't authored by the current user
+                        foreach(var collection in collections)
+                        {
+                            if (collection.Author != Definery.CurrentUser.Id)
+                            {
+                                filteredCollections.Add(collection);
+                            }
+                        }
+
+                        return filteredCollections;
                     }
                     catch (Exception ex)
                     {

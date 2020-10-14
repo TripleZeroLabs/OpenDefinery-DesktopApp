@@ -109,7 +109,7 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList.DisplayMemberPath = "Name";
                 CollectionsList.ItemsSource = Definery.MyCollections;
 
-                Definery.PublishedCollections = Collection.AllPublished(Definery);
+                Definery.PublishedCollections = Collection.GetPublished(Definery);
                 CollectionsList_Published.DisplayMemberPath = "Name";
                 CollectionsList_Published.ItemsSource = Definery.PublishedCollections;
 
