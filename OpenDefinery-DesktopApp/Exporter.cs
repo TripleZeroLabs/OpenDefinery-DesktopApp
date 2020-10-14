@@ -39,7 +39,7 @@ namespace OpenDefinery_DesktopApp
             // As of now, we are setting all parameters to a single Group
             var groupTable = 
                 "*GROUP\tID\tNAME\n" +
-                "GROUP\t999\tDefault Group\n";
+                "GROUP\t1\tDefault Group\n";
 
             // Create the parameters
             var parameterTable = SharedParameter.CreateParamTable(parameters);

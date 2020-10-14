@@ -700,7 +700,7 @@ namespace OpenDefinery
                 output += p.DataType + "\t";
                 output += p.DataCategory + "\t";
                 //output += p.Group + "\t";
-                output += "999\t";  // Assign the "Default Group" until more robust group system is in place
+                output += "1\t";  // Assign the "Default Group" until more robust group system is in place
                 output += p.Visible + "\t";
                 output += p.Description + "\t";
                 output += p.UserModifiable + "\t";
