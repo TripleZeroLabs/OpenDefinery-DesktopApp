@@ -536,15 +536,20 @@ namespace OpenDefinery_DesktopApp
             {
                 var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
 
+                // Toggle UI
                 ForkParameterButton.Visibility = Visibility.Visible;
                 PropertiesSideBar.Visibility = Visibility.Visible;
+                // TODO: Make this a timed display rather than persisting until a new row is clicked
+                PropTxtRowCopied.Visibility = Visibility.Collapsed;  
 
-                // Update Properties
+                // Update GUID field
                 PropTextGuid.Text = selectedParam.Guid.ToString();
                 
+                // Update Data type field
                 var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
                 PropComboDataType.SelectedItem = paramDataType;
 
+                // Update boolean fields
                 if (selectedParam.Visible == "1")
                 {
                     PropCheckVisible.IsChecked = true;
@@ -562,6 +567,17 @@ namespace OpenDefinery_DesktopApp
                 {
                     PropCheckUserMod.IsChecked = false;
                 }
+
+                // Update copy/paste textbox
+                PropTxtRow.Text = "PARAM\t" +
+                    selectedParam.Guid.ToString() + "\t" +
+                    selectedParam.Name + "\t" +
+                    selectedParam.DataType + "\t" +
+                    selectedParam.DataCategory + "\t" +
+                    "1" + "\t" +  // Hardcode the Default Group until Groups are properly implemented
+                    selectedParam.Visible + "\t" +
+                    selectedParam.Description + "\t" +
+                    selectedParam.UserModifiable;
             }
             if (DataGridParameters.SelectedItems.Count > 1)
             {
@@ -1191,6 +1207,19 @@ namespace OpenDefinery_DesktopApp
             Collection,
             Search,
             Orphaned
+        }
+
+        /// <summary>
+        /// Method to execute when copy/paste button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PropCopyPasteRowButton_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(PropTxtRow.Text);
+
+            // Display confirmation message
+            PropTxtRowCopied.Visibility = Visibility.Visible;
         }
     }
 }

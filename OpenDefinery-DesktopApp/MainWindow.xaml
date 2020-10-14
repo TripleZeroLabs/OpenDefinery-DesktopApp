@@ -124,6 +124,9 @@
                                 <ComboBox x:Name="PropComboDataType" VerticalAlignment="Stretch" IsEnabled="False"/>
                                 <CheckBox x:Name="PropCheckVisible" Content="Visible" Margin="0,20,0,0" IsEnabled="False"/>
                                 <CheckBox x:Name="PropCheckUserMod" Content="User Modifiable" Margin="0,10,0,0" IsEnabled="False"/>
+                                <Button Style="{StaticResource MaterialDesignFlatDarkBgButton}" FontSize="13" Content="Copy Txt Row to Clipboard" x:Name="PropCopyPasteRowButton" Click="PropCopyPasteRowButton_Click" ToolTip="This text is formatted to copy and paste directly into a text file" Margin="0,30,0,0" />
+                                <TextBlock x:Name="PropTxtRowCopied" TextWrapping="Wrap" Text="Row copied to clipboard" Margin="10,10,10,0" Padding="10,5" Background="#FFE3FFD7" Foreground="#DD095A00"/>
+                                <TextBox x:Name="PropTxtRow" Height="23" Margin="0" FontFamily="Source Code Pro" FontSize="10" HorizontalAlignment="Left" Visibility="Hidden"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -142,13 +145,21 @@
                 <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,75" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
                 <Label Content="USERNAME" Margin="45,25,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,125,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
-                <TextBlock HorizontalAlignment="Center" Margin="0,0,0,25" TextWrapping="Wrap" VerticalAlignment="Bottom"><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/password"><InlineUIContainer>  
+                <TextBlock HorizontalAlignment="Center" Margin="0,0,0,25" TextWrapping="Wrap" VerticalAlignment="Bottom">
+                    <Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/password">
+                        <InlineUIContainer>  
                             <TextBlock Text="Forgot Password"/>  
-                        </InlineUIContainer></Hyperlink><Run Text=" "/><InlineUIContainer>
+                        </InlineUIContainer></Hyperlink><Run Text=" "/>
+                    <InlineUIContainer>
                         <TextBlock Text="|" Margin="15,0" Foreground="#DDA0A0A0"/>  
-                    </InlineUIContainer><Run Text=" "/><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/register"><InlineUIContainer>  
-                            <TextBlock Text="Register for an Account"/>  
-                        </InlineUIContainer></Hyperlink></TextBlock>
+                    </InlineUIContainer>
+                    <Run Text=" "/>
+                        <Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/register">
+                            <InlineUIContainer>  
+                                <TextBlock Text="Register for an Account"/>  
+                            </InlineUIContainer>
+                        </Hyperlink>
+                </TextBlock>
             </Grid>
             <Grid x:Name="ProgressGrid" Margin="0" VerticalAlignment="Top" Width="400" Background="White" Height="110" d:IsHidden="True">
                 <Grid.ColumnDefinitions>
