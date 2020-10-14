@@ -67,7 +67,6 @@ namespace OpenDefinery
 
                 return null;
             }
-
         }
 
         /// <summary>
@@ -124,7 +123,6 @@ namespace OpenDefinery
 
                 return null;
             }
-
         }
 
         public static IRestResponse Create(Definery definery, string name, string description)

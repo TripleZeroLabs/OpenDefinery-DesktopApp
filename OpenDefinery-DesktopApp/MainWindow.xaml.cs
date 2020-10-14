@@ -64,7 +64,9 @@ namespace OpenDefinery_DesktopApp
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
 
-            PropertiesSideBar.Visibility = Visibility.Collapsed;
+            PropertiesSideBar.Visibility = Visibility.Collapsed; // Sidebar should be collapsed by default
+
+            MainBrowserGrid.Visibility = Visibility.Hidden; // Hide the main UI until logged in
 
             ParamSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
 
@@ -586,13 +588,27 @@ namespace OpenDefinery_DesktopApp
         }
 
         /// <summary>
-        /// Helper method to refresh all UI elements after a new payload.
+        /// Helper method to refresh all UI elements after a new payload. This should execute anytime there is a change to the UI.
         /// </summary>
         public void RefreshUi()
         {
-            // Update the data grid
-            DataGridParameters.ItemsSource = Definery.Parameters;
-            DataGridParameters.Items.Refresh();
+            // Update the Grid based on the parameter source. Show dashboard if none.
+            if (ParamSource != ParameterSource.None)
+            {
+                MainBrowserGrid.Visibility = Visibility.Visible;
+                DashboardGrid.Visibility = Visibility.Collapsed;
+
+                DataGridParameters.ItemsSource = Definery.Parameters;
+                DataGridParameters.Items.Refresh();
+
+                PagerPanel.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                MainBrowserGrid.Visibility = Visibility.Collapsed;
+                DashboardGrid.Visibility = Visibility.Visible;
+            }
+
 
             if (DataGridParameters.Items.Count > 0)
             {
@@ -869,6 +885,8 @@ namespace OpenDefinery_DesktopApp
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Collection;
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -886,6 +904,8 @@ namespace OpenDefinery_DesktopApp
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Collection;
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -1220,6 +1240,30 @@ namespace OpenDefinery_DesktopApp
 
             // Display confirmation message
             PropTxtRowCopied.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Helper method to allow mouse scrolling in the Collections side bar
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scv = (ScrollViewer)sender;
+            scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Method to execute when the Dashboard button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DashboardButton_Click(object sender, RoutedEventArgs e)
+        {
+            ParamSource = ParameterSource.None;
+
+            RefreshUi();
         }
     }
 }

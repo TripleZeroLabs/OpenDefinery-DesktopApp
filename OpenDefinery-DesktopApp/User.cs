@@ -46,7 +46,7 @@ namespace OpenDefinery
                     return null;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }
@@ -84,7 +84,7 @@ namespace OpenDefinery
                     return null;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }
