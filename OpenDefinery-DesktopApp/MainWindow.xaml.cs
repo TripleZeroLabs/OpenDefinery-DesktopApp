@@ -109,9 +109,9 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList.DisplayMemberPath = "Name";
                 CollectionsList.ItemsSource = Definery.MyCollections;
 
-                Definery.AllCollections = Collection.AllPublished(Definery);
+                Definery.PublishedCollections = Collection.AllPublished(Definery);
                 CollectionsList_Published.DisplayMemberPath = "Name";
-                CollectionsList_Published.ItemsSource = Definery.AllCollections;
+                CollectionsList_Published.ItemsSource = Definery.PublishedCollections;
 
                 // Update the main Pager object
                 Pager.CurrentPage = 0;

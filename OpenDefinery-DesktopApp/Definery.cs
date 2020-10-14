@@ -19,7 +19,7 @@ namespace OpenDefinery
         public string AuthCode { get; set; }
 
         public List<Collection> MyCollections { get; set; }
-        public List<Collection> AllCollections { get; set; }
+        public List<Collection> PublishedCollections { get; set; }
         public ObservableCollection<SharedParameter> Parameters { get; set; }
         public List<DataType> DataTypes { get; set; }
         public List<Group> Groups { get; set; }
