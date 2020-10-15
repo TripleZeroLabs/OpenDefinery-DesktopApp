@@ -53,23 +53,29 @@
                 </Button>
             </Grid>
             <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0" Grid.Row="1">
-                <ScrollViewer Height="Auto" Background="Transparent" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-                    <StackPanel x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" Background="#FFE9EBED" CanVerticallyScroll="True">
-                        <Label Content="MY COLLECTIONS" Padding="17,4,4,4" Margin="0,10,0,0" FontSize="11" FontWeight="Bold"/>
-                        <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
-                        <Label Content="PUBLISHED COLLECTIONS" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold"/>
-                        <ListBox x:Name="CollectionsList_Published" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_Published_SelectionChanged" />
-                        <Label Content="OTHER" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold" Height="21"/>
-                        <ListBox x:Name="OrphanedList" Margin="10,0,9.8,0">
-                            <ListBoxItem x:Name="OrphanedListItem" Selected="OrphanedListBox_Selected">
-                                Orphaned Params
-                            </ListBoxItem>
-                        </ListBox>
-                    </StackPanel>
+                <ScrollViewer Height="Auto" Background="#FFE9EBED" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row ="0" x:Name="SidebarStack" Width="219" Margin="0,0,0,0.2" CanVerticallyScroll="True">
+                            <Label Content="MY COLLECTIONS" Padding="17,4,4,4" Margin="0,10,0,0" FontSize="11" FontWeight="Bold"/>
+                            <ListBox x:Name="CollectionsList" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_SelectionChanged" />
+                            <Label Content="PUBLISHED COLLECTIONS" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold"/>
+                            <ListBox x:Name="CollectionsList_Published" Margin="10,0,9.8,0" SelectionChanged="CollectionsList_Published_SelectionChanged" />
+                            <Label Content="OTHER" Padding="17,4,4,4" Margin="0,20,0,0" FontSize="11" FontWeight="Bold" Height="21"/>
+                            <ListBox x:Name="OrphanedList" Margin="10,0,9.8,0">
+                                <ListBoxItem x:Name="OrphanedListItem" Selected="OrphanedListBox_Selected">
+                                    Orphaned Params
+                                </ListBoxItem>
+                            </ListBox>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
                 <Grid x:Name="DashboardGrid" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Top" Visibility="Collapsed">
-                    <TextBlock TextWrapping="Wrap" Text="Welcome to OpenDefinery v0.1" Margin="0,100,0,0" VerticalAlignment="Top" FontSize="36" Foreground="#DD767676" HorizontalAlignment="Center"/>
-                    <TextBlock Margin="0,150,0,0" TextWrapping="Wrap" Text="We are currently in private beta. Please report any bugs or feature requests to i@opendefinery.com" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                    <TextBlock TextWrapping="Wrap" Text="Welcome to OpenDefinery" Margin="0,100,0,0" VerticalAlignment="Top" FontSize="36" Foreground="#DD767676" HorizontalAlignment="Center"/>
+                    <TextBlock Margin="0,155,0,0" TextWrapping="Wrap" Text="(private beta v0.0.1)" VerticalAlignment="Top" FontSize="15" HorizontalAlignment="Center" Foreground="#DD767676"/>
 
                 </Grid>
                 <Grid x:Name="MainBrowserGrid">
@@ -122,7 +128,7 @@
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <Grid x:Name="PropertiesSideBar"  Width="300" Grid.Column="1">
+                        <Grid x:Name="PropertiesSideBar"  Width="300" Grid.Column="1" Background="#FFE9EBED">
                             <StackPanel Margin="20,20,20,20">
                                 <Label Content="GUID" Margin="0" Padding="0,4,4,4"/>
                                 <TextBox x:Name="PropTextGuid" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0" IsEnabled="False"/>
@@ -138,11 +144,20 @@
                     </Grid>
                 </Grid>
             </DockPanel>
-            <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="0,0,14.6,10.4" HorizontalAlignment="Right" Grid.Row="2" Width="556">
-                <TextBox x:Name="PagerTextBox" HorizontalAlignment="Right" TextWrapping="Wrap" Width="378" Margin="0,0,20,0" IsReadOnly="True" BorderBrush="{x:Null}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <Button x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="36"/>
-                <Button x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Click="PagerNextButton_Click" Margin="0" Height="36" HorizontalContentAlignment="Center"/>
-            </StackPanel>
+            <Grid x:Name="FooterGrid" Grid.Row="2" Background="#FF60666C" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" Foreground="White" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
+                <Grid Width="Auto" Grid.Column="1">
+                    <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0" HorizontalAlignment="Right">
+                        <TextBlock x:Name="PagerTextBox" Foreground="#FFFFFF" TextAlignment="Right" VerticalAlignment="Center" HorizontalAlignment="Right" TextWrapping="Wrap" Width="Auto" Margin="0,0,20,0" />
+                        <Button Style="{StaticResource MaterialDesignFlatAccentBgButton}" x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="36"/>
+                        <Button Style="{StaticResource MaterialDesignFlatAccentBgButton}" x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Click="PagerNextButton_Click" Margin="0" Height="36" HorizontalContentAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
         </Grid>
         <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="350" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">

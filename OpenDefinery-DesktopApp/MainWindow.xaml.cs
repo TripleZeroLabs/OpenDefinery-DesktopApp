@@ -70,6 +70,7 @@ namespace OpenDefinery_DesktopApp
 
             ParamSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
 
+            // Show the login modal
             if (string.IsNullOrEmpty(Definery.AuthCode) | string.IsNullOrEmpty(Definery.CsrfToken))
             {
                 OverlayGrid.Visibility = Visibility.Visible;
@@ -369,13 +370,17 @@ namespace OpenDefinery_DesktopApp
                 // Store the auth code for GET requests
                 Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
 
+                // Load all of the things!!!
+                LoadData();
+
                 // Hide login form
                 OverlayGrid.Visibility = Visibility.Hidden;
                 LoginGrid.Visibility = Visibility.Hidden;
             }
-
-            // Load all of the things!!!
-            LoadData();
+            else
+            {
+                MessageBox.Show("There was an error logging in. Please try again.");
+            }
         }
 
         /// <summary>
@@ -601,12 +606,14 @@ namespace OpenDefinery_DesktopApp
                 DataGridParameters.ItemsSource = Definery.Parameters;
                 DataGridParameters.Items.Refresh();
 
-                PagerPanel.Visibility = Visibility.Hidden;
+                PagerPanel.Visibility = Visibility.Visible;
             }
             else
             {
                 MainBrowserGrid.Visibility = Visibility.Collapsed;
                 DashboardGrid.Visibility = Visibility.Visible;
+
+                PagerPanel.Visibility = Visibility.Hidden;
             }
 
 
@@ -1264,6 +1271,11 @@ namespace OpenDefinery_DesktopApp
             ParamSource = ParameterSource.None;
 
             RefreshUi();
+        }
+
+        private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start("https://github.com/jmerlan/OpenDefinery-DesktopApp/issues");
         }
     }
 }
