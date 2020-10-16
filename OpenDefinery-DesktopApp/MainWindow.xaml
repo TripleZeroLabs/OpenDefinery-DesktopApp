@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:OpenDefinery_DesktopApp"
         mc:Ignorable="d"
         Title="OpenDefinery" Height="1000" Width="1300"
@@ -31,10 +32,46 @@
             </Grid.ColumnDefinitions>
             <Grid x:Name="ToolbarGrid" Height="57" VerticalAlignment="Top" Margin="0,0,-0.4,0" Background="#FF2E3742" Grid.Row="0" Grid.RowSpan="2">
                 <StackPanel Margin="0" Orientation="Horizontal">
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DashboardButton" Content="Dashboard" HorizontalAlignment="Left" Margin="20,0,0,0" Height="Auto" Foreground="White" Padding="0,4,4,4" ToolTip="See all of the things" Click="DashboardButton_Click" />
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewParameterButton" Content="New Parameter" HorizontalAlignment="Left" Margin="20,0,0,0" Click="NewParameterButton_Click" Height="Auto" Foreground="White" Padding="0,4,4,4" ToolTip="Create a new Shared Parameter" />
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewCollectionButton" Content="New Collection" Margin="20,0,0,0" Click="NewCollectionButton_Click" Height="Auto" Foreground="#FFFFFCFC" HorizontalAlignment="Left" ToolTip="Collections are used to group Shared Parameters."/>
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="BatchUploadOverlayButton" Content="Batch Upload" Height="Auto" Click="BatchUploadOverlayButton_Click" Margin="20,0,0,0" HorizontalContentAlignment="Right" Foreground="White" Padding="4" HorizontalAlignment="Right" ToolTip="Import a Shared Parameter text file"/>
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DashboardButton" Margin="20,0,0,0" Height="Auto" Foreground="White" Padding="0,4,4,4" ToolTip="See all of the things" Click="DashboardButton_Click">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:BoxIcons Kind="SolidHome"/>
+                                    <TextBlock Text="Home" Margin="10,0,0,0"></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewParameterButton" Margin="20,0,0,0" Click="NewParameterButton_Click" Height="Auto" Foreground="White" Padding="0,4,4,4" ToolTip="Create a new Shared Parameter">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:BoxIcons Kind="SolidPlusCircle"/>
+                                    <TextBlock Text="New Parameter" Margin="10,0,0,0"></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewCollectionButton" Margin="20,0,0,0" Click="NewCollectionButton_Click" Height="Auto" Foreground="#FFFFFCFC" ToolTip="Collections are used to group Shared Parameters.">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:BoxIcons Kind="SolidBookAdd"/>
+                                    <TextBlock Text="New Collection" Margin="10,0,0,0"></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="BatchUploadOverlayButton" Height="Auto" Click="BatchUploadOverlayButton_Click" Margin="20,0,0,0" Foreground="White" Padding="4" ToolTip="Import a Shared Parameter text file">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:BoxIcons Kind="SolidLayer"/>
+                                    <TextBlock Text="Batch Upload" Margin="10,0,0,0"></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
                 </StackPanel>
                 <TextBox x:Name="SearchTxtBox" Style="{DynamicResource MaterialDesignTextBox}" HorizontalAlignment="Right" Margin="0,0,69,0" TextWrapping="Wrap" VerticalAlignment="Center" Padding="4,0.25,0,0" TabIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="231" Height="25" KeyDown="PressEnterToSearch" FontSize="11" ToolTip="Search by keyword, data type, or GUID...">
                     <TextBox.Resources>
@@ -85,10 +122,46 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <StackPanel Orientation="Horizontal" Height="Auto">
-                            <Button x:Name="ExportCollectionButton" Content="Export Collection (txt)" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file"/>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="AddToCollectionButton" Content="Add To Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Click="AddToCollectionButton_Click" Padding="10,4" ToolTip="Add the selected Shared Parameters to a Collection"/>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="RemoveFromCollectionButton" Content="Remove From Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="RemoveFromCollectionButton_Click" ToolTip="Remove the selected Shared Parameters from the current Collection"/>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="ForkParameterButton" Content="Fork Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="ForkParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection"/>
+                            <Button x:Name="ExportCollectionButton" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="SolidFileExport"/>
+                                            <TextBlock Text="Export" Margin="7,0,0,0"></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="AddToCollectionButton" HorizontalAlignment="Left" Margin="10,0,0,0" Click="AddToCollectionButton_Click" Padding="10,4" ToolTip="Add the selected Shared Parameters to a Collection">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="RegularAddToQueue"/>
+                                            <TextBlock Text="Add to Collection" Margin="7,0,0,0"></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="RemoveFromCollectionButton" Content="Remove From Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="RemoveFromCollectionButton_Click" ToolTip="Remove the selected Shared Parameters from the current Collection">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="RegularXCircle"/>
+                                            <TextBlock Text="Remove" Margin="7,0,0,0"></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="ForkParameterButton" Content="Fork Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="ForkParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="RegularGitRepoForked"/>
+                                            <TextBlock Text="Fork" Margin="7,0,0,0"></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="1">
@@ -136,7 +209,16 @@
                                 <ComboBox x:Name="PropComboDataType" VerticalAlignment="Stretch" IsEnabled="False"/>
                                 <CheckBox x:Name="PropCheckVisible" Content="Visible" Margin="0,20,0,0" IsEnabled="False"/>
                                 <CheckBox x:Name="PropCheckUserMod" Content="User Modifiable" Margin="0,10,0,0" IsEnabled="False"/>
-                                <Button Style="{StaticResource MaterialDesignFlatDarkBgButton}" FontSize="13" Content="Copy PARAM to Clipboard" x:Name="PropCopyPasteRowButton" Click="PropCopyPasteRowButton_Click" ToolTip="Copy this definition as a line of text to paste into a text file" Margin="0,30,0,0" />
+                                <Button Style="{StaticResource MaterialDesignFlatDarkBgButton}" FontSize="13" x:Name="PropCopyPasteRowButton" Click="PropCopyPasteRowButton_Click" ToolTip="Copy this Shared Parameter as a tab delimited line of text to manually paste into a text file" Margin="0,30,0,0">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <iconPacks:BoxIcons Kind="RegularClipboard"/>
+                                                <TextBlock Text="Copy PARAM" Margin="7,0,0,0"></TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
                                 <TextBlock x:Name="PropTxtRowCopied" TextWrapping="Wrap" Text="PARAM data copied to clipboard" Margin="10,10,10,0" Padding="10,5" Background="#FFE3FFD7" Foreground="#DD095A00"/>
                                 <TextBox x:Name="PropTxtRow" Height="23" Margin="0" FontFamily="Source Code Pro" FontSize="10" HorizontalAlignment="Left" Visibility="Hidden"/>
                             </StackPanel>
@@ -144,17 +226,35 @@
                     </Grid>
                 </Grid>
             </DockPanel>
-            <Grid x:Name="FooterGrid" Grid.Row="2" Background="#FF60666C" >
+            <Grid x:Name="FooterGrid" Grid.Row="2" Background="#FFFFFF">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" Foreground="White" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
+                <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" Foreground="#333333" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
                 <Grid Width="Auto" Grid.Column="1">
                     <StackPanel x:Name="PagerPanel" Height="45" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0" HorizontalAlignment="Right">
-                        <TextBlock x:Name="PagerTextBox" Foreground="#FFFFFF" TextAlignment="Right" VerticalAlignment="Center" HorizontalAlignment="Right" TextWrapping="Wrap" Width="Auto" Margin="0,0,20,0" />
-                        <Button Style="{StaticResource MaterialDesignFlatAccentBgButton}" x:Name="PagerPreviousButton" Content="Previous" HorizontalAlignment="Right" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="36"/>
-                        <Button Style="{StaticResource MaterialDesignFlatAccentBgButton}" x:Name="PagerNextButton" Content="Next" HorizontalAlignment="Right" Click="PagerNextButton_Click" Margin="0" Height="36" HorizontalContentAlignment="Center"/>
+                        <TextBlock x:Name="PagerTextBox" Foreground="#888888" TextAlignment="Right" VerticalAlignment="Center" HorizontalAlignment="Right" TextWrapping="Wrap" Width="Auto" Margin="0,0,20,0" />
+                        <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerPreviousButton" Margin="0,0,10,0" Click="PagerPreviousButton_Click" Height="30" Padding="10, 0" Foreground="#FFFFFF">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:BoxIcons Kind="RegularChevronLeftCircle"/>
+                                        <TextBlock Text="Previous" Margin="5,0,0,0"></TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerNextButton" Click="PagerNextButton_Click" Margin="0" Height="30" Padding="10, 0" Foreground="#FFFFFF">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Next" Margin="0,0,5,0"></TextBlock>
+                                        <iconPacks:BoxIcons Kind="RegularChevronRightCircle"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Grid>
