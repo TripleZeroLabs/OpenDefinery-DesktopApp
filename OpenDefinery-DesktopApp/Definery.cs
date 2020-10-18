@@ -22,6 +22,7 @@ namespace OpenDefinery
         public List<Collection> PublishedCollections { get; set; }
         public ObservableCollection<SharedParameter> Parameters { get; set; }
         public List<DataType> DataTypes { get; set; }
+        public List<DataCategory> DataCategories { get; set; }
         public List<Group> Groups { get; set; }
         public static User CurrentUser { get; set; }
         

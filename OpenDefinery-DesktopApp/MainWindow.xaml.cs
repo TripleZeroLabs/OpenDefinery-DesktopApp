@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Win32;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -90,9 +91,25 @@ namespace OpenDefinery_DesktopApp
                 // Load the data from Drupal
                 Definery.Groups = Group.GetAll(Definery);
                 Definery.DataTypes = DataType.GetAll(Definery);
+                Definery.DataCategories = DataCategory.GetAll(Definery);
+
+                // Clean up Data Category names
+                foreach (var cat in Definery.DataCategories)
+                {
+                    var splitName = cat.Name.Split('_');
+                    cat.Name = splitName[1];
+                }
 
                 // Sort the lists for future use by UI
                 Definery.DataTypes.Sort(delegate (DataType x, DataType y)
+                {
+                    if (x.Name == null && y.Name == null) return 0;
+                    else if (x.Name == null) return -1;
+                    else if (y.Name == null) return 1;
+                    else return x.Name.CompareTo(y.Name);
+                });
+
+                Definery.DataCategories.Sort(delegate (DataCategory x, DataCategory y)
                 {
                     if (x.Name == null && y.Name == null) return 0;
                     else if (x.Name == null) return -1;
@@ -104,8 +121,13 @@ namespace OpenDefinery_DesktopApp
                 NewParamDataTypeCombo.ItemsSource = Definery.DataTypes;
                 NewParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
                 NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+                NewParamDataCatCombo.ItemsSource = Definery.DataCategories;
+                NewParamDataCatCombo.DisplayMemberPath = "Name";
+                NewParamDataCatCombo.SelectedIndex = 0;
                 PropComboDataType.ItemsSource = Definery.DataTypes;
                 PropComboDataType.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
+                PropComboDataCategory.ItemsSource = Definery.DataCategories;
+                PropComboDataCategory.DisplayMemberPath = "Name";
 
                 // Display Collections in listboxes
                 Definery.MyCollections = Collection.ByCurrentUser(Definery);
@@ -196,7 +218,7 @@ namespace OpenDefinery_DesktopApp
             }
 
             // Update the textbox
-            mw.PagerTextBox.Text = string.Format("Page {0} of {1} (Total Parameters: {2})", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
+            mw.PagerTextBox.Text = string.Format("Page {0} of {1}    |    Total Parameters: {2}", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
 
             // Set the object from the updated Pager object
             Pager = pager;
@@ -268,7 +290,7 @@ namespace OpenDefinery_DesktopApp
                             if (line != null)
                             {
                                 // Cast tab delimited line from shared parameter text file to SharedParameter object
-                                var newParameter = SharedParameter.FromTxt(line);
+                                var newParameter = SharedParameter.FromTxt(Definery, line);
 
                                 if (newParameter != null)
                                 {
@@ -551,10 +573,30 @@ namespace OpenDefinery_DesktopApp
 
                 // Update GUID field
                 PropTextGuid.Text = selectedParam.Guid.ToString();
-                
-                // Update Data type field
+
+                // Update Data type field and select the item in the ComboBox
                 var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
                 PropComboDataType.SelectedItem = paramDataType;
+
+                // Update Data Category field and select the item in the ComboBox
+                if (!string.IsNullOrEmpty(selectedParam.DataCategoryHashcode))
+                {
+                    // Toggle UI
+                    PropComboLabelDataCategory.Visibility = Visibility.Visible;
+                    PropComboDataCategory.Visibility = Visibility.Visible;
+
+                    // A rather roundabout way to displaying the current DataCategory in the combobox
+                    var paramDataCat = DataCategory.GetByHashcode(Definery, selectedParam.DataCategoryHashcode);
+                    var foundDataCats = Definery.DataCategories.Where(o => o.Hashcode == paramDataCat.Hashcode);
+                    var dataCategory = foundDataCats.FirstOrDefault();
+
+                    PropComboDataCategory.SelectedItem = dataCategory;
+                }
+                else
+                {
+                    PropComboLabelDataCategory.Visibility = Visibility.Collapsed;
+                    PropComboDataCategory.Visibility = Visibility.Collapsed;
+                }
 
                 // Update boolean fields
                 if (selectedParam.Visible == "1")
@@ -580,7 +622,7 @@ namespace OpenDefinery_DesktopApp
                     selectedParam.Guid.ToString() + "\t" +
                     selectedParam.Name + "\t" +
                     selectedParam.DataType + "\t" +
-                    selectedParam.DataCategory + "\t" +
+                    selectedParam.DataCategoryHashcode + "\t" +
                     "1" + "\t" +  // Hardcode the Default Group until Groups are properly implemented
                     selectedParam.Visible + "\t" +
                     selectedParam.Description + "\t" +
@@ -720,6 +762,8 @@ namespace OpenDefinery_DesktopApp
             NewParamFormCombo.ItemsSource = Definery.MyCollections;
             NewParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
             NewParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+            NewParamDataTypeCombo.SelectedIndex = 0;
+            NewParamDataCatCombo.SelectedIndex = 0;
 
             // Generate a GUID by default
             NewParamGuidTextBox.Text = Guid.NewGuid().ToString();
@@ -758,10 +802,13 @@ namespace OpenDefinery_DesktopApp
             var collection = NewParamFormCombo.SelectedItem as Collection;
             var response = string.Empty;
             var dataType = NewParamDataTypeCombo.SelectedItem as DataType;
+            var dataCategory = NewParamDataCatCombo.SelectedItem as DataCategory;
 
+            // TODO: Refactor this logic using the new constructor 
             var param = new SharedParameter();
             param.Description = NewParamDescTextBox.Text;
             param.DataType = dataType.Name;
+            param.DataCategoryHashcode = dataCategory.Hashcode;
             param.Visible = (NewParamVisibleCheck.IsChecked ?? false) ? "1" : "0";  // Reports out a 1 or 0 as a string
             param.UserModifiable = (NewParamUserModCheckbox.IsChecked ?? false) ? "1" : "0";
 
@@ -788,8 +835,15 @@ namespace OpenDefinery_DesktopApp
                         // Assign the GUID
                         var guid = new Guid(NewParamGuidTextBox.Text);
                         param.Guid = guid;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
 
-                        // Finially create the parameter
+                    // Finally create the parameter
+                    try
+                    {
                         response = SharedParameter.Create(Definery, param, collection.Id);
 
                         // Hide the overlay and form
@@ -802,9 +856,7 @@ namespace OpenDefinery_DesktopApp
 
                         // Reset the form values and UI
                         InitializeParamForm();
-
                     }
-                    // Display a message if the text cannot be cast to a GUID
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.ToString());
@@ -885,6 +937,8 @@ namespace OpenDefinery_DesktopApp
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RefreshCollectionParameters(CollectionsList);
+
+            StatusProgressBar.Visibility = Visibility.Hidden;
 
             // Deselect the other ListBoxes
             CollectionsList_Published.SelectedItem = null;
@@ -1276,6 +1330,30 @@ namespace OpenDefinery_DesktopApp
         private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Process.Start("https://github.com/jmerlan/OpenDefinery-DesktopApp/issues");
+        }
+
+        /// <summary>
+        /// Method to execute when the DataType Combo changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewParamDataTypeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (NewParamDataTypeCombo.SelectedItem != null)
+            {
+                var selectedDataType = NewParamDataTypeCombo.SelectedItem as DataType;
+
+                if (selectedDataType.Name == "FAMILYTYPE")
+                {
+                    NewParamDataCatLabel.Visibility = Visibility.Visible;
+                    NewParamDataCatCombo.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    NewParamDataCatLabel.Visibility = Visibility.Collapsed;
+                    NewParamDataCatCombo.Visibility = Visibility.Collapsed;
+                }
+            }
         }
     }
 }
