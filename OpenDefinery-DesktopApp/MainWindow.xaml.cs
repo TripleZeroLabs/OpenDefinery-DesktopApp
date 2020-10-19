@@ -38,6 +38,8 @@ namespace OpenDefinery_DesktopApp
         public MainWindow()
         {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
+            MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
 
             InitializeComponent();
 
