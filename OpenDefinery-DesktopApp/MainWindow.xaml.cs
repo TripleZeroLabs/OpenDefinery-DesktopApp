@@ -2,6 +2,7 @@
 using RestSharp.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -34,6 +35,7 @@ namespace OpenDefinery_DesktopApp
         public static Pager Pager { get; set; }
         public static Collection SelectedCollection { get; set; }
         ParameterSource ParamSource { get; set; }
+        bool AllParamsLoaded { get; set; }
 
         public MainWindow()
         {
@@ -66,6 +68,8 @@ namespace OpenDefinery_DesktopApp
             PagerPanel.Visibility = Visibility.Hidden;  // Pager
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
+
+            AllParamsLoaded = false;
 
             PropertiesSideBar.Visibility = Visibility.Collapsed; // Sidebar should be collapsed by default
 
@@ -144,6 +148,16 @@ namespace OpenDefinery_DesktopApp
                 Pager.CurrentPage = 0;
                 UpdatePager(Pager, 0);
 
+                // If there are more than one page, enable the Load All button
+                if (Pager.TotalPages == 1)
+                {
+                    AllParamsLoaded = true;
+                }
+                else
+                {
+                    AllParamsLoaded = false;
+                }
+
                 // Update the GUI anytime data is loaded
                 RefreshUi();
             }
@@ -158,72 +172,81 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         /// <param name="pager">The Pager object to update</param>
         /// <param name="incrementChange">The increment in which to update the page number (can be positive or negative). Note the first page number is 0.</param>
-        public static void UpdatePager(Pager pager, int incrementChange)
+        /// <param name="loadingAll">Specify if the update is executed by the Load All method</param>
+        public void UpdatePager(Pager pager, int incrementChange, bool loadingAll = false)
         {
-            // Get the current instance of the application window
-            MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-
-            // Increment the current page
-            pager.CurrentPage += incrementChange;
-
-            // Set the Offset
-            if (pager.CurrentPage == 0)
+            this.Dispatcher.Invoke(() =>
             {
-                pager.IsFirstPage = true;
-                pager.IsLastPage = false;
+                // Increment the current page
+                pager.CurrentPage += incrementChange;
 
-                // Set the new offset to 0
-                pager.Offset = 0;
+                // Set the Offset
+                if (pager.CurrentPage == 0)
+                {
+                    pager.IsFirstPage = true;
+                    pager.IsLastPage = false;
 
-                // Toggle the UI
-                mw.PagerNextButton.IsEnabled = true;
-                mw.PagerPreviousButton.IsEnabled = false;
-            }
-            if (pager.CurrentPage >= 1)
-            {
-                pager.IsFirstPage = false;
+                    // Set the new offset to 0
+                    pager.Offset = 0;
 
-                // Set the new offset based on the items per page and current page
-                pager.Offset = pager.ItemsPerPage * pager.CurrentPage;
-            }
+                    // Toggle the UI
 
-            // Enable UI as needed
-            if (pager.CurrentPage < pager.TotalPages - 1)
-            {
-                mw.PagerNextButton.IsEnabled = true;
-            }
-            if (pager.CurrentPage == pager.TotalPages - 1)
-            {
-                mw.PagerNextButton.IsEnabled = false;
-                pager.IsLastPage = true;
-            }
+                    PagerNextButton.IsEnabled = true;
+                    PagerPreviousButton.IsEnabled = false;
+                }
+                if (pager.CurrentPage >= 1)
+                {
+                    pager.IsFirstPage = false;
 
-            if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage >= 0)
-            {
-                mw.PagerPreviousButton.IsEnabled = true;
-            }
-            if (pager.CurrentPage < 1)
-            {
-                mw.PagerPreviousButton.IsEnabled = false;
-                pager.IsFirstPage = true;
-            }
+                    // Set the new offset based on the items per page and current page
+                    pager.Offset = pager.ItemsPerPage * pager.CurrentPage;
+                }
 
-            // Disable the pager buttons if there is only one page
-            if (pager.CurrentPage == 0 & pager.TotalPages == 1)
-            {
-                mw.PagerNextButton.IsEnabled = false;
-                mw.PagerPreviousButton.IsEnabled = false;
+                // Enable UI as needed
+                if (pager.CurrentPage < pager.TotalPages - 1)
+                {
+                    PagerNextButton.IsEnabled = true;
+                }
+                if (pager.CurrentPage == pager.TotalPages - 1)
+                {
+                    PagerNextButton.IsEnabled = false;
+                    pager.IsLastPage = true;
+                }
 
-                // First and last page are both true when there is only one page
-                pager.IsFirstPage = true;
-                pager.IsLastPage = true;
-            }
+                if (pager.CurrentPage <= pager.TotalPages - 1 && pager.CurrentPage >= 0)
+                {
+                    PagerPreviousButton.IsEnabled = true;
+                }
+                if (pager.CurrentPage < 1)
+                {
+                    PagerPreviousButton.IsEnabled = false;
+                    pager.IsFirstPage = true;
+                }
 
-            // Update the textbox
-            mw.PagerTextBox.Text = string.Format("Page {0} of {1}    |    Total Parameters: {2}", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
+                // Disable the pager buttons if there is only one page
+                if (pager.CurrentPage == 0 & pager.TotalPages == 1)
+                {
+                    PagerNextButton.IsEnabled = false;
+                    PagerPreviousButton.IsEnabled = false;
 
-            // Set the object from the updated Pager object
-            Pager = pager;
+                    // First and last page are both true when there is only one page
+                    pager.IsFirstPage = true;
+                    pager.IsLastPage = true;
+                }
+
+                // Update the textbox
+                if (!loadingAll)
+                {
+                    PagerTextBox.Text = string.Format("Page {0} of {1}    |    Total Parameters: {2}", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
+                }
+                else
+                {
+                    PagerTextBox.Text = string.Format("Loading page {0} of {1}    |    Total Parameters: {2}", pager.CurrentPage + 1, pager.TotalPages, pager.TotalItems);
+                }
+
+                // Set the object from the updated Pager object
+                Pager = pager;
+            });
         }
 
         /// <summary>
@@ -547,30 +570,28 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Show the Add to Collection button if something is selected.
-            if (DataGridParameters.SelectedItems.Count > 0)
-            {
-                AddToCollectionButton.Visibility = Visibility.Visible;
-
-                // Toggle UI based on the ParameterSource
-                if (DataGridParameters.SelectedItems.Count > 0 && ParamSource == ParameterSource.Collection)
-                {
-                    RemoveFromCollectionButton.Visibility = Visibility.Visible;
-                }
-                if (ParamSource == ParameterSource.Search)
-                {
-                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                }
-            }
-            // Toggle sidebar UI
             if (DataGridParameters.SelectedItems.Count == 1)
             {
                 var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
 
+                if (ParamSource == ParameterSource.Collection)
+                {
+                    // Toggle UI based on permissions
+                    if (selectedParam.Author == Definery.CurrentUser.Id)
+                    {
+                        AddToCollectionButton.Visibility = Visibility.Visible;
+                        RemoveFromCollectionButton.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        AddToCollectionButton.Visibility = Visibility.Collapsed;
+                        RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                        ForkParameterButton.Visibility = Visibility.Visible;
+                    }
+                }
+
                 // Toggle UI
-                ForkParameterButton.Visibility = Visibility.Visible;
                 PropertiesSideBar.Visibility = Visibility.Visible;
-                // TODO: Make this a timed display rather than persisting until a new row is clicked
                 PropTxtRowCopied.Visibility = Visibility.Collapsed;  
 
                 // Update GUID field
@@ -639,52 +660,79 @@ namespace OpenDefinery_DesktopApp
         /// <summary>
         /// Helper method to refresh all UI elements after a new payload. This should execute anytime there is a change to the UI.
         /// </summary>
-        public void RefreshUi()
+        /// <param name="loadingAll">Specify is the the refresh is called by the Load All method</param>
+        public void RefreshUi(bool loadingAll = false)
         {
-            // Update the Grid based on the parameter source. Show dashboard if none.
-            if (ParamSource != ParameterSource.None)
+            this.Dispatcher.Invoke(() =>
             {
-                MainBrowserGrid.Visibility = Visibility.Visible;
-                DashboardGrid.Visibility = Visibility.Collapsed;
+                // Enable UI for Parameter lists that have more than one page
+                if (AllParamsLoaded == false)
+                {
+                    PagerNextButton.Visibility = Visibility.Visible;
+                    PagerPreviousButton.Visibility = Visibility.Visible;
+                    PagerLoadAllButton.Visibility = Visibility.Visible;
+                    PagerLoadAllButton.IsEnabled = true;
+                }
+                else
+                {
+                    PagerNextButton.Visibility = Visibility.Collapsed;
+                    PagerPreviousButton.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.Visibility = Visibility.Collapsed;
+                }
 
-                DataGridParameters.ItemsSource = Definery.Parameters;
-                DataGridParameters.Items.Refresh();
+                // Update the Grid based on the parameter source. Show dashboard if none.
+                if (ParamSource != ParameterSource.None)
+                {
+                    MainBrowserGrid.Visibility = Visibility.Visible;
+                    DashboardGrid.Visibility = Visibility.Collapsed;
 
-                PagerPanel.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                MainBrowserGrid.Visibility = Visibility.Collapsed;
-                DashboardGrid.Visibility = Visibility.Visible;
+                    DataGridParameters.ItemsSource = Definery.Parameters;
+                    DataGridParameters.Items.Refresh();
 
-                PagerPanel.Visibility = Visibility.Hidden;
-            }
+                    PagerPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    MainBrowserGrid.Visibility = Visibility.Collapsed;
+                    DashboardGrid.Visibility = Visibility.Visible;
+
+                    PagerPanel.Visibility = Visibility.Hidden;
+                }
+
+                // Toggle UI based on the Load All button
+                if (DataGridParameters.Items.Count > 0 & !loadingAll)
+                {
+                    DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
+                }
+                if (loadingAll)
+                {
+                    PagerNextButton.Visibility = Visibility.Collapsed;
+                    PagerPreviousButton.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.IsEnabled = false;
+                }
 
 
-            if (DataGridParameters.Items.Count > 0)
-            {
-                DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
-            }
+                // Toggle UI based on DataGrid selection
+                if (DataGridParameters.SelectedItems.Count == 0)
+                {
+                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                    PropertiesSideBar.Visibility = Visibility.Collapsed;
+                }
+                if (DataGridParameters.SelectedItems.Count == 1)
+                {
+                    PropertiesSideBar.Visibility = Visibility.Visible;
+                }
+                if (DataGridParameters.SelectedItems.Count > 1)
+                {
+                    PropertiesSideBar.Visibility = Visibility.Collapsed;
+                }
 
-            // Toggle UI based on DataGrid selection
-            if (DataGridParameters.SelectedItems.Count == 0)
-            {
-                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            }
-            if (DataGridParameters.Items.Count == 1)
-            {
-                PropertiesSideBar.Visibility = Visibility.Visible;
-            }
-            if (DataGridParameters.Items.Count > 1)
-            {
-                PropertiesSideBar.Visibility = Visibility.Collapsed;
-            }
-
-            // Manage contextual UI
-            if (ParamSource == ParameterSource.Search)
-            {
-                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            }
+                // Manage contextual UI
+                if (ParamSource == ParameterSource.Search)
+                {
+                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                }
+            });
         }
 
         /// <summary>
@@ -704,8 +752,17 @@ namespace OpenDefinery_DesktopApp
                     // Get current Shared Parameter as a SharedParameter object
                     var selectedParam = p as SharedParameter;
 
-                    // Add the Shared Parameter to the Collection
-                    SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                    if (selectedParam.Author != Definery.CurrentUser.Id)
+                    {
+                        // Don't allow adding to a Collection if the user isn't the author
+                        // Force the user to Fork the Parameter instead
+
+                    }
+                    else
+                    {
+                        // Add the Shared Parameter to the Collection
+                        SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                    }
                 }
 
                 // Notify the user of the update
@@ -852,6 +909,7 @@ namespace OpenDefinery_DesktopApp
                         NewParameterGrid.Visibility = Visibility.Hidden;
                         OverlayGrid.Visibility = Visibility.Hidden;
 
+                        // TODO: Validate that the Shared Parameter was actually created
                         MessageBox.Show("The parameter has been successfully created.");
 
                         Debug.Write(response);
@@ -938,6 +996,7 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Retrieve a page of Parameters from the selected Collection
             RefreshCollectionParameters(CollectionsList);
 
             StatusProgressBar.Visibility = Visibility.Hidden;
@@ -948,6 +1007,16 @@ namespace OpenDefinery_DesktopApp
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Collection;
+
+            // Set properties based on the total pages
+            if (Pager.TotalPages > 1)
+            {
+                AllParamsLoaded = false;
+            }
+            if (Pager.TotalPages == 1)
+            {
+                AllParamsLoaded = true;
+            }
 
             RefreshUi();
         }
@@ -967,6 +1036,16 @@ namespace OpenDefinery_DesktopApp
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Collection;
+
+            // Set properties based on the total pages
+            if (Pager.TotalPages > 1)
+            {
+                AllParamsLoaded = false;
+            }
+            if (Pager.TotalPages == 1)
+            {
+                AllParamsLoaded = true;
+            }
 
             RefreshUi();
         }
@@ -1040,8 +1119,25 @@ namespace OpenDefinery_DesktopApp
             Pager.IsFirstPage = true;
             Pager.IsLastPage = false;
 
-            // Get all of the SharedParameters from the Collection
-            var allParams = SharedParameter.GetAllFromCollection(Definery, SelectedCollection);
+            // Get the first page of SharedParameters
+            var allParams = SharedParameter.ByCollection(Definery, SelectedCollection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true).ToList();
+
+            // Update the pager since it is not the last page
+            UpdatePager(Pager, 1);
+
+            // Loop through all of the pages
+            do
+            {
+                // Get all SharedParameters of the current page
+                allParams.AddRange(SharedParameter.ByCollection(
+                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false));
+
+                // Update the pager since it is not the last page
+                UpdatePager(Pager, 1);
+
+            } while (Pager.CurrentPage < Pager.TotalPages);
+
+            Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), SelectedCollection.Name));
 
             // Generate the text file
             Exporter.ToRevitTxt(Definery, allParams.ToList());
@@ -1050,11 +1146,10 @@ namespace OpenDefinery_DesktopApp
             Pager.CurrentPage = 0;
             Pager.Offset = 0;
 
-            // Get the parameters of the logged in user by default and display in the DataGrid
-            // Get the parameters of the logged in user by default and display in the DataGrid
-            Definery.Parameters = SharedParameter.ByCollection(
-                Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
-                );
+            //// Get the parameters of the logged in user by default and display in the DataGrid
+            //Definery.Parameters = SharedParameter.ByCollection(
+            //    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
+            //    );
 
             // Update the GUI anytime data is loaded
             UpdatePager(Pager, 0);
@@ -1087,6 +1182,15 @@ namespace OpenDefinery_DesktopApp
 
                 // Update the GUI anytime data is loaded
                 PagerPanel.Visibility = Visibility.Visible;
+                if (Pager.TotalPages > 1)
+                {
+                    AllParamsLoaded = false;
+                }
+                else
+                {
+                    AllParamsLoaded = true;
+                }
+
                 RefreshUi();
 
                 // Logic to execute if there are parameters within the collection
@@ -1356,6 +1460,76 @@ namespace OpenDefinery_DesktopApp
                     NewParamDataCatCombo.Visibility = Visibility.Collapsed;
                 }
             }
+        }
+
+        /// <summary>
+        /// Method to execute when Load All button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void PagerLoadAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Prevent clicking more than once
+            PagerLoadAllButton.IsEnabled = false;
+
+            // Prevent clicking another Collection while loading is occuring
+            CollectionsList.IsEnabled = false;
+            CollectionsList_Published.IsEnabled = false;
+            OrphanedList.IsEnabled = false;
+
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
+
+            // Instantiate a new list of Parameters
+            var allParams = new ObservableCollection<SharedParameter>();
+
+            await Task.Run(() =>
+            {
+                // Loop through all of the pages
+                do
+                {
+                    // Get all SharedParameters of the current page
+                    var currentPage = SharedParameter.ByCollection(
+                        Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false);
+
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        // Add them to the main list
+                        foreach (var p in currentPage)
+                        {
+                            allParams.Add(p);
+                        }
+
+                        PagerLoadAllButton.IsEnabled = false;
+                        PagerNextButton.Visibility = Visibility.Collapsed;
+                        PagerPreviousButton.Visibility = Visibility.Collapsed;
+                    });
+
+                    // Update the pager since it is not the last page
+                    UpdatePager(Pager, 1, true);
+
+                    // Set the current list of Parameters
+                    Definery.Parameters = allParams;
+
+                    // Refresh the UI
+                    RefreshUi(true);
+
+                } while (Pager.CurrentPage < Pager.TotalPages);
+            });
+
+            AllParamsLoaded = true;
+
+            // Refresh the UI
+            RefreshUi(true);
+
+            // Allow users to select another collection
+            CollectionsList.IsEnabled = true;
+            CollectionsList_Published.IsEnabled = true;
+            OrphanedList.IsEnabled = true;
+
+            // Toggle the Pager UI
+            PagerTextBox.Text = string.Format("Loaded all {0} parameters", allParams.Count().ToString());
         }
     }
 }

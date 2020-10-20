@@ -128,7 +128,6 @@
                 <Grid x:Name="DashboardGrid" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Top" Visibility="Collapsed">
                     <TextBlock TextWrapping="Wrap" Text="Welcome to OpenDefinery" Margin="0,100,0,0" VerticalAlignment="Top" FontSize="36" Foreground="#DD767676" HorizontalAlignment="Center"/>
                     <TextBlock Margin="0,155,0,0" TextWrapping="Wrap" Text="(private beta v0.0.1)" VerticalAlignment="Top" FontSize="15" HorizontalAlignment="Center" Foreground="#DD767676"/>
-
                 </Grid>
                 <Grid x:Name="MainBrowserGrid">
                     <Grid.RowDefinitions>
@@ -251,12 +250,22 @@
                 <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" Foreground="#333333" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
                 <Grid Width="Auto" Grid.Column="1">
                     <StackPanel FlowDirection="RightToLeft" x:Name="PagerPanel" Height="45" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
-                        <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerNextButton" Click="PagerNextButton_Click" Margin="0" Height="30" Padding="10, 0" Foreground="#FFFFFF">
+                        <Button Style="{StaticResource MaterialDesignFlatAccentBgButton}" x:Name="PagerLoadAllButton" Margin="0" Height="30" Padding="10, 0" Foreground="#FFFFFF" Click="PagerLoadAllButton_Click">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Next" Margin="0,0,5,0"/>
+                                        <iconPacks:BoxIcons Kind="RegularCloudDownload"/>
+                                        <TextBlock Text="Load All" Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerNextButton" Click="PagerNextButton_Click" Margin="10,0,0,0" Height="30" Padding="10, 0" Foreground="#FFFFFF">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
                                         <iconPacks:BoxIcons Kind="RegularChevronRightCircle"/>
+                                        <TextBlock Text="Next" Margin="5,0,0,0"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </Button.ContentTemplate>
@@ -265,8 +274,8 @@
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Previous" Margin="0,0,5,0"/>
                                         <iconPacks:BoxIcons Kind="RegularChevronLeftCircle"/>
-                                        <TextBlock Text="Previous" Margin="5,0,0,0"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </Button.ContentTemplate>
@@ -278,7 +287,7 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Grid x:Name="OverlayGrid" Background="#B2000000">
+        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
             <Grid x:Name="LoginGrid" Margin="0" Background="White" Height="350" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,150,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,50,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
@@ -316,7 +325,7 @@
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
             </Grid>
-            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" VerticalAlignment="Top">
+            <Grid x:Name="NewParameterGrid" Margin="0" Background="White" HorizontalAlignment="Center" Width="501" VerticalAlignment="Top" d:IsHidden="True">
                 <StackPanel Margin="0">
                     <Label Content="CHOOSE A COLLECTION" Margin="0,50,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <ComboBox x:Name="NewParamFormCombo" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>

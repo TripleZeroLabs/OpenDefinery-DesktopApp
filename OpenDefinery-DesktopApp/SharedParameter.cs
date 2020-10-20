@@ -289,9 +289,6 @@ namespace OpenDefinery
         public static ObservableCollection<SharedParameter> ByCollection(
             Definery definery, Collection collection, int itemsPerPage, int offset, bool resetTotals)
         {
-            // Get the current instance of the application window
-            MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-
             var listOfParams = new List<SharedParameter>();
 
             var client = new RestClient(Definery.BaseUrl + string.Format(
@@ -336,30 +333,30 @@ namespace OpenDefinery
         /// <param name="definery">The main Definery object</param>
         /// <param name="collection">The Collection to retrieve the parameters from</param>
         /// <returns>A List of all SharedParameters in the Collection</returns>
-        public static ObservableCollection<SharedParameter> GetAllFromCollection(Definery definery, Collection collection)
-        {
-            // Get the first page of SharedParameters
-            var allParams = ByCollection(definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true).ToList();
+        //public static ObservableCollection<SharedParameter> GetAllFromCollection(Definery definery, Collection collection)
+        //{
+        //    // Get the first page of SharedParameters
+        //    var allParams = ByCollection(definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true).ToList();
 
-            // Update the pager since it is not the last page
-            MainWindow.UpdatePager(MainWindow.Pager, 1);
+        //    // Update the pager since it is not the last page
+        //    MainWindow.UpdatePager(MainWindow.Pager, 1);
 
-            // Loop through all of the pages
-            do
-            {
-                // Get all SharedParameters of the current page
-                allParams.AddRange(ByCollection(
-                    definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, false));
+        //    // Loop through all of the pages
+        //    do
+        //    {
+        //        // Get all SharedParameters of the current page
+        //        allParams.AddRange(ByCollection(
+        //            definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, false));
 
-                // Update the pager since it is not the last page
-                MainWindow.UpdatePager(MainWindow.Pager, 1);
+        //        // Update the pager since it is not the last page
+        //        MainWindow.UpdatePager(MainWindow.Pager, 1);
 
-            } while (MainWindow.Pager.CurrentPage < MainWindow.Pager.TotalPages);
+        //    } while (MainWindow.Pager.CurrentPage < MainWindow.Pager.TotalPages);
 
-            Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), collection.Name));
+        //    Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), collection.Name));
 
-            return new ObservableCollection<SharedParameter>(allParams);
-        }
+        //    return new ObservableCollection<SharedParameter>(allParams);
+        //}
 
         /// <summary>
         /// Retrieve the Shared Parameters that don't belong to any Collections
@@ -370,9 +367,6 @@ namespace OpenDefinery
         public static ObservableCollection<SharedParameter> GetOrphaned(
             Definery definery, int itemsPerPage, int offset, bool resetTotals)
         {
-            // Get the current instance of the application window
-            MainWindow mw = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-
             var listOfParams = new List<SharedParameter>();
 
             var client = new RestClient(Definery.BaseUrl + string.Format(
@@ -714,6 +708,43 @@ namespace OpenDefinery
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Fork an existing Shared Parameter, allowing overrides to only the name and description.
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="param">The existing Shared Parameter to fork</param>
+        /// <param name="name">The new Parameter name. Provide null/empty string to use the current name</param>
+        /// <param name="description">The new description. Provide null/empty string to use the current description</param>
+        /// <returns></returns>
+        public static SharedParameter Fork(Definery definery, SharedParameter param, string name, string description)
+        {
+            // If no overridden name or description is provide the same values as the existing Parameter
+            var newName = string.Empty;
+            var newDesc = string.Empty;
+
+            if (string.IsNullOrEmpty(name))
+            {
+                newName = param.Name;
+            }
+            if (string.IsNullOrEmpty(description))
+            {
+                newDesc = param.Description;
+            }
+
+            var newParam = new SharedParameter(
+                definery, 
+                param.Guid, 
+                name, 
+                param.DataType, 
+                param.DataCategoryHashcode, 
+                param.Group, 
+                param.Visible, 
+                description, 
+                param.UserModifiable);
+
+            return newParam;
         }
 
         /// <summary>

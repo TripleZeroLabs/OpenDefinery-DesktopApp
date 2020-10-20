@@ -125,6 +125,13 @@ namespace OpenDefinery
             }
         }
 
+        /// <summary>
+        /// Create a new Collction.
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="name">The name of the Colllection</param>
+        /// <param name="description">The description of the Collection</param>
+        /// <returns></returns>
         public static IRestResponse Create(Definery definery, string name, string description)
         {
             var newCollection = new Collection();
@@ -159,6 +166,21 @@ namespace OpenDefinery
 
             // TODO: Return the new Collection object rather than the response
             return response;
+        }
+
+        /// <summary>
+        /// Check that a Collection has duplicate GUIDs.
+        /// </summary>
+        /// <param name="collection">The Collection to check</param>
+        /// <param name="guid">The GUID to check for</param>
+        /// <returns></returns>
+        public static bool HasDuplicateGuids(Collection collection, Guid guid)
+        {
+            var hasDuplicate = false;
+
+
+
+            return hasDuplicate;
         }
     }
 }
