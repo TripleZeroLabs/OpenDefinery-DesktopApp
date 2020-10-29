@@ -53,6 +53,8 @@ namespace OpenDefinery
         [JsonProperty("collections")]
         public string CollectionsString { get; set; }
 
+        public List<Collection> Collections { get; set; }
+
         public string BatchId { get; set; }
 
         public SharedParameter()
@@ -324,7 +326,33 @@ namespace OpenDefinery
                 MessageBox.Show("There was an error getting the parameters.");
             }
 
-            return new ObservableCollection<SharedParameter>(listOfParams);
+            var parameters = new ObservableCollection<SharedParameter>(listOfParams);
+
+            // Set the Collections
+            var updatedParams = SetCollections(definery, parameters);
+
+            return updatedParams;
+        }
+
+        /// <summary>
+        /// Set the Collections on a list of SharedParameters.
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="parameters">The list of SharedParameters to process</param>
+        /// <returns></returns>
+        public static ObservableCollection<SharedParameter> SetCollections(Definery definery, ObservableCollection<SharedParameter> parameters)
+        {
+            // Set the Collections
+            var updatedParams = new ObservableCollection<SharedParameter>();
+
+            foreach (var p in parameters)
+            {
+                var newParam = Collection.GetFromString(definery, p, p.CollectionsString);
+
+                updatedParams.Add(newParam);
+            }
+
+            return updatedParams;
         }
 
         /// <summary>
@@ -403,7 +431,12 @@ namespace OpenDefinery
                 MessageBox.Show("There was an error getting the parameters.");
             }
 
-            return new ObservableCollection<SharedParameter>(listOfParams);
+            var parameters = new ObservableCollection<SharedParameter>(listOfParams);
+
+            // Set the Collections
+            var updatedParams = SetCollections(definery, parameters);
+
+            return updatedParams;
         }
 
         /// <summary>
@@ -449,7 +482,12 @@ namespace OpenDefinery
                 MessageBox.Show("There was an error getting the parameters.");
             }
 
-            return new ObservableCollection<SharedParameter>(listOfParams);
+            var parameters = new ObservableCollection<SharedParameter>(listOfParams);
+
+            // Set the Collections
+            var updatedParams = SetCollections(definery, parameters);
+
+            return updatedParams;
         }
 
         /// <summary>

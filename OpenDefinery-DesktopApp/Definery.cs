@@ -20,6 +20,7 @@ namespace OpenDefinery
 
         public List<Collection> MyCollections { get; set; }
         public List<Collection> PublishedCollections { get; set; }
+        public List<Collection> AllCollections { get; set; }
         public ObservableCollection<SharedParameter> Parameters { get; set; }
         public List<DataType> DataTypes { get; set; }
         public List<DataCategory> DataCategories { get; set; }

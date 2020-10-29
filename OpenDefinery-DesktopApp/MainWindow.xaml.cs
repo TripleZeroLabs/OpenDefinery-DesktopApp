@@ -144,6 +144,11 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList_Published.DisplayMemberPath = "Name";
                 CollectionsList_Published.ItemsSource = Definery.PublishedCollections;
 
+                // Set all Collections
+                Definery.AllCollections = new List<Collection>();
+                Definery.AllCollections.AddRange(Definery.MyCollections);
+                Definery.AllCollections.AddRange(Definery.PublishedCollections);
+
                 // Update the main Pager object
                 Pager.CurrentPage = 0;
                 UpdatePager(Pager, 0);
@@ -731,6 +736,10 @@ namespace OpenDefinery_DesktopApp
                 if (ParamSource == ParameterSource.Search)
                 {
                     RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                }
+                if (ParamSource == ParameterSource.Collection | ParamSource == ParameterSource.Orphaned)
+                {
+                    CollectionsColumn.Visibility = Visibility.Collapsed;
                 }
             });
         }

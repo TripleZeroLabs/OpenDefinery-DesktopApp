@@ -182,5 +182,48 @@ namespace OpenDefinery
 
             return hasDuplicate;
         }
+
+        /// <summary>
+        /// Retrieve a list of Collections from a comma separated values string (typically returned from the API).
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="collectionsString">A comma separated values string of Collection IDs</param>
+        /// <returns></returns>
+        public static SharedParameter GetFromString(Definery definery, SharedParameter parameter, string collectionsString)
+        {
+            var collections = new List<Collection>();
+
+            // Get multiple Collections
+            if (!string.IsNullOrEmpty(collectionsString) && collectionsString.Contains(","))
+            {
+                var strings = collectionsString.Split(',');
+
+                foreach (var s in strings)
+                {
+                    // Get Collection from ID
+                    var foundCollections = definery.AllCollections.Where(o => o.Id.ToString() == s.Trim());
+
+                    foreach (var foundCollection in foundCollections)
+                    {
+                        // Add Collection to list
+                        collections.Add(foundCollection);
+                    }
+                }
+            }
+            // Get a single Collection
+            if (!string.IsNullOrEmpty(collectionsString) && !collectionsString.Contains(","))
+            {
+                // Get Collection from ID
+                var foundCollection = definery.AllCollections.Where(o => o.Id.ToString() == collectionsString.Trim()).FirstOrDefault();
+
+                // Add Collection to list
+                collections.Add(foundCollection);
+            }
+            
+            // Set the new list to the SharedParameter property and return
+            parameter.Collections = collections;
+
+            return parameter;
+        }
     }
 }

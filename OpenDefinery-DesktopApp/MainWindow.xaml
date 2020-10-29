@@ -213,6 +213,13 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Collections" x:Name="CollectionsColumn">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ItemsControl ItemsSource="{Binding Collections}" DisplayMemberPath="Name"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <Grid x:Name="PropertiesSideBar"  Width="300" Grid.Column="1" Background="#05000000">
