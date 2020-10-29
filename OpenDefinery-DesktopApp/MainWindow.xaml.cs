@@ -682,6 +682,27 @@ namespace OpenDefinery_DesktopApp
         /// <param name="loadingAll">Specify is the the refresh is called by the Load All method</param>
         public void RefreshUi(bool loadingAll = false)
         {
+            // Manage the main UI first to handle the datagrid and home screen
+            this.Dispatcher.Invoke(() =>
+            {
+                if (ParamSource != ParameterSource.None)
+                {
+                    MainBrowserGrid.Visibility = Visibility.Visible;
+                    DashboardGrid.Visibility = Visibility.Collapsed;
+
+                    DataGridParameters.ItemsSource = Definery.Parameters;
+                    DataGridParameters.Items.Refresh();
+                }
+                if (ParamSource == ParameterSource.None)
+                {
+                    MainBrowserGrid.Visibility = Visibility.Collapsed;
+                    DashboardGrid.Visibility = Visibility.Visible;
+
+                    PagerPanel.Visibility = Visibility.Hidden;
+                }
+            });
+
+            // Handle the rest of the UI elements
             this.Dispatcher.Invoke(() =>
             {
                 // Toggle UI based on Parameter results
@@ -725,22 +746,6 @@ namespace OpenDefinery_DesktopApp
                     PropertiesSideBar.Visibility = Visibility.Collapsed;
                 }
 
-                // Manage contextual UI
-                if (ParamSource != ParameterSource.None)
-                {
-                    MainBrowserGrid.Visibility = Visibility.Visible;
-                    DashboardGrid.Visibility = Visibility.Collapsed;
-
-                    DataGridParameters.ItemsSource = Definery.Parameters;
-                    DataGridParameters.Items.Refresh();
-                }
-                if (ParamSource == ParameterSource.None)
-                {
-                    MainBrowserGrid.Visibility = Visibility.Collapsed;
-                    DashboardGrid.Visibility = Visibility.Visible;
-
-                    PagerPanel.Visibility = Visibility.Hidden;
-                }
                 if (ParamSource == ParameterSource.Search)
                 {
                     CollectionsColumn.Visibility = Visibility.Visible;
@@ -1079,7 +1084,9 @@ namespace OpenDefinery_DesktopApp
             // Retrieve a page of Parameters from the selected Collection
             RefreshCollectionParameters(CollectionsList);
 
-            StatusProgressBar.Visibility = Visibility.Hidden;
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
 
             // Deselect the other ListBoxes
             CollectionsList_Published.SelectedItem = null;
@@ -1099,6 +1106,10 @@ namespace OpenDefinery_DesktopApp
             ParamSource = ParameterSource.Collection;
 
             RefreshCollectionParameters(CollectionsList_Published);
+
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
 
             // Deselect the other ListBoxes
             CollectionsList.SelectedItem = null;
@@ -1126,7 +1137,7 @@ namespace OpenDefinery_DesktopApp
             UpdatePager(Pager, 0);
 
             // Update the GUI anytime data is loaded
-            PagerPanel.Visibility = Visibility.Visible;
+            //PagerPanel.Visibility = Visibility.Visible;
 
             // Set enum for UI purposes
             ParamSource = ParameterSource.Orphaned;
