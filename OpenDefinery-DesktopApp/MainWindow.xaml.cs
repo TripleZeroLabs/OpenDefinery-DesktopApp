@@ -570,11 +570,18 @@ namespace OpenDefinery_DesktopApp
 
         /// <summary>
         /// Helper method to catch when a selection changes in the DataGrid.
+        /// Note that this method should not call the RefreshUI method as it requires one-off logic.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (DataGridParameters.SelectedItems.Count == 0)
+            {
+                AddToCollectionButton.Visibility = Visibility.Collapsed;
+                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                ForkParameterButton.Visibility = Visibility.Collapsed;
+            }
             if (DataGridParameters.SelectedItems.Count == 1)
             {
                 var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
@@ -586,6 +593,7 @@ namespace OpenDefinery_DesktopApp
                     {
                         AddToCollectionButton.Visibility = Visibility.Visible;
                         RemoveFromCollectionButton.Visibility = Visibility.Visible;
+                        ForkParameterButton.Visibility = Visibility.Visible;
                     }
                     else
                     {
@@ -593,6 +601,11 @@ namespace OpenDefinery_DesktopApp
                         RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                         ForkParameterButton.Visibility = Visibility.Visible;
                     }
+                }
+                if (ParamSource == ParameterSource.Orphaned)
+                {
+                    AddToCollectionButton.Visibility = Visibility.Visible;
+                    ForkParameterButton.Visibility = Visibility.Visible;
                 }
 
                 // Toggle UI
@@ -659,6 +672,7 @@ namespace OpenDefinery_DesktopApp
             if (DataGridParameters.SelectedItems.Count > 1)
             {
                 PropertiesSideBar.Visibility = Visibility.Collapsed;
+                ForkParameterButton.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -670,6 +684,111 @@ namespace OpenDefinery_DesktopApp
         {
             this.Dispatcher.Invoke(() =>
             {
+                // Toggle UI based on Parameter results
+                if (Definery.Parameters != null && Definery.Parameters.Count() > 0 & ParamSource == ParameterSource.Collection)
+                {
+                    // Show the export button
+                    ExportCollectionButton.Visibility = Visibility.Visible;
+                }
+                if (Definery.Parameters != null && Definery.Parameters.Count() < 1)
+                {
+                    ExportCollectionButton.Visibility = Visibility.Collapsed;
+                }
+
+                // Toggle UI based on the Load All button
+                if (DataGridParameters.Items.Count > 0 & !loadingAll)
+                {
+                    DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
+                }
+                if (loadingAll)
+                {
+                    PagerNextButton.Visibility = Visibility.Collapsed;
+                    PagerPreviousButton.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.IsEnabled = false;
+                }
+
+                // Toggle UI based on DataGrid selection
+                if (DataGridParameters.SelectedItems.Count == 0)
+                {
+                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                    AddToCollectionButton.Visibility = Visibility.Collapsed;
+                    ForkParameterButton.Visibility = Visibility.Collapsed;
+                    PropertiesSideBar.Visibility = Visibility.Collapsed;
+                }
+                if (DataGridParameters.SelectedItems.Count == 1)
+                {
+                    ForkParameterButton.Visibility = Visibility.Collapsed;
+                    PropertiesSideBar.Visibility = Visibility.Visible;
+                }
+                if (DataGridParameters.SelectedItems.Count > 1)
+                {
+                    PropertiesSideBar.Visibility = Visibility.Collapsed;
+                }
+
+                // Manage contextual UI
+                if (ParamSource != ParameterSource.None)
+                {
+                    MainBrowserGrid.Visibility = Visibility.Visible;
+                    DashboardGrid.Visibility = Visibility.Collapsed;
+
+                    DataGridParameters.ItemsSource = Definery.Parameters;
+                    DataGridParameters.Items.Refresh();
+                }
+                if (ParamSource == ParameterSource.None)
+                {
+                    MainBrowserGrid.Visibility = Visibility.Collapsed;
+                    DashboardGrid.Visibility = Visibility.Visible;
+
+                    //PagerPanel.Visibility = Visibility.Hidden;
+                }
+                if (ParamSource == ParameterSource.Search)
+                {
+                    CollectionsColumn.Visibility = Visibility.Visible;
+                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.Visibility = Visibility.Collapsed;
+                    PagerPanel.Visibility = Visibility.Visible;
+                    ExportCollectionButton.Visibility = Visibility.Collapsed;
+                }
+                if (ParamSource == ParameterSource.Collection)
+                {
+                    CollectionsColumn.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.Visibility = Visibility.Visible;
+                }
+                if (ParamSource == ParameterSource.Orphaned)
+                {
+                    CollectionsColumn.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.Visibility = Visibility.Collapsed;
+                    ExportCollectionButton.Visibility = Visibility.Collapsed;
+                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                }
+
+                // Toggle the Pager visibility
+                if (Pager.TotalPages == 1)
+                {
+                    AllParamsLoaded = true;
+                }
+                if (Pager.TotalPages > 1 && !loadingAll)
+                {
+                    PagerPanel.Visibility = Visibility.Visible;
+
+                    AllParamsLoaded = false;
+                }
+                if (Pager.TotalItems > 1 && loadingAll)
+                {
+                    PagerPanel.Visibility = Visibility.Visible;
+                    PagerPreviousButton.Visibility = Visibility.Collapsed;
+                    PagerNextButton.Visibility = Visibility.Collapsed;
+                    PagerLoadAllButton.Visibility = Visibility.Collapsed;
+                    
+                    AllParamsLoaded = true;
+                }
+                if (Pager.TotalItems < 2)
+                {
+                    PagerLoadAllButton.Visibility = Visibility.Collapsed;
+
+                    AllParamsLoaded = true;
+                }
+
                 // Enable UI for Parameter lists that have more than one page
                 if (AllParamsLoaded == false)
                 {
@@ -685,62 +804,9 @@ namespace OpenDefinery_DesktopApp
                     PagerLoadAllButton.Visibility = Visibility.Collapsed;
                 }
 
-                // Update the Grid based on the parameter source. Show dashboard if none.
-                if (ParamSource != ParameterSource.None)
-                {
-                    MainBrowserGrid.Visibility = Visibility.Visible;
-                    DashboardGrid.Visibility = Visibility.Collapsed;
-
-                    DataGridParameters.ItemsSource = Definery.Parameters;
-                    DataGridParameters.Items.Refresh();
-
-                    PagerPanel.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    MainBrowserGrid.Visibility = Visibility.Collapsed;
-                    DashboardGrid.Visibility = Visibility.Visible;
-
-                    PagerPanel.Visibility = Visibility.Hidden;
-                }
-
-                // Toggle UI based on the Load All button
-                if (DataGridParameters.Items.Count > 0 & !loadingAll)
-                {
-                    DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
-                }
+                // Toggle loading all
                 if (loadingAll)
                 {
-                    PagerNextButton.Visibility = Visibility.Collapsed;
-                    PagerPreviousButton.Visibility = Visibility.Collapsed;
-                    PagerLoadAllButton.IsEnabled = false;
-                }
-
-
-                // Toggle UI based on DataGrid selection
-                if (DataGridParameters.SelectedItems.Count == 0)
-                {
-                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                    PropertiesSideBar.Visibility = Visibility.Collapsed;
-                }
-                if (DataGridParameters.SelectedItems.Count == 1)
-                {
-                    PropertiesSideBar.Visibility = Visibility.Visible;
-                }
-                if (DataGridParameters.SelectedItems.Count > 1)
-                {
-                    PropertiesSideBar.Visibility = Visibility.Collapsed;
-                }
-
-                // Manage contextual UI
-                if (ParamSource == ParameterSource.Search)
-                {
-                    CollectionsColumn.Visibility = Visibility.Visible;
-                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                }
-                if (ParamSource == ParameterSource.Collection | ParamSource == ParameterSource.Orphaned)
-                {
-                    CollectionsColumn.Visibility = Visibility.Collapsed;
                 }
             });
         }
@@ -1007,6 +1073,9 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Set enum for UI purposes
+            ParamSource = ParameterSource.Collection;
+
             // Retrieve a page of Parameters from the selected Collection
             RefreshCollectionParameters(CollectionsList);
 
@@ -1015,19 +1084,6 @@ namespace OpenDefinery_DesktopApp
             // Deselect the other ListBoxes
             CollectionsList_Published.SelectedItem = null;
             OrphanedList.SelectedItem = null;
-
-            // Set enum for UI purposes
-            ParamSource = ParameterSource.Collection;
-
-            // Set properties based on the total pages
-            if (Pager.TotalPages > 1)
-            {
-                AllParamsLoaded = false;
-            }
-            if (Pager.TotalPages == 1)
-            {
-                AllParamsLoaded = true;
-            }
 
             RefreshUi();
         }
@@ -1039,24 +1095,14 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void CollectionsList_Published_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Set enum for UI purposes
+            ParamSource = ParameterSource.Collection;
+
             RefreshCollectionParameters(CollectionsList_Published);
 
             // Deselect the other ListBoxes
             CollectionsList.SelectedItem = null;
             OrphanedList.SelectedItem = null;
-
-            // Set enum for UI purposes
-            ParamSource = ParameterSource.Collection;
-
-            // Set properties based on the total pages
-            if (Pager.TotalPages > 1)
-            {
-                AllParamsLoaded = false;
-            }
-            if (Pager.TotalPages == 1)
-            {
-                AllParamsLoaded = true;
-            }
 
             RefreshUi();
         }
@@ -1072,11 +1118,6 @@ namespace OpenDefinery_DesktopApp
             CollectionsList_Published.SelectedItem = null;
             CollectionsList.SelectedItem = null;
 
-            // Hide contextual UI since no parameters will be selected
-            AddToCollectionButton.Visibility = Visibility.Collapsed;
-            RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            ForkParameterButton.Visibility = Visibility.Collapsed;
-
             // Get the parameters
             Definery.Parameters = SharedParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 0, true);
 
@@ -1087,16 +1128,10 @@ namespace OpenDefinery_DesktopApp
             // Update the GUI anytime data is loaded
             PagerPanel.Visibility = Visibility.Visible;
 
-            RefreshUi();
-
-            // Hide the export button because this is not a Collection
-            ExportCollectionButton.Visibility = Visibility.Collapsed;
-
-            // Hide the add to collection button because nothing will be selected
-            AddToCollectionButton.Visibility = Visibility.Hidden;
-
             // Set enum for UI purposes
             ParamSource = ParameterSource.Orphaned;
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -1157,11 +1192,6 @@ namespace OpenDefinery_DesktopApp
             Pager.CurrentPage = 0;
             Pager.Offset = 0;
 
-            //// Get the parameters of the logged in user by default and display in the DataGrid
-            //Definery.Parameters = SharedParameter.ByCollection(
-            //    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
-            //    );
-
             // Update the GUI anytime data is loaded
             UpdatePager(Pager, 0);
             RefreshUi();
@@ -1173,13 +1203,8 @@ namespace OpenDefinery_DesktopApp
         /// <param name="listBox"></param>
         private void RefreshCollectionParameters(ListBox listBox)
         {
-            if (listBox.SelectedItems.Count > 0)
+            if (listBox.SelectedItems.Count == 1)
             {
-                // Hide contextual UI since no parameters will be selected
-                AddToCollectionButton.Visibility = Visibility.Collapsed;
-                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                ForkParameterButton.Visibility = Visibility.Collapsed;
-
                 // Instantiate the selected item as a Collection object and assign it to the MainWindow for future reference
                 SelectedCollection = listBox.SelectedItem as Collection;
 
@@ -1191,33 +1216,8 @@ namespace OpenDefinery_DesktopApp
                 Pager.CurrentPage = 0;
                 UpdatePager(Pager, 0);
 
-                // Update the GUI anytime data is loaded
-                PagerPanel.Visibility = Visibility.Visible;
-                if (Pager.TotalPages > 1)
-                {
-                    AllParamsLoaded = false;
-                }
-                else
-                {
-                    AllParamsLoaded = true;
-                }
-
                 RefreshUi();
-
-                // Logic to execute if there are parameters within the collection
-                if (Definery.Parameters.Count() > 0)
-                {
-                    // Show the export button
-                    ExportCollectionButton.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    ExportCollectionButton.Visibility = Visibility.Collapsed;
-                }
             }
-
-            // Hide the add to collection button because nothing will be selected
-            AddToCollectionButton.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -1372,9 +1372,6 @@ namespace OpenDefinery_DesktopApp
             // Set enum for UI purposes
             ParamSource = ParameterSource.Search;
 
-            // Update the GUI anytime data is loaded
-            PagerPanel.Visibility = Visibility.Visible;
-            ExportCollectionButton.Visibility = Visibility.Collapsed;
             RefreshUi();
 
             // Deselect all other items
@@ -1440,6 +1437,16 @@ namespace OpenDefinery_DesktopApp
         private void DashboardButton_Click(object sender, RoutedEventArgs e)
         {
             ParamSource = ParameterSource.None;
+            PagerPanel.Visibility = Visibility.Hidden;
+
+            // Deselect Listboxes
+            CollectionsList.SelectedItem = null;
+            CollectionsList_Published.SelectedItem = null;
+            OrphanedList.SelectedItem = null;
+
+            // Reset pager and update Pager
+            Pager = Pager.Reset();
+            UpdatePager(Pager, 0);
 
             RefreshUi();
         }
@@ -1480,8 +1487,9 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private async void PagerLoadAllButton_Click(object sender, RoutedEventArgs e)
         {
-            // Prevent clicking more than once
+            // Prevent clicking more than once and hide button
             PagerLoadAllButton.IsEnabled = false;
+            PagerLoadAllButton.Visibility = Visibility.Collapsed;
 
             // Prevent clicking another Collection while loading is occuring
             CollectionsList.IsEnabled = false;

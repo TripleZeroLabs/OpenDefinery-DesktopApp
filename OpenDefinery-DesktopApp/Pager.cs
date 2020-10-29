@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace OpenDefinery
 {
@@ -47,20 +48,30 @@ namespace OpenDefinery
             var pagerResponse = json.SelectToken("pager");
             pager = JsonConvert.DeserializeObject<Pager>(pagerResponse.ToString());
 
-            // Add the MainWindow data to the Pager object
-            pager.CurrentPage = MainWindow.Pager.CurrentPage;
-
             // Always reassign values for total pages and items because the pager property from Drupal is relative to the current request,
             // however we always want to report the absolute totals if they are greater than zero.
             if (!resetTotals)
             {
+                // Add the MainWindow data to the Pager object
                 pager.TotalPages = MainWindow.Pager.TotalPages;
                 pager.TotalItems = MainWindow.Pager.TotalItems;
+                pager.CurrentPage = MainWindow.Pager.CurrentPage;
             }
             else
             {
-                // Do nothing with the pager
+                pager.CurrentPage = 0;
             }
+
+            return pager;
+        }
+
+        public static Pager Reset()
+        {
+            var pager = new Pager();
+            pager.TotalItems = 0;
+            pager.TotalPages = 0;
+            pager.CurrentPage = 0;
+            pager.ItemsPerPage = MainWindow.Pager.ItemsPerPage;
 
             return pager;
         }
