@@ -735,6 +735,7 @@ namespace OpenDefinery_DesktopApp
                 // Manage contextual UI
                 if (ParamSource == ParameterSource.Search)
                 {
+                    CollectionsColumn.Visibility = Visibility.Visible;
                     RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                 }
                 if (ParamSource == ParameterSource.Collection | ParamSource == ParameterSource.Orphaned)
