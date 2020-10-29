@@ -50,28 +50,20 @@ namespace OpenDefinery
         /// <returns></returns>
         public static DataCategory GetByHashcode(Definery definery, string hashcode)
         {
-            var dataCat = new DataCategory();
+            // Get DataCategory using the hashcode
+            var dataCats = definery.DataCategories.Where(o => o.Hashcode == hashcode);
 
-            var client = new RestClient(Definery.BaseUrl + string.Format("rest/datacategory/hashcode/{0}?_format=json", hashcode));
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
-            IRestResponse response = client.Execute(request);
-            Console.WriteLine(response.Content);
-
-            var dataCategories = JsonConvert.DeserializeObject<List<DataCategory>>(response.Content);
-
-            if (dataCategories != null && dataCategories.Count == 1)
+            // Only return one DataCategory
+            if (dataCats.Count() == 1)
             {
-                dataCat = dataCategories[0];
+                return dataCats.FirstOrDefault();
             }
             else
             {
-                MessageBox.Show("Error retrieving Data Category.");
+                MessageBox.Show("Error retrieving Data Categories (duplicate hashcodes).");
+
+                return null;
             }
-
-            return dataCat;
         }
-
     }
 }
