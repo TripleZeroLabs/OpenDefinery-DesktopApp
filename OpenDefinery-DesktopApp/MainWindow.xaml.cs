@@ -944,8 +944,9 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void NewCollectionButton_Click(object sender, RoutedEventArgs e)
         {
-            // Clear the combobox in case it was previously canceled
+            // Clear the form
             NewCollectionFormTextBox.Text = string.Empty;
+            NewCollectionFormDesc.Text = string.Empty;
 
             // Show the overlay
             NewCollectionGrid.Visibility = Visibility.Visible;
