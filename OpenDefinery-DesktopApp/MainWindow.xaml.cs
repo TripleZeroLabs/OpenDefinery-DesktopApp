@@ -739,7 +739,7 @@ namespace OpenDefinery_DesktopApp
                     MainBrowserGrid.Visibility = Visibility.Collapsed;
                     DashboardGrid.Visibility = Visibility.Visible;
 
-                    //PagerPanel.Visibility = Visibility.Hidden;
+                    PagerPanel.Visibility = Visibility.Hidden;
                 }
                 if (ParamSource == ParameterSource.Search)
                 {
@@ -1436,9 +1436,6 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void DashboardButton_Click(object sender, RoutedEventArgs e)
         {
-            ParamSource = ParameterSource.None;
-            PagerPanel.Visibility = Visibility.Hidden;
-
             // Deselect Listboxes
             CollectionsList.SelectedItem = null;
             CollectionsList_Published.SelectedItem = null;
@@ -1447,6 +1444,8 @@ namespace OpenDefinery_DesktopApp
             // Reset pager and update Pager
             Pager = Pager.Reset();
             UpdatePager(Pager, 0);
+
+            ParamSource = ParameterSource.None;
 
             RefreshUi();
         }
