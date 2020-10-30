@@ -15,6 +15,7 @@ using System.Web.UI.WebControls.WebParts;
 using System.Windows;
 using System.Windows.Controls;
 using System.Diagnostics;
+using System.Net;
 
 namespace OpenDefinery
 {
@@ -52,6 +53,7 @@ namespace OpenDefinery
 
         [JsonProperty("collections")]
         public string CollectionsString { get; set; }
+        public int ForkedSourceId { get; set; }
 
         public List<Collection> Collections { get; set; }
 
@@ -70,8 +72,7 @@ namespace OpenDefinery
             string groupId,
             string isVisible,
             string description,
-            string isUserModifiable
-            )
+            string isUserModifiable)
         {
             Guid = guid;
             Name = name;
@@ -81,6 +82,29 @@ namespace OpenDefinery
             Visible = isVisible;
             Description = description;
             UserModifiable = isUserModifiable;
+        }
+
+        public SharedParameter(
+            Definery definery,
+            Guid guid,
+            string name,
+            string dataTypeName,
+            string dataCatHashcode,
+            string groupId,
+            string isVisible,
+            string description,
+            string isUserModifiable,
+            int forkedSourceId)
+        {
+            Guid = guid;
+            Name = name;
+            DataType = dataTypeName;
+            DataCategoryHashcode = dataCatHashcode;
+            Group = groupId;
+            Visible = isVisible;
+            Description = description;
+            UserModifiable = isUserModifiable;
+            ForkedSourceId = forkedSourceId;
         }
 
         /// <summary>
@@ -492,12 +516,15 @@ namespace OpenDefinery
 
         /// <summary>
         /// Creates a new Shared Parameter on Drupal
+        /// Response codes:
+        ///     201: Created
+        ///     422: Unprocessable entity (possibly missing a required field)
         /// </summary>
         /// <param name="definery"></param>
         /// <param name="param"></param>
         /// <param name="collectionId"></param>
         /// <returns></returns>
-        public static string Create(Definery definery, SharedParameter param, int collectionId)
+        public static SharedParameter Create(Definery definery, SharedParameter param, int collectionId, int? forkedId = null)
         {
             var client = new RestClient(Definery.BaseUrl + "node?_format=json");
             client.Timeout = -1;
@@ -585,6 +612,13 @@ namespace OpenDefinery
                 "\"und\": \"" + param.UserModifiable + "\"" +
                 "}";
 
+            if (!string.IsNullOrEmpty(forkedId.ToString()))
+            {
+                requestBody += ",\"field_forked_source\": {" +
+                "\"und\": \"" + forkedId.ToString() + "\"" +
+                "}";
+            }
+
             // Here we pass the existing parameter "group" from the text file and assign this as a tag instead of the group to maintain the data point
             // This property is only added to the request if the tagId is not null.
             if (!string.IsNullOrEmpty(tagId))
@@ -604,8 +638,19 @@ namespace OpenDefinery
 
             IRestResponse response = client.Execute(request);
 
-            // TODO: Return the new Shared Parameter object rather than the response.Content
-            return response.Content;
+            Debug.WriteLine(response);
+
+            // Get Shared Parameter if successful
+            if (response.StatusCode.ToString() == "201")
+            {
+                var newParam = new SharedParameter();
+
+                return newParam;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -773,14 +818,16 @@ namespace OpenDefinery
 
             var newParam = new SharedParameter(
                 definery, 
-                param.Guid, 
-                name, 
+                param.Guid,
+                newName, 
                 param.DataType, 
                 param.DataCategoryHashcode, 
                 param.Group, 
-                param.Visible, 
-                description, 
-                param.UserModifiable);
+                param.Visible,
+                newDesc, 
+                param.UserModifiable,
+                param.Id
+                );
 
             return newParam;
         }

@@ -361,9 +361,7 @@ namespace OpenDefinery_DesktopApp
                                             var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
 
                                         // Create the SharedParameter
-                                        var response = SharedParameter.Create(Definery, newParameter, sollection.Id);
-
-                                            Debug.WriteLine(response);
+                                        SharedParameter.Create(Definery, newParameter, sollection.Id);
                                         });
 
                                         Application.Current.Dispatcher.BeginInvoke(
@@ -607,6 +605,20 @@ namespace OpenDefinery_DesktopApp
                     AddToCollectionButton.Visibility = Visibility.Visible;
                     ForkParameterButton.Visibility = Visibility.Visible;
                 }
+                if (ParamSource == ParameterSource.Search)
+                {
+                    ForkParameterButton.Visibility = Visibility.Visible;
+
+                    // Only allow the user to add the Parameter to a Collection if they are the author
+                    if (selectedParam.Author == Definery.CurrentUser.Id)
+                    {
+                        AddToCollectionButton.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        AddToCollectionButton.Visibility = Visibility.Collapsed;
+                    }
+                }
 
                 // Toggle UI
                 PropertiesSideBar.Visibility = Visibility.Visible;
@@ -833,11 +845,10 @@ namespace OpenDefinery_DesktopApp
                     // Get current Shared Parameter as a SharedParameter object
                     var selectedParam = p as SharedParameter;
 
+                    // Don't allow adding to a Collection if the user isn't the author because Drupal permissions won't allow it
                     if (selectedParam.Author != Definery.CurrentUser.Id)
                     {
-                        // Don't allow adding to a Collection if the user isn't the author
-                        // Force the user to Fork the Parameter instead
-
+                        // Do nothing because the UI should force the user to Fork the Parameter instead
                     }
                     else
                     {
@@ -984,7 +995,15 @@ namespace OpenDefinery_DesktopApp
                     // Finally create the parameter
                     try
                     {
-                        response = SharedParameter.Create(Definery, param, collection.Id);
+                        // Pass the ID of the Parameter that is being forked if provided
+                        if (!string.IsNullOrEmpty(ForkedParamIdTextBox.Text))
+                        {
+                            SharedParameter.Create(Definery, param, collection.Id, Convert.ToInt32(ForkedParamIdTextBox.Text));
+                        }
+                        else
+                        {
+                            SharedParameter.Create(Definery, param, collection.Id);
+                        }
 
                         // Hide the overlay and form
                         NewParameterGrid.Visibility = Visibility.Hidden;
@@ -992,8 +1011,6 @@ namespace OpenDefinery_DesktopApp
 
                         // TODO: Validate that the Shared Parameter was actually created
                         MessageBox.Show("The parameter has been successfully created.");
-
-                        Debug.Write(response);
 
                         // Reset the form values and UI
                         InitializeParamForm();
@@ -1258,6 +1275,10 @@ namespace OpenDefinery_DesktopApp
 
                 var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
 
+                // Set ID to track which parameter it was forked from
+                // This is the Drupal node ID, not the GUID
+                ForkedParamIdTextBox.Text = selectedParam.Id.ToString();
+
                 // Prepopulate the fields based on the selected parameter
                 NewParamNameTextBox.Text = selectedParam.Name;
                 NewParamGuidTextBox.Text = selectedParam.Guid.ToString();
@@ -1300,6 +1321,7 @@ namespace OpenDefinery_DesktopApp
             NewParamDataTypeCombo.IsEnabled = true;
             NewParamVisibleCheck.IsEnabled = true;
             NewParamUserModCheckbox.IsEnabled = true;
+            ForkedParamIdTextBox.Text = string.Empty;
         }
 
         /// <summary>

@@ -340,6 +340,7 @@
                     <TextBox x:Name="NewParamNameTextBox" HorizontalAlignment="Center" Height="36" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" VerticalContentAlignment="Center"/>
                     <Label Content="GUID" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <TextBox x:Name="NewParamGuidTextBox" HorizontalAlignment="Center" Height="36" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" VerticalContentAlignment="Center"/>
+                    <TextBox x:Name="ForkedParamIdTextBox" HorizontalAlignment="Center" Height="36" Margin="60.4,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" VerticalContentAlignment="Center" Visibility="Collapsed"/>
                     <Label Content="DATA TYPE" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <ComboBox x:Name="NewParamDataTypeCombo" HorizontalAlignment="Center" VerticalAlignment="Top" Width="380" SelectionChanged="NewParamDataTypeCombo_SelectionChanged"/>
                     <Label x:Name="NewParamDataCatLabel" Content="DATA CATEGORY" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
