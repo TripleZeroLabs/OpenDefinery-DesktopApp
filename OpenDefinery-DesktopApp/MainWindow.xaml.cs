@@ -129,7 +129,7 @@ namespace OpenDefinery_DesktopApp
                 NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
                 NewParamDataCatCombo.ItemsSource = Definery.DataCategories;
                 NewParamDataCatCombo.DisplayMemberPath = "Name";
-                NewParamDataCatCombo.SelectedIndex = 0;
+                NewParamDataCatCombo.SelectedItem = null;
                 PropComboDataType.ItemsSource = Definery.DataTypes;
                 PropComboDataType.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
                 PropComboDataCategory.ItemsSource = Definery.DataCategories;
@@ -712,6 +712,10 @@ namespace OpenDefinery_DesktopApp
 
                     PagerPanel.Visibility = Visibility.Hidden;
                 }
+                if (ParamSource == ParameterSource.Search)
+                {
+                    ExportCollectionButton.Visibility = Visibility.Collapsed;
+                }    
             });
 
             // Handle the rest of the UI elements
@@ -914,7 +918,7 @@ namespace OpenDefinery_DesktopApp
             NewParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
             NewParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
             NewParamDataTypeCombo.SelectedIndex = 0;
-            NewParamDataCatCombo.SelectedIndex = 0;
+            NewParamDataCatCombo.SelectedItem = null;
 
             // Generate a GUID by default
             NewParamGuidTextBox.Text = Guid.NewGuid().ToString();
@@ -953,7 +957,12 @@ namespace OpenDefinery_DesktopApp
             var collection = NewParamFormCombo.SelectedItem as Collection;
             var response = string.Empty;
             var dataType = NewParamDataTypeCombo.SelectedItem as DataType;
-            var dataCategory = NewParamDataCatCombo.SelectedItem as DataCategory;
+            // Set the DataCategory if selected
+            var dataCategory = new DataCategory();
+            if (NewParamDataCatCombo.SelectedItem != null)
+            {
+                dataCategory = NewParamDataCatCombo.SelectedItem as DataCategory;
+            }
 
             // TODO: Refactor this logic using the new constructor 
             var param = new SharedParameter();
@@ -1286,6 +1295,16 @@ namespace OpenDefinery_DesktopApp
                 var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
                 NewParamDataTypeCombo.SelectedItem = paramDataType;
 
+                // Set the DataCategory if the DataType is a FamilyType
+                if (paramDataType.Name == "FAMILYTYPE")
+                {
+                    var existingDataCat = DataCategory.GetByHashcode(Definery, selectedParam.DataCategoryHashcode);
+                    NewParamDataCatCombo.SelectedItem = existingDataCat;
+                    NewParamDataCatCombo.Visibility = Visibility.Visible;
+                    NewParamDataCatCombo.IsEnabled = false;
+                }
+
+
                 if (selectedParam.Visible == "1")
                 {
                     NewParamVisibleCheck.IsChecked = true;
@@ -1322,6 +1341,7 @@ namespace OpenDefinery_DesktopApp
             NewParamVisibleCheck.IsEnabled = true;
             NewParamUserModCheckbox.IsEnabled = true;
             ForkedParamIdTextBox.Text = string.Empty;
+            NewParamDataCatCombo.SelectedItem = null;
         }
 
         /// <summary>
@@ -1390,10 +1410,11 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            // Hide contextual UI since no parameters will be selected
-            AddToCollectionButton.Visibility = Visibility.Collapsed;
-            RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            ForkParameterButton.Visibility = Visibility.Collapsed;
+            //// Hide contextual UI since no parameters will be selected
+            //AddToCollectionButton.Visibility = Visibility.Collapsed;
+            //RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+            //ForkParameterButton.Visibility = Visibility.Collapsed;
+            //ExportCollectionButton.Visibility = Visibility.Collapsed;
 
             // Get the parameters
             Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
@@ -1503,6 +1524,8 @@ namespace OpenDefinery_DesktopApp
                 {
                     NewParamDataCatLabel.Visibility = Visibility.Visible;
                     NewParamDataCatCombo.Visibility = Visibility.Visible;
+                    NewParamDataCatCombo.IsEnabled = true;
+                    NewParamDataCatCombo.SelectedIndex = 0;
                 }
                 else
                 {
