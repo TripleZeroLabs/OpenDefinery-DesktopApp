@@ -176,6 +176,16 @@
                                     </DataTemplate>
                                 </Button.ContentTemplate>
                             </Button>
+                            <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DeleteCollectionButton" Content="" HorizontalAlignment="Left" Margin="10,8.8,0,8.8" Padding="10,4" ToolTip="Delete the current Collection" Click="DeleteCollectionButton_Click">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="RegularTrash"/>
+                                            <TextBlock Text="Delete Collection" Margin="7,0,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="1">

@@ -63,6 +63,7 @@ namespace OpenDefinery_DesktopApp
             RemoveFromCollectionButton.Visibility = Visibility.Collapsed;  // Remove from Collection button
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
             ForkParameterButton.Visibility = Visibility.Collapsed;  // Fork Parameter button
+            DeleteCollectionButton.Visibility = Visibility.Collapsed;  // The Collection delete button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
 
             PagerPanel.Visibility = Visibility.Hidden;  // Pager
@@ -712,10 +713,11 @@ namespace OpenDefinery_DesktopApp
 
                     PagerPanel.Visibility = Visibility.Hidden;
                 }
-                if (ParamSource == ParameterSource.Search)
+                if (SelectedCollection == null)
                 {
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
-                }    
+                    DeleteCollectionButton.Visibility = Visibility.Collapsed;
+                }
             });
 
             // Handle the rest of the UI elements
@@ -769,11 +771,22 @@ namespace OpenDefinery_DesktopApp
                     PagerLoadAllButton.Visibility = Visibility.Collapsed;
                     PagerPanel.Visibility = Visibility.Visible;
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
+                    DeleteCollectionButton.Visibility = Visibility.Collapsed;
                 }
                 if (ParamSource == ParameterSource.Collection)
                 {
                     CollectionsColumn.Visibility = Visibility.Collapsed;
                     PagerLoadAllButton.Visibility = Visibility.Visible;
+
+                    // Show UI if current user is the Collection author
+                    if (SelectedCollection.Author == Definery.CurrentUser.Id)
+                    {
+                        DeleteCollectionButton.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        DeleteCollectionButton.Visibility = Visibility.Collapsed;
+                    }
                 }
                 if (ParamSource == ParameterSource.Orphaned)
                 {
@@ -781,6 +794,7 @@ namespace OpenDefinery_DesktopApp
                     PagerLoadAllButton.Visibility = Visibility.Collapsed;
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
                     RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
+                    DeleteCollectionButton.Visibility = Visibility.Collapsed;
                 }
 
                 // Toggle the Pager visibility
@@ -1105,7 +1119,10 @@ namespace OpenDefinery_DesktopApp
         private void CollectionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Set enum for UI purposes
-            ParamSource = ParameterSource.Collection;
+            if (CollectionsList.SelectedItem != null)
+            {
+                ParamSource = ParameterSource.Collection;
+            }
 
             // Retrieve a page of Parameters from the selected Collection
             RefreshCollectionParameters(CollectionsList);
@@ -1129,7 +1146,10 @@ namespace OpenDefinery_DesktopApp
         private void CollectionsList_Published_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Set enum for UI purposes
-            ParamSource = ParameterSource.Collection;
+            if (CollectionsList_Published.SelectedItem != null)
+            {
+                ParamSource = ParameterSource.Collection;
+            }
 
             RefreshCollectionParameters(CollectionsList_Published);
 
@@ -1415,6 +1435,7 @@ namespace OpenDefinery_DesktopApp
             //RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
             //ForkParameterButton.Visibility = Visibility.Collapsed;
             //ExportCollectionButton.Visibility = Visibility.Collapsed;
+            //DeleteCollectionButton.Visibility = Visibility.Collapsed;
 
             // Get the parameters
             Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
@@ -1426,12 +1447,13 @@ namespace OpenDefinery_DesktopApp
             // Set enum for UI purposes
             ParamSource = ParameterSource.Search;
 
-            RefreshUi();
-
-            // Deselect all other items
+            // Refresh UI
+            SelectedCollection = null;
             CollectionsList.SelectedItem = null;
             CollectionsList_Published.SelectedItem = null;
             OrphanedList.SelectedItem = null;
+
+            RefreshUi();
         }
 
         /// <summary>
@@ -1604,6 +1626,39 @@ namespace OpenDefinery_DesktopApp
 
             // Toggle the Pager UI
             PagerTextBox.Text = string.Format("Loaded all {0} parameters", allParams.Count().ToString());
+        }
+
+        /// <summary>
+        /// Method to execute when Delete Collection button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DeleteCollectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult messageBoxResult = 
+                MessageBox.Show(
+                    "Are you sure you want to delete the collection? This action cannot be undone.\n\n" +
+                    "Note: Any Shared Parameters currently in this Collection will be orphaned unless they belong to another Collection.", 
+                    "Delete Collection", 
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+            // Delete the Collection if the use confirms
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                Collection.Delete(Definery, SelectedCollection.Id);
+
+                // Refresh the UI
+                Definery.MyCollections = Collection.ByCurrentUser(Definery);
+                CollectionsList.ItemsSource = Definery.MyCollections;
+                SelectedCollection = null;
+                ParamSource = ParameterSource.None;
+                RefreshUi();
+            }
+            else
+            {
+                MessageBox.Show("Deletion canceled.");
+            }
         }
     }
 }

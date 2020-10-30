@@ -183,6 +183,26 @@ namespace OpenDefinery
         }
 
         /// <summary>
+        /// Delete a Collection
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="collectionId">The ID of the Collection to delete</param>
+        public static void Delete(Definery definery, int collectionId)
+        {
+            var client = new RestClient(Definery.BaseUrl + string.Format("node/{0}?_format=hal_json", collectionId.ToString()));
+            var request = new RestRequest(Method.DELETE);
+            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            request.AddParameter("application/json",
+                "{\"type\": [" +
+                "{\"target_id\": \"collection\"}" +
+                "]}", 
+                ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+            Console.WriteLine(response.Content);
+        }
+
+        /// <summary>
         /// Check that a Collection has duplicate GUIDs.
         /// </summary>
         /// <param name="collection">The Collection to check</param>
