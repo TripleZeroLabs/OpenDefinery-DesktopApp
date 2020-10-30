@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI.WebControls;
@@ -64,7 +65,6 @@ namespace OpenDefinery
         }
 
         public SharedParameter(
-            Definery definery,
             Guid guid,
             string name,
             string dataTypeName,
@@ -85,7 +85,6 @@ namespace OpenDefinery
         }
 
         public SharedParameter(
-            Definery definery,
             Guid guid,
             string name,
             string dataTypeName,
@@ -641,11 +640,42 @@ namespace OpenDefinery
             Debug.WriteLine(response);
 
             // Get Shared Parameter if successful
-            if (response.StatusCode.ToString() == "201")
+            if (response.StatusCode.ToString() == "Created")
             {
-                var newParam = new SharedParameter();
+                // Instantiate a generic node from the response first
+                var node = JsonConvert.DeserializeObject<Node>(response.Content);
 
+                var newParam = FromId(definery, node.Nid[0].Value);
+                
                 return newParam;
+            }
+            else
+            {
+               MessageBox.Show("There was an error creating the Shared Parameter.");
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve a specific Shared Parameter by its unique ID
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="nodeId">The node ID of the Shared Parameter (this is not the GUID)</param>
+        /// <returns></returns>
+        public static SharedParameter FromId(Definery definery, int nodeId)
+        {
+            var client = new RestClient(Definery.BaseUrl + string.Format("rest/params/id/{0}?_format=json", nodeId.ToString()));
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+
+            if (response.StatusCode.ToString() == "OK")
+            {
+                var parameters = JsonConvert.DeserializeObject<List<SharedParameter>>(response.Content);
+
+                return parameters[0];
             }
             else
             {
@@ -817,7 +847,6 @@ namespace OpenDefinery
             }
 
             var newParam = new SharedParameter(
-                definery, 
                 param.Guid,
                 newName, 
                 param.DataType, 

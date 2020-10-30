@@ -166,8 +166,11 @@ namespace OpenDefinery
             {
                 var genericNode = JsonConvert.DeserializeObject<Node>(response.Content);
 
-                // Instantiate the collection by retrieving it via the API
-                var newCollection = GetById(definery, genericNode.Nid[0].Value);
+                // Instantiate the collection
+                var newCollection = new Collection();
+                newCollection.Id = genericNode.Nid[0].Value;
+                newCollection.Name = genericNode.Title[0].Value;
+                newCollection.Author = Definery.CurrentUser.Id.ToString();
 
                 return newCollection;
             }
@@ -177,33 +180,6 @@ namespace OpenDefinery
 
                 return null;
             }
-        }
-
-        public static Collection GetById(Definery definery, int collectionId)
-        {
-            var client = new RestClient(Definery.BaseUrl + string.Format("node/{0}?_format=json", collectionId.ToString()));
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Content-Type", "application/json");
-            //request.AddHeader("X-CSRF-Token", definery.CsrfToken);
-            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-
-            IRestResponse response = client.Execute(request);
-            Debug.WriteLine(response.Content);
-
-            // Instantiate a new Collection from response
-            if (response.StatusCode.ToString() == "OK")
-            { 
-                var foundCollection = JsonConvert.DeserializeObject<Collection>(response.Content);
-
-                return foundCollection;
-            }
-            else
-            {
-                MessageBox.Show("There was an error retrieving the Collection.");
-
-                return null;
-            }
-
         }
 
         /// <summary>

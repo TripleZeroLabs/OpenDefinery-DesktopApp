@@ -56,6 +56,15 @@ namespace OpenDefinery
 
         [JsonProperty("path")]
         public Path[] Path { get; set; }
+
+        [JsonProperty("field_guid")]
+        public FieldGuid[] FieldGuid { get; set; }
+    }
+
+    public partial class FieldGuid
+    {
+        [JsonProperty("value")]
+        public Guid Value { get; set; }
     }
 
     public partial class Changed
