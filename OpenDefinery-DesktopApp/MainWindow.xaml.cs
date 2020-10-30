@@ -1079,10 +1079,10 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void NewCollectionFormSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var response = Collection.Create(Definery, NewCollectionFormTextBox.Text, NewCollectionFormDesc.Text);
+            var newCollection = Collection.Create(Definery, NewCollectionFormTextBox.Text, NewCollectionFormDesc.Text);
 
             // If the Collection was successfully created, refresh the Collections list
-            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            if (newCollection != null)
             {
                 MessageBox.Show("The collection was successfully created.");
 

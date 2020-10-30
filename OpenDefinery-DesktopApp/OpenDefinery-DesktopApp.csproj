@@ -121,6 +121,7 @@
     <Compile Include="DataType.cs" />
     <Compile Include="Exporter.cs" />
     <Compile Include="Group.cs" />
+    <Compile Include="Node.cs" />
     <Compile Include="Pager.cs" />
     <Compile Include="SharedParameter.cs" />
     <Compile Include="Tag.cs" />
