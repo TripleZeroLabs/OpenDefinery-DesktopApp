@@ -185,7 +185,7 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </Button.ContentTemplate>
-                            </Button>
+                            </Button>   
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="1">
@@ -200,7 +200,6 @@
                             SelectionUnit="FullRow" 
                             SelectionChanged="DataGridParameters_SelectionChanged"
                             AutoGenerateColumns="False"
-                            CanUserSortColumns="False"
                             Grid.Column="0">
                             <DataGrid.CellStyle>
                                 <Style
@@ -214,7 +213,17 @@
                                 </Style>
                             </DataGrid.CellStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Param" Binding="{Binding Name}" Width="300"/>
+                                <DataGridTemplateColumn Header="Param" x:Name="ParamColumn">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding Name}"/>
+                                                <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Text="{Binding Guid}" Foreground="{StaticResource MaterialDesignBodyLight}" FontFamily="Monospac821 BT"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="300" Visibility="Hidden"/>
                                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" MaxWidth="400">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style>
