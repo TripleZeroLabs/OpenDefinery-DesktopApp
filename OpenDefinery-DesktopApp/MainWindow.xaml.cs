@@ -51,7 +51,7 @@ namespace OpenDefinery_DesktopApp
 
             // Set current pagination fields
             Pager.CurrentPage = 0;
-            Pager.ItemsPerPage = 50;
+            Pager.ItemsPerPage = 100;
             Pager.Offset = 0;
 
             // Set up UI elements at launch of app
@@ -1122,20 +1122,24 @@ namespace OpenDefinery_DesktopApp
             if (CollectionsList.SelectedItem != null)
             {
                 ParamSource = ParameterSource.Collection;
+
+                // Retrieve a page of Parameters from the selected Collection
+                RefreshCollectionParameters(CollectionsList);
+
+                // Force the pager to page 0 and update
+                Pager.CurrentPage = 0;
+                UpdatePager(Pager, 0);
+
+                // Deselect the other ListBoxes
+                CollectionsList_Published.SelectedItem = null;
+                OrphanedList.SelectedItem = null;
+
+                RefreshUi();
             }
-
-            // Retrieve a page of Parameters from the selected Collection
-            RefreshCollectionParameters(CollectionsList);
-
-            // Force the pager to page 0 and update
-            Pager.CurrentPage = 0;
-            UpdatePager(Pager, 0);
-
-            // Deselect the other ListBoxes
-            CollectionsList_Published.SelectedItem = null;
-            OrphanedList.SelectedItem = null;
-
-            RefreshUi();
+            else
+            {
+                // Do nothing
+            }
         }
 
         /// <summary>
@@ -1149,19 +1153,23 @@ namespace OpenDefinery_DesktopApp
             if (CollectionsList_Published.SelectedItem != null)
             {
                 ParamSource = ParameterSource.Collection;
+
+                RefreshCollectionParameters(CollectionsList_Published);
+
+                // Force the pager to page 0 and update
+                Pager.CurrentPage = 0;
+                UpdatePager(Pager, 0);
+
+                // Deselect the other ListBoxes
+                CollectionsList.SelectedItem = null;
+                OrphanedList.SelectedItem = null;
+
+                RefreshUi();
             }
-
-            RefreshCollectionParameters(CollectionsList_Published);
-
-            // Force the pager to page 0 and update
-            Pager.CurrentPage = 0;
-            UpdatePager(Pager, 0);
-
-            // Deselect the other ListBoxes
-            CollectionsList.SelectedItem = null;
-            OrphanedList.SelectedItem = null;
-
-            RefreshUi();
+            else
+            {
+                // Do nothing
+            }
         }
 
         /// <summary>
@@ -1171,24 +1179,31 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void OrphanedListBox_Selected(object sender, RoutedEventArgs e)
         {
-            // Deselect the other ListBoxes
-            CollectionsList_Published.SelectedItem = null;
-            CollectionsList.SelectedItem = null;
+            if (OrphanedListItem.IsSelected == true)
+            {
+                // Deselect the other ListBoxes
+                CollectionsList_Published.SelectedItem = null;
+                CollectionsList.SelectedItem = null;
 
-            // Get the parameters
-            Definery.Parameters = SharedParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 0, true);
+                // Get the parameters
+                Definery.Parameters = SharedParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 0, true);
 
-            // Force the pager to page 0 and update
-            Pager.CurrentPage = 0;
-            UpdatePager(Pager, 0);
+                // Force the pager to page 0 and update
+                Pager.CurrentPage = 0;
+                UpdatePager(Pager, 0);
 
-            // Update the GUI anytime data is loaded
-            //PagerPanel.Visibility = Visibility.Visible;
+                // Update the GUI anytime data is loaded
+                //PagerPanel.Visibility = Visibility.Visible;
 
-            // Set enum for UI purposes
-            ParamSource = ParameterSource.Orphaned;
+                // Set enum for UI purposes
+                ParamSource = ParameterSource.Orphaned;
 
-            RefreshUi();
+                RefreshUi();
+            }
+            else
+            {
+                // Do nothing
+            }
         }
 
         /// <summary>
