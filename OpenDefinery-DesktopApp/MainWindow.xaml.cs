@@ -829,8 +829,12 @@ namespace OpenDefinery_DesktopApp
                 {
                     PagerNextButton.Visibility = Visibility.Visible;
                     PagerPreviousButton.Visibility = Visibility.Visible;
-                    PagerLoadAllButton.Visibility = Visibility.Visible;
-                    PagerLoadAllButton.IsEnabled = true;
+
+                    // Hide the Load All button for search results
+                    if (ParamSource == ParameterSource.Search | ParamSource == ParameterSource.Orphaned)
+                    {
+                        PagerLoadAllButton.Visibility = Visibility.Collapsed;
+                    }
                 }
                 else
                 {
@@ -1588,39 +1592,41 @@ namespace OpenDefinery_DesktopApp
             // Instantiate a new list of Parameters
             var allParams = new ObservableCollection<SharedParameter>();
 
-            await Task.Run(() =>
+            if (ParamSource == ParameterSource.Collection)
             {
-                // Loop through all of the pages
-                do
+                await Task.Run(() =>
                 {
-                    // Get all SharedParameters of the current page
-                    var currentPage = SharedParameter.ByCollection(
-                        Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false);
+                    // Loop through all of the pages
+                    do
+                      {
+                        // Get all SharedParameters of the current page
+                        var currentPage = SharedParameter.ByCollection(
+                            Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false);
 
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        // Add them to the main list
-                        foreach (var p in currentPage)
+                        this.Dispatcher.Invoke(() =>
                         {
-                            allParams.Add(p);
-                        }
+                            // Add them to the main list
+                            foreach (var p in currentPage)
+                            {
+                                allParams.Add(p);
+                            }
 
-                        PagerLoadAllButton.IsEnabled = false;
-                        PagerNextButton.Visibility = Visibility.Collapsed;
-                        PagerPreviousButton.Visibility = Visibility.Collapsed;
-                    });
+                            PagerLoadAllButton.IsEnabled = false;
+                            PagerNextButton.Visibility = Visibility.Collapsed;
+                            PagerPreviousButton.Visibility = Visibility.Collapsed;
+                        });
 
-                    // Update the pager since it is not the last page
-                    UpdatePager(Pager, 1, true);
+                        // Update the pager since it is not the last page
+                        UpdatePager(Pager, 1, true);
 
-                    // Set the current list of Parameters
-                    Definery.Parameters = allParams;
+                        // Set the current list of Parameters
+                        Definery.Parameters = allParams;
 
-                    // Refresh the UI
-                    RefreshUi(true);
+                        // Refresh the UI
+                        RefreshUi(true);
 
-                } while (Pager.CurrentPage < Pager.TotalPages);
-            });
+                  } while (Pager.CurrentPage < Pager.TotalPages);
+              });
 
             AllParamsLoaded = true;
 
@@ -1634,6 +1640,12 @@ namespace OpenDefinery_DesktopApp
 
             // Toggle the Pager UI
             PagerTextBox.Text = string.Format("Loaded all {0} parameters", allParams.Count().ToString());
+            }
+            else
+            {
+                // Do nothing for now.
+                MessageBox.Show("Can't load all during search.");
+            }
         }
 
         /// <summary>
