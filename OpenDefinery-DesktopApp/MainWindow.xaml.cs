@@ -1445,13 +1445,6 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            //// Hide contextual UI since no parameters will be selected
-            //AddToCollectionButton.Visibility = Visibility.Collapsed;
-            //RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-            //ForkParameterButton.Visibility = Visibility.Collapsed;
-            //ExportCollectionButton.Visibility = Visibility.Collapsed;
-            //DeleteCollectionButton.Visibility = Visibility.Collapsed;
-
             // Get the parameters
             Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
 

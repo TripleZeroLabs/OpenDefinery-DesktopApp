@@ -213,7 +213,7 @@
                                 </Style>
                             </DataGrid.CellStyle>
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Param" x:Name="ParamColumn">
+                                <DataGridTemplateColumn Header="Param" x:Name="ParamColumn" MinWidth="300">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel>
