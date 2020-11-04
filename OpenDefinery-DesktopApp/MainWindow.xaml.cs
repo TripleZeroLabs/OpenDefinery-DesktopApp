@@ -59,10 +59,7 @@ namespace OpenDefinery_DesktopApp
             NewParameterGrid.Visibility = Visibility.Hidden;  // The New Parameter form
             NewCollectionGrid.Visibility = Visibility.Hidden;  // The New Collection form
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The Batch Upload form
-            AddToCollectionButton.Visibility = Visibility.Collapsed;  // Add to Collection button
-            RemoveFromCollectionButton.Visibility = Visibility.Collapsed;  // Remove from Collection button
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
-            ForkParameterButton.Visibility = Visibility.Collapsed;  // Fork Parameter button
             DeleteCollectionButton.Visibility = Visibility.Collapsed;  // The Collection delete button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
 
@@ -575,51 +572,9 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void DataGridParameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DataGridParameters.SelectedItems.Count == 0)
-            {
-                AddToCollectionButton.Visibility = Visibility.Collapsed;
-                RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                ForkParameterButton.Visibility = Visibility.Collapsed;
-            }
             if (DataGridParameters.SelectedItems.Count == 1)
             {
                 var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
-
-                if (ParamSource == ParameterSource.Collection)
-                {
-                    // Toggle UI based on permissions
-                    if (selectedParam.Author == Definery.CurrentUser.Id)
-                    {
-                        AddToCollectionButton.Visibility = Visibility.Visible;
-                        RemoveFromCollectionButton.Visibility = Visibility.Visible;
-                        ForkParameterButton.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        AddToCollectionButton.Visibility = Visibility.Collapsed;
-                        RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                        ForkParameterButton.Visibility = Visibility.Visible;
-                    }
-                }
-                if (ParamSource == ParameterSource.Orphaned)
-                {
-                    AddToCollectionButton.Visibility = Visibility.Visible;
-                    ForkParameterButton.Visibility = Visibility.Visible;
-                }
-                if (ParamSource == ParameterSource.Search)
-                {
-                    ForkParameterButton.Visibility = Visibility.Visible;
-
-                    // Only allow the user to add the Parameter to a Collection if they are the author
-                    if (selectedParam.Author == Definery.CurrentUser.Id)
-                    {
-                        AddToCollectionButton.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        AddToCollectionButton.Visibility = Visibility.Collapsed;
-                    }
-                }
 
                 // Toggle UI
                 PropertiesSideBar.Visibility = Visibility.Visible;
@@ -685,7 +640,6 @@ namespace OpenDefinery_DesktopApp
             if (DataGridParameters.SelectedItems.Count > 1)
             {
                 PropertiesSideBar.Visibility = Visibility.Collapsed;
-                ForkParameterButton.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -749,14 +703,10 @@ namespace OpenDefinery_DesktopApp
                 // Toggle UI based on DataGrid selection
                 if (DataGridParameters.SelectedItems.Count == 0)
                 {
-                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
-                    AddToCollectionButton.Visibility = Visibility.Collapsed;
-                    ForkParameterButton.Visibility = Visibility.Collapsed;
                     PropertiesSideBar.Visibility = Visibility.Collapsed;
                 }
                 if (DataGridParameters.SelectedItems.Count == 1)
                 {
-                    ForkParameterButton.Visibility = Visibility.Collapsed;
                     PropertiesSideBar.Visibility = Visibility.Visible;
                 }
                 if (DataGridParameters.SelectedItems.Count > 1)
@@ -767,7 +717,6 @@ namespace OpenDefinery_DesktopApp
                 if (ParamSource == ParameterSource.Search)
                 {
                     CollectionsColumn.Visibility = Visibility.Visible;
-                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                     PagerLoadAllButton.Visibility = Visibility.Collapsed;
                     PagerPanel.Visibility = Visibility.Visible;
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
@@ -793,7 +742,6 @@ namespace OpenDefinery_DesktopApp
                     CollectionsColumn.Visibility = Visibility.Collapsed;
                     PagerLoadAllButton.Visibility = Visibility.Collapsed;
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
-                    RemoveFromCollectionButton.Visibility = Visibility.Collapsed;
                     DeleteCollectionButton.Visibility = Visibility.Collapsed;
                 }
 
@@ -1433,10 +1381,6 @@ namespace OpenDefinery_DesktopApp
                         Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
                         );
 
-                    // Toggle UI
-                    ForkParameterButton.Visibility = Visibility.Collapsed;
-                    AddToCollectionButton.Visibility = Visibility.Collapsed;
-
                     RefreshUi();
                 }
             }
@@ -1679,6 +1623,140 @@ namespace OpenDefinery_DesktopApp
             {
                 MessageBox.Show("Deletion canceled.");
             }
+        }
+
+        /// <summary>
+        /// Method to execute when contextural button is clicked on a Parameter row
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParamContextMenu_Click(object sender, RoutedEventArgs e)
+        {
+            // Instantiate a new context menu
+            var contextMenu = new ContextMenu();
+
+            // Inherit the datacontext of the row data object
+            var selectedParam = ((FrameworkElement)sender).DataContext as SharedParameter;
+
+            // Only select the clicked row
+            DataGridParameters.SelectedItem = selectedParam;
+
+            // Toggle contextual menu
+            ContextMenu cm = this.FindResource("ParamContextMenu") as ContextMenu;
+
+            foreach (var i in cm.Items)
+            {
+                if (i.GetType().Name != "Separator")  // Ignore separators
+                { 
+                    var item = cm.Items[cm.Items.IndexOf(i)] as MenuItem;
+
+                    if (item.Header.ToString() == "Fork")
+                    {
+                        item.Visibility = Visibility.Visible;
+                    }
+
+                    // Toggle UI when note viewing a Collection
+                    if (ParamSource != ParameterSource.Collection)
+                    {
+                        if (item.Header.ToString() == "Remove From Collection")
+                        {
+                            item.Visibility = Visibility.Collapsed;
+                        }
+                    }
+
+                    // Control menu items for the current user
+                    if (selectedParam.Author == Definery.CurrentUser.Id)
+                    {
+                        if (item.Header.ToString() == "Edit")
+                        {
+                            item.Visibility = Visibility.Visible;
+                        }
+                        if (item.Header.ToString() == "Add To Collection")
+                        {
+                            item.Visibility = Visibility.Visible;
+                        }
+
+                        // Toggle UI for Collections
+                        if (ParamSource == ParameterSource.Collection)
+                        {
+                            if (item.Header.ToString() == "Remove From Collection")
+                            {
+                                item.Visibility = Visibility.Visible;
+                            }
+                        }
+                    }
+                    // Logic for when the selected Parameter is not authored by the current user
+                    else
+                    {
+                        if (item.Header.ToString() == "Edit")
+                        {
+                            item.Visibility = Visibility.Collapsed;
+                        }
+                        if (item.Header.ToString() == "Add To Collection")
+                        {
+                            item.Visibility = Visibility.Collapsed;
+                        }
+                        if (item.Header.ToString() == "Remove From Collection")
+                        {
+                            item.Visibility = Visibility.Collapsed;
+                        }
+                    }
+                }
+            }
+
+            // Display the menu
+            cm.PlacementTarget = sender as Button;
+            cm.IsOpen = true;
+        }
+
+        /// <summary>
+        /// Contextual menu item for forking a Parameter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParamMenuFork_Click(object sender, RoutedEventArgs e)
+        {
+            ForkParameterButton_Click(sender, e);
+        }
+
+        /// <summary>
+        /// Contextual menu item for editing a Parameter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParamMenuEdit_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Parameter editing is coming soon...");
+        }
+
+        /// <summary>
+        /// Contextual menu item for adding a Parameter to a Collection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParamMenuAdd_Click(object sender, RoutedEventArgs e)
+        {
+            AddToCollectionButton_Click(sender, e);
+        }
+
+        /// <summary>
+        /// Contextual menu item for removing a Parameter from a Collection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParamMenuRemove_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveFromCollectionButton_Click(sender, e);
+        }
+
+        /// <summary>
+        /// Contextual menu item for deleting a Parameter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParamMenuDelete_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

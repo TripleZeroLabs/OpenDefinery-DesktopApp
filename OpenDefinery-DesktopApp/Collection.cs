@@ -212,8 +212,6 @@ namespace OpenDefinery
         {
             var hasDuplicate = false;
 
-
-
             return hasDuplicate;
         }
 

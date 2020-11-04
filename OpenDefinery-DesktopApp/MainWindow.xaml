@@ -32,6 +32,28 @@
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
             </Style.Resources>
         </Style>
+        <ContextMenu x:Key="ParamContextMenu">
+            <MenuItem x:Name="ParamMenuAdd" Style="{StaticResource MaterialDesignMenuItem}" Header="Add To Collection" Click="ParamMenuAdd_Click">
+                <MenuItem.Icon>
+                    <iconPacks:BoxIcons Kind="RegularPlusCircle"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="ParamMenuFork" Style="{StaticResource MaterialDesignMenuItem}" Header="Fork" Click="ParamMenuFork_Click">
+                <MenuItem.Icon>
+                    <iconPacks:BoxIcons Kind="RegularGitRepoForked"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="ParamMenuEdit" Style="{StaticResource MaterialDesignMenuItem}" Header="Edit" Click="ParamMenuEdit_Click">
+                <MenuItem.Icon>
+                    <iconPacks:BoxIcons Kind="RegularPencil"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="ParamMenuRemove" Style="{StaticResource MaterialDesignMenuItem}" Header="Remove From Collection" Click="ParamMenuRemove_Click">
+                <MenuItem.Icon>
+                    <iconPacks:BoxIcons Kind="RegularMinusCircle"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
     <Grid x:Name="MainGrid" Margin="0">
         <!--<iconPacks:PackIconBoxIcons x:Name="Loader" 
@@ -146,36 +168,6 @@
                                     </DataTemplate>
                                 </Button.ContentTemplate>
                             </Button>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="AddToCollectionButton" HorizontalAlignment="Left" Margin="10,0,0,0" Click="AddToCollectionButton_Click" Padding="10,4" ToolTip="Add the selected Shared Parameters to a Collection">
-                                <Button.ContentTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <iconPacks:BoxIcons Kind="RegularAddToQueue"/>
-                                            <TextBlock Text="Add to Collection" Margin="7,0,0,0"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Button.ContentTemplate>
-                            </Button>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="RemoveFromCollectionButton" Content="Remove From Collection" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="RemoveFromCollectionButton_Click" ToolTip="Remove the selected Shared Parameters from the current Collection">
-                                <Button.ContentTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <iconPacks:BoxIcons Kind="RegularXCircle"/>
-                                            <TextBlock Text="Remove" Margin="7,0,0,0"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Button.ContentTemplate>
-                            </Button>
-                            <Button Style="{DynamicResource MaterialDesignOutlinedButton}" x:Name="ForkParameterButton" Content="Fork Parameter" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" Click="ForkParameterButton_Click" ToolTip="Duplicate the selected Shared Parameters and add to a Collection">
-                                <Button.ContentTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <iconPacks:BoxIcons Kind="RegularGitRepoForked"/>
-                                            <TextBlock Text="Fork" Margin="7,0,0,0"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Button.ContentTemplate>
-                            </Button>
                             <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DeleteCollectionButton" Content="" HorizontalAlignment="Left" Margin="10,8.8,0,8.8" Padding="10,4" ToolTip="Delete the current Collection" Click="DeleteCollectionButton_Click">
                                 <Button.ContentTemplate>
                                     <DataTemplate>
@@ -213,6 +205,24 @@
                                 </Style>
                             </DataGrid.CellStyle>
                             <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="" x:Name="ContextualMenuColumn" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button 
+                                                x:Name="ParamContextMenu"
+                                                Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                                Foreground="#cccccc"
+                                                Margin="0"
+                                                Click="ParamContextMenu_Click"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl},
+                                                    Mode=FindAncestor},
+                                                    Path=DataContext.OpenItemCommand}" 
+                                                >
+                                                <iconPacks:BoxIcons Kind="RegularMenu"/>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Param" x:Name="ParamColumn" MinWidth="300">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
