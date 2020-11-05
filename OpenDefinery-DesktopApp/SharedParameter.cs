@@ -379,37 +379,6 @@ namespace OpenDefinery
         }
 
         /// <summary>
-        /// Retrieve all SharedParameters on all pages from a Collection
-        /// </summary>
-        /// <param name="definery">The main Definery object</param>
-        /// <param name="collection">The Collection to retrieve the parameters from</param>
-        /// <returns>A List of all SharedParameters in the Collection</returns>
-        //public static ObservableCollection<SharedParameter> GetAllFromCollection(Definery definery, Collection collection)
-        //{
-        //    // Get the first page of SharedParameters
-        //    var allParams = ByCollection(definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true).ToList();
-
-        //    // Update the pager since it is not the last page
-        //    MainWindow.UpdatePager(MainWindow.Pager, 1);
-
-        //    // Loop through all of the pages
-        //    do
-        //    {
-        //        // Get all SharedParameters of the current page
-        //        allParams.AddRange(ByCollection(
-        //            definery, collection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, false));
-
-        //        // Update the pager since it is not the last page
-        //        MainWindow.UpdatePager(MainWindow.Pager, 1);
-
-        //    } while (MainWindow.Pager.CurrentPage < MainWindow.Pager.TotalPages);
-
-        //    Debug.WriteLine(string.Format("Found {0} parameters to export from {1}.", allParams.Count().ToString(), collection.Name));
-
-        //    return new ObservableCollection<SharedParameter>(allParams);
-        //}
-
-        /// <summary>
         /// Retrieve the Shared Parameters that don't belong to any Collections
         /// </summary>
         /// <param name="definery"></param>

@@ -1524,6 +1524,8 @@ namespace OpenDefinery_DesktopApp
             // Prevent clicking more than once and hide button
             PagerLoadAllButton.IsEnabled = false;
             PagerLoadAllButton.Visibility = Visibility.Collapsed;
+            PagerNextButton.Visibility = Visibility.Collapsed;
+            PagerPreviousButton.Visibility = Visibility.Collapsed;
 
             // Prevent clicking another Collection while loading is occuring
             CollectionsList.IsEnabled = false;
