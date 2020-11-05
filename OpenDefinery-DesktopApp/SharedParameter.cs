@@ -793,41 +793,28 @@ namespace OpenDefinery
         }
 
         /// <summary>
-        /// Fork an existing Shared Parameter, allowing overrides to only the name and description.
+        /// Modify an existing Shared Parameter, but only allow modifications to the name and description for now.
         /// </summary>
         /// <param name="definery">The main Definery object</param>
-        /// <param name="param">The existing Shared Parameter to fork</param>
-        /// <param name="name">The new Parameter name. Provide null/empty string to use the current name</param>
-        /// <param name="description">The new description. Provide null/empty string to use the current description</param>
+        /// <param name="param">The existing Shared Parameter to modify</param>
+        /// <param name="name">The updated Parameter name</param>
+        /// <param name="description">The updated description</param>
         /// <returns></returns>
-        public static SharedParameter Fork(Definery definery, SharedParameter param, string name, string description)
+        public static void Modify(Definery definery, SharedParameter param, string name, string description)
         {
-            // If no overridden name or description is provide the same values as the existing Parameter
-            var newName = string.Empty;
-            var newDesc = string.Empty;
+            var client = new RestClient(string.Format(Definery.BaseUrl + "node/{0}?_format=json", param.Id));
+            var request = new RestRequest(Method.PATCH);
+            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            request.AddParameter("application/json", "{\"type\": [{" +
+                "\"target_id\": \"shared_parameter\"}]," +
+                "\"title\": {\"value\": \"" + name + "\"}," +
+                "\"field_description\": {\"value\": \"" + description + "\"}}", 
+                ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
 
-            if (string.IsNullOrEmpty(name))
-            {
-                newName = param.Name;
-            }
-            if (string.IsNullOrEmpty(description))
-            {
-                newDesc = param.Description;
-            }
-
-            var newParam = new SharedParameter(
-                param.Guid,
-                newName, 
-                param.DataType, 
-                param.DataCategoryHashcode, 
-                param.Group, 
-                param.Visible,
-                newDesc, 
-                param.UserModifiable,
-                param.Id
-                );
-
-            return newParam;
+            Debug.WriteLine(response.Content);
         }
 
         /// <summary>

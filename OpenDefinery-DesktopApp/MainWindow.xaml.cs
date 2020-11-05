@@ -59,6 +59,7 @@ namespace OpenDefinery_DesktopApp
             NewParameterGrid.Visibility = Visibility.Hidden;  // The New Parameter form
             NewCollectionGrid.Visibility = Visibility.Hidden;  // The New Collection form
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The Batch Upload form
+            ModifyParameterGrid.Visibility = Visibility.Hidden;  // The Modify Parameter form
             ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
             DeleteCollectionButton.Visibility = Visibility.Collapsed;  // The Collection delete button
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
@@ -473,6 +474,9 @@ namespace OpenDefinery_DesktopApp
             }
 
             RefreshUi();
+
+            // Scroll to top
+            DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
         }
 
         /// <summary>
@@ -501,6 +505,9 @@ namespace OpenDefinery_DesktopApp
             }
 
             RefreshUi();
+
+            // Scroll to top
+            DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
         }
 
         /// <summary>
@@ -689,10 +696,6 @@ namespace OpenDefinery_DesktopApp
                 }
 
                 // Toggle UI based on the Load All button
-                if (DataGridParameters.Items.Count > 0 & !loadingAll)
-                {
-                    DataGridParameters.ScrollIntoView(DataGridParameters.Items[0]);
-                }
                 if (loadingAll)
                 {
                     PagerNextButton.Visibility = Visibility.Collapsed;
@@ -1729,7 +1732,59 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void ParamMenuEdit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Parameter editing is coming soon...");
+            // Inherit the datacontext of the row data object
+            var selectedParam = ((FrameworkElement)sender).DataContext as SharedParameter;
+
+            // Toggle the UI
+            ModifyParameterGrid.Visibility = Visibility.Visible;
+            OverlayGrid.Visibility = Visibility.Visible;
+
+            // Prefill the text boxes
+            ModParamNameTextBox.Text = selectedParam.Name;
+            ModParamNameTextBox.ToolTip = selectedParam.Name;
+            ModParamDescTextBox.Text = selectedParam.Description;
+            if (!string.IsNullOrEmpty(selectedParam.Description))
+            {
+                ModParamDescTextBox.ToolTip = selectedParam.Description;
+            }
+            else
+            {
+                ModParamDescTextBox.ToolTip = null;
+            }
+        }
+
+        /// <summary>
+        /// Save the modified Shared Parameter by clicking the Save button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ModParamFormButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+
+            // Update the SharedParameter
+            SharedParameter.Modify(Definery, selectedParam, ModParamNameTextBox.Text, ModParamDescTextBox.Text);
+
+            selectedParam.Name = ModParamNameTextBox.Text;
+            selectedParam.Description = ModParamDescTextBox.Text;
+
+            RefreshUi();
+
+            // Toggle the UI
+            ModifyParameterGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Cancel the modification of a Shared Parameter by clicking the Cancel button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelModParamButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Toggle the UI
+            ModifyParameterGrid.Visibility = Visibility.Hidden;
+            OverlayGrid.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
