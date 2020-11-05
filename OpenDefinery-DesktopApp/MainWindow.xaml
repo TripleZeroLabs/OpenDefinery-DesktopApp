@@ -286,16 +286,6 @@
                 <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" Foreground="#333333" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
                 <Grid Width="Auto" Grid.Column="1">
                     <StackPanel FlowDirection="RightToLeft" x:Name="PagerPanel" Height="45" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
-                        <Button Style="{StaticResource MaterialDesignFlatAccentBgButton}" x:Name="PagerLoadAllButton" Margin="0" Height="30" Padding="10, 0" Foreground="#FFFFFF" Click="PagerLoadAllButton_Click">
-                            <Button.ContentTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <iconPacks:BoxIcons Kind="RegularCloudDownload"/>
-                                        <TextBlock Text="Load All" Margin="5,0,0,0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Button.ContentTemplate>
-                        </Button>
                         <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerNextButton" Click="PagerNextButton_Click" Margin="10,0,0,0" Height="30" Padding="10, 0" Foreground="#FFFFFF">
                             <Button.ContentTemplate>
                                 <DataTemplate>
@@ -316,7 +306,16 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <TextBlock Text="Page 1 of 120" x:Name="PagerTextBox" Foreground="#888888" TextAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap" Width="Auto" Margin="20,0,0,0" />
+                        <Button Style="{StaticResource MaterialDesignToolForegroundButton}" x:Name="PagerLoadAllButton" Margin="20,0,0,0" Height="30" Padding="10, 0" Foreground="#FF1976D2" Click="PagerLoadAllButton_Click">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="View All" Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <TextBlock Text="Page 1 of 120" x:Name="PagerTextBox" Foreground="#888888" TextAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap" Width="Auto" Margin="10,0,0,0" />
                         <TextBlock x:Name="StatusTextBlock" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="300,0,0,0"/>
                     </StackPanel>
                     <ProgressBar Minimum="0" Maximum="100" x:Name="StatusProgressBar" IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0" Width="200" Height="20" Visibility="Hidden" />

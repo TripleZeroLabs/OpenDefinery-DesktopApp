@@ -753,6 +753,7 @@ namespace OpenDefinery_DesktopApp
                 if (Pager.TotalPages > 1 && !loadingAll)
                 {
                     PagerPanel.Visibility = Visibility.Visible;
+                    PagerLoadAllButton.IsEnabled = true;
 
                     AllParamsLoaded = false;
                 }
