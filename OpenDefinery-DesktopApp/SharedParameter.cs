@@ -492,7 +492,7 @@ namespace OpenDefinery
         /// <param name="param"></param>
         /// <param name="collectionId"></param>
         /// <returns></returns>
-        public static SharedParameter Create(Definery definery, SharedParameter param, int collectionId, int? forkedId = null)
+        public static SharedParameter Create(Definery definery, SharedParameter param, int? collectionId = null, int? forkedId = null)
         {
             var client = new RestClient(Definery.BaseUrl + "node?_format=json");
             client.Timeout = -1;
@@ -503,7 +503,7 @@ namespace OpenDefinery
 
             // Format values before assigning
             if (dataType != null)
-            { 
+            {
                 param.DataType = dataType.Id.ToString();
             }
 
@@ -570,15 +570,23 @@ namespace OpenDefinery
                 "\"field_data_category\": {" +
                 "\"und\": \"" + dataCategory.Id + "\"" +
                 "}," +
-                "\"field_collections\": {" +
-                "\"und\": \"" + collectionId + "\"" +
-                "}," +
+                //"\"field_collections\": {" +
+                //"\"und\": \"" + collectionId + "\"" +
+                //"}," +
                 "\"field_visible\": {" +
                 "\"und\": \"" + param.Visible + "\"" +
                 "}," +
                 "\"field_user_modifiable\": {" +
                 "\"und\": \"" + param.UserModifiable + "\"" +
                 "}";
+
+            if (collectionId != null)
+            {
+                requestBody += "," +
+                    "\"field_collections\": {" +
+                "\"und\": \"" + collectionId + "\"" +
+                "}";
+            }
 
             if (!string.IsNullOrEmpty(forkedId.ToString()))
             {
@@ -620,9 +628,9 @@ namespace OpenDefinery
             }
             else
             {
-               MessageBox.Show("There was an error creating the Shared Parameter.");
+               MessageBox.Show("There was an error creating the Shared Parameter.\n\n" + response.Content);
 
-                return null;
+               return null;
             }
         }
 

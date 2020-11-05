@@ -212,6 +212,8 @@ namespace OpenDefinery
         {
             var hasDuplicate = false;
 
+            
+
             return hasDuplicate;
         }
 
@@ -256,6 +258,21 @@ namespace OpenDefinery
             parameter.Collections = collections;
 
             return parameter;
+        }
+
+        public static List<SharedParameter> GetIds(Definery definery, Collection collection)
+        {
+            // Make the API call
+            var client = new RestClient(Definery.BaseUrl + string.Format("rest/lite/collection/{0}?_format=json", collection.Id.ToString()));
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Bearer " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+            Debug.WriteLine(response.Content);
+
+            // Deserialize into "lite" SharedParameter objects which only have a GUID and ID
+            var parameters = JsonConvert.DeserializeObject<List<SharedParameter>>(response.Content);
+
+            return parameters;
         }
     }
 }

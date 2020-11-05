@@ -884,9 +884,8 @@ namespace OpenDefinery_DesktopApp
             InitializeParamForm();
 
             // Pass the Collections list to the combobox and configure
-            NewParamFormCombo.ItemsSource = Definery.MyCollections;
-            NewParamFormCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
-            NewParamFormCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+            NewParamFormCollectionsCombo.ItemsSource = Definery.MyCollections;
+            NewParamFormCollectionsCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
             NewParamDataTypeCombo.SelectedIndex = 0;
             NewParamDataCatCombo.SelectedItem = null;
 
@@ -924,7 +923,12 @@ namespace OpenDefinery_DesktopApp
         private void NewParamFormButton_Click(object sender, RoutedEventArgs e)
         {
             // Instantiate the data from the form inputs
-            var collection = NewParamFormCombo.SelectedItem as Collection;
+            var collection = new Collection();
+            if (NewParamFormCollectionsCombo.SelectedItem != null)
+            {
+                collection = NewParamFormCollectionsCombo.SelectedItem as Collection;
+            }
+
             var response = string.Empty;
             var dataType = NewParamDataTypeCombo.SelectedItem as DataType;
             // Set the DataCategory if selected
@@ -971,32 +975,38 @@ namespace OpenDefinery_DesktopApp
                         MessageBox.Show(ex.ToString());
                     }
 
-                    // Finally create the parameter
-                    try
+                    // Require the Collections combo
+                    if (NewParamFormCollectionsCombo.SelectedItem != null)
                     {
-                        // Pass the ID of the Parameter that is being forked if provided
-                        if (!string.IsNullOrEmpty(ForkedParamIdTextBox.Text))
+                        var selectedCollection = NewParamFormCollectionsCombo.SelectedItem as Collection;
+                        // Finally create the parameter
+                        try
                         {
-                            SharedParameter.Create(Definery, param, collection.Id, Convert.ToInt32(ForkedParamIdTextBox.Text));
+                            // Pass the ID of the Parameter that is being forked if provided
+                            if (!string.IsNullOrEmpty(ForkedParamIdTextBox.Text))
+                            {
+                                SharedParameter.Create(Definery, param, selectedCollection.Id, Convert.ToInt32(ForkedParamIdTextBox.Text));
+                            }
+                            else
+                            {
+                                SharedParameter.Create(Definery, param, selectedCollection.Id);
+                            }
+
+                            // Hide the overlay and form
+                            NewParameterGrid.Visibility = Visibility.Hidden;
+                            OverlayGrid.Visibility = Visibility.Hidden;
+
+                            // Reset the form values and UI
+                            InitializeParamForm();
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            SharedParameter.Create(Definery, param, collection.Id);
+                            MessageBox.Show(ex.ToString());
                         }
-
-                        // Hide the overlay and form
-                        NewParameterGrid.Visibility = Visibility.Hidden;
-                        OverlayGrid.Visibility = Visibility.Hidden;
-
-                        // TODO: Validate that the Shared Parameter was actually created
-                        MessageBox.Show("The parameter has been successfully created.");
-
-                        // Reset the form values and UI
-                        InitializeParamForm();
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        MessageBox.Show(ex.ToString());
+                        MessageBox.Show("You must select a Collection to add the Parameter to.");
                     }
                 }
             }
@@ -1148,9 +1158,6 @@ namespace OpenDefinery_DesktopApp
                 Pager.CurrentPage = 0;
                 UpdatePager(Pager, 0);
 
-                // Update the GUI anytime data is loaded
-                //PagerPanel.Visibility = Visibility.Visible;
-
                 // Set enum for UI purposes
                 ParamSource = ParameterSource.Orphaned;
 
@@ -1263,9 +1270,8 @@ namespace OpenDefinery_DesktopApp
                 NewParameterGrid.Visibility = Visibility.Visible;
 
                 // Add Collections to ComboBox
-                NewParamFormCombo.ItemsSource = Definery.MyCollections;
-                NewParamFormCombo.DisplayMemberPath = "Name";
-                NewParamFormCombo.SelectedIndex = 0;
+                NewParamFormCollectionsCombo.ItemsSource = Definery.MyCollections;
+                NewParamFormCollectionsCombo.DisplayMemberPath = "Name";
 
                 // Disable editing of certain fields otherwise you are technically not forking
                 NewParamGuidTextBox.IsEnabled = false;
@@ -1294,7 +1300,6 @@ namespace OpenDefinery_DesktopApp
                     NewParamDataCatCombo.Visibility = Visibility.Visible;
                     NewParamDataCatCombo.IsEnabled = false;
                 }
-
 
                 if (selectedParam.Visible == "1")
                 {
@@ -1815,6 +1820,41 @@ namespace OpenDefinery_DesktopApp
         private void ParamMenuDelete_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void NewParamFormCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// Method to execute when selecting a Collection from the New Parameter form.
+        /// This logic checks if the GUID already exists in the selected Collection.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewParamFormCollectionsCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (NewParamFormCollectionsCombo.SelectedItem != null)
+            {
+                var selectedCollection = NewParamFormCollectionsCombo.SelectedItem as Collection;
+
+                // Check if the current selection already has the GUID
+                var checkForDupes = Collection.GetIds(Definery, selectedCollection);
+
+                var foundDupes = checkForDupes.Where(p => p.Guid.ToString() == NewParamGuidTextBox.Text);
+
+                // Toggle UI if duplicates are found
+                if (foundDupes.Count() > 0)
+                {
+                    MessageBox.Show("Error: This Collection already contains a Parameter with this GUID. Select a different Collection.");
+                    AddParamFormButton.IsEnabled = false;
+                }
+                else
+                {
+                    AddParamFormButton.IsEnabled = true;
+                }
+            }
         }
     }
 }
