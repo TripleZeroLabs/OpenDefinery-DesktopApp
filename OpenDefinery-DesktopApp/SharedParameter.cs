@@ -706,6 +706,10 @@ namespace OpenDefinery
             {
                 collectionIds.Add(newCollectionId.ToString());
             }
+            else
+            {
+                MessageBox.Show(param.Name + " already belongs to " + newCollectionId.ToString());
+            }
 
             // Instantiate a string to pass Collections to body of API call
             var bodyFieldCollections = ", \"field_collections\": [";

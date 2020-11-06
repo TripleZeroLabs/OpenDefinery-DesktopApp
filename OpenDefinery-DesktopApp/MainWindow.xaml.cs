@@ -833,11 +833,11 @@ namespace OpenDefinery_DesktopApp
                     {
                         // Add the Shared Parameter to the Collection
                         SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+
+                        // Notify the user of the update
+                        MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
                     }
                 }
-
-                // Notify the user of the update
-                MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
             }
             else  // Logic to execute if the current source is the Orphaned list
             {
