@@ -127,12 +127,12 @@ namespace OpenDefinery
                 parameter.Visible = values[6];
 
                 // Older shared parmater text files do not have the DESCRIPTION column
-                if (values.Count() == 9)
+                if (values.Count() > 9)
                 {
                     parameter.Description = values[7];
                     parameter.UserModifiable = values[8];
                 }
-                if (values.Count() == 8)
+                if (values.Count() == 9)
                 {
                     parameter.Description = string.Empty;
                     parameter.UserModifiable = values[7];
@@ -152,7 +152,7 @@ namespace OpenDefinery
         /// <returns>A list of SharedParameter objects</returns>
         public static ObservableCollection<SharedParameter> FromGuid(Definery definery, Guid guid)
         {
-            var client = new RestClient(Definery.BaseUrl + "rest/params?_format=json&guid=" + guid);
+            var client = new RestClient(Definery.BaseUrl + string.Format("rest/params/guid/{0}?_format=json", guid.ToString()));
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);
@@ -182,37 +182,51 @@ namespace OpenDefinery
         /// <returns>True if a match is found, false if not</returns>
         public static bool HasExactMatch(Definery definery, SharedParameter newParameter)
         {
-            // TODO: Only validate parameters from the current Drupal user
-            var foundParams = FromGuid(definery, newParameter.Guid);
             var foundMatch = false;
 
+            // Retrieve all Parameters from the GUID
+            var foundParams = FromGuid(definery, newParameter.Guid);
+
             // Logic when one ore more SharedParameter is found in Drupal
-            if (foundParams != null && foundParams.Count() > 0)
+            if (foundParams != null && foundParams.Count() > 1)
             {
                 foreach (var p in foundParams)
                 {
-                    // Compare the two parameters
-                    CompareLogic compareLogic = new CompareLogic();
-
-                    compareLogic.Config.MembersToInclude.Add("Guid");
-                    compareLogic.Config.MembersToInclude.Add("Name");
-                    compareLogic.Config.MembersToInclude.Add("DataType");
-                    compareLogic.Config.MembersToInclude.Add("DataCategory");
-                    compareLogic.Config.MembersToInclude.Add("Visible");
-                    compareLogic.Config.MembersToInclude.Add("Description");
-                    compareLogic.Config.MembersToInclude.Add("UserModifiable");
-
-                    ComparisonResult result = compareLogic.Compare(newParameter, p);
-
-                    if (result.AreEqual)
+                    // Only consider exact match if the current user is the author
+                    if (p.Author == Definery.CurrentUser.Id)
                     {
-                        foundMatch = true;
+                        // Compare the two parameters
+                        CompareLogic compareLogic = new CompareLogic();
 
-                        break;
+                        compareLogic.Config.MembersToInclude.Add("Guid");
+                        compareLogic.Config.MembersToInclude.Add("Name");
+                        compareLogic.Config.MembersToInclude.Add("DataType");
+                        compareLogic.Config.MembersToInclude.Add("DataCategory");
+                        compareLogic.Config.MembersToInclude.Add("Visible");
+                        compareLogic.Config.MembersToInclude.Add("Description");
+                        compareLogic.Config.MembersToInclude.Add("UserModifiable");
+
+                        ComparisonResult result = compareLogic.Compare(newParameter, p);
+
+                        if (result.AreEqual)
+                        {
+                            // Break the loop if there is any Parameter that is equal
+                            foundMatch = true;
+
+                            break;
+                        }
+                        else
+                        {
+                            foundMatch = false;
+                        }
+                    }
+                    else
+                    {
+                        foundMatch = false;
                     }
                 }
             }
-            else
+            if (foundParams != null && foundParams.Count() == 0)
             {
                 foundMatch = false;
             }

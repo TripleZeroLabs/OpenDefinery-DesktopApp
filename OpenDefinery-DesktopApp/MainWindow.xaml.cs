@@ -311,6 +311,8 @@ namespace OpenDefinery_DesktopApp
                     string line = string.Empty;
                     string headerLine = stringReader.ReadLine();
 
+                    var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
+
                     await Task.Run(() =>
                     {
                         do
@@ -347,7 +349,7 @@ namespace OpenDefinery_DesktopApp
                                           DispatcherPriority.Background,
                                           new Action(() =>
                                           {
-                                              ProgressStatus.Text += " Already exists. Skipping.";
+                                              ProgressStatus.Text = newParameter.Name + " already exists. Skipped.";
                                           }));
                                     }
                                     else
@@ -357,10 +359,9 @@ namespace OpenDefinery_DesktopApp
                                         // Instantiate the selected item as a Collection
                                         this.Dispatcher.Invoke(() =>
                                         {
-                                            var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
 
-                                        // Create the SharedParameter
-                                        SharedParameter.Create(Definery, newParameter, sollection.Id);
+                                            // Create the SharedParameter
+                                            SharedParameter.Create(Definery, newParameter, sollection.Id);
                                         });
                                     }
                                 }
