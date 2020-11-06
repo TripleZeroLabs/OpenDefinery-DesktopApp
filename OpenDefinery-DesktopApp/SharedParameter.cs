@@ -543,6 +543,16 @@ namespace OpenDefinery
                 tagId = null;
             }
 
+            // Add default values
+            if (param.UserModifiable == null)
+            {
+                param.UserModifiable = "1";
+            }
+            if (param.Visible == null)
+            {
+                param.Visible = "1";
+            }
+
             //TODO: Clean up this mess some day.
             var requestBody = "{" +
                 "\"type\": [{" +

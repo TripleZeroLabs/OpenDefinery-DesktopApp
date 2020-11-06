@@ -362,13 +362,6 @@ namespace OpenDefinery_DesktopApp
                                         // Create the SharedParameter
                                         SharedParameter.Create(Definery, newParameter, sollection.Id);
                                         });
-
-                                        Application.Current.Dispatcher.BeginInvoke(
-                                          DispatcherPriority.Background,
-                                          new Action(() =>
-                                          {
-                                              ProgressStatus.Text += "Done.";
-                                          }));
                                     }
                                 }
                             }
@@ -387,18 +380,15 @@ namespace OpenDefinery_DesktopApp
             }
 
             // Update the UI
+            if (SelectedCollection == BatchUploadCollectionCombo.SelectedItem)
+            {
+                RefreshCollectionParameters(CollectionsList);
+            }
+
             ProgressGrid.Visibility = Visibility.Hidden;
             OverlayGrid.Visibility = Visibility.Hidden;
+
             MessageBox.Show("Batch upload complete.");
-
-            // Reload the data
-            // Get the parameters of the logged in user by default and display in the DataGrid
-            Definery.Parameters = SharedParameter.ByUser(
-                Definery, Definery.CurrentUser.Name, Pager.ItemsPerPage, Pager.Offset, true
-                );
-
-            // Update the GUI anytime data is loaded
-            RefreshUi();
         }
 
         /// <summary>
@@ -437,7 +427,7 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        private void RefreshCurrentPage()
         {
             // Reset page back to 1
             Pager.CurrentPage = 0;
@@ -445,8 +435,8 @@ namespace OpenDefinery_DesktopApp
             // Upate the pager data and UI
             UpdatePager(Pager, 0);
 
-            // Load all of the things!!!
-            LoadData();
+            // Update the GUI anytime data is loaded
+            RefreshUi();
         }
 
         /// <summary>
@@ -523,7 +513,16 @@ namespace OpenDefinery_DesktopApp
             // Populate the Collections combo
             BatchUploadCollectionCombo.ItemsSource = Definery.MyCollections;
             BatchUploadCollectionCombo.DisplayMemberPath = "Name";
-            BatchUploadCollectionCombo.SelectedIndex = 0;
+
+            // If a Collection is selected, select it in the combobox
+            if (SelectedCollection != null)
+            {
+                BatchUploadCollectionCombo.SelectedItem = SelectedCollection;
+            }
+            else
+            {
+                BatchUploadCollectionCombo.SelectedIndex = 0;
+            }
 
             // Show the batch upload form
             OverlayGrid.Visibility = Visibility.Visible;
@@ -1092,15 +1091,9 @@ namespace OpenDefinery_DesktopApp
                 // Retrieve a page of Parameters from the selected Collection
                 RefreshCollectionParameters(CollectionsList);
 
-                // Force the pager to page 0 and update
-                Pager.CurrentPage = 0;
-                UpdatePager(Pager, 0);
-
                 // Deselect the other ListBoxes
                 CollectionsList_Published.SelectedItem = null;
                 OrphanedList.SelectedItem = null;
-
-                RefreshUi();
             }
             else
             {
