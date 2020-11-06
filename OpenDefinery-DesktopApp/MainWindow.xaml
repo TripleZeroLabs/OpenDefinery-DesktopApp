@@ -149,7 +149,7 @@
                 </ScrollViewer>
                 <Grid x:Name="DashboardGrid" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Top" Visibility="Collapsed">
                     <TextBlock TextWrapping="Wrap" Text="Welcome to OpenDefinery" Margin="0,100,0,0" VerticalAlignment="Top" FontSize="36" Foreground="#DD767676" HorizontalAlignment="Center"/>
-                    <TextBlock Margin="0,155,0,0" TextWrapping="Wrap" Text="(private beta v0.0.1)" VerticalAlignment="Top" FontSize="15" HorizontalAlignment="Center" Foreground="#DD767676"/>
+                    <TextBlock x:Name="DashboardVersionText" Margin="0,155,0,0" TextWrapping="Wrap" Text="(private beta v0.0.1)" VerticalAlignment="Top" FontSize="15" HorizontalAlignment="Center" Foreground="#DD767676"/>
                 </Grid>
                 <Grid x:Name="MainBrowserGrid">
                     <Grid.RowDefinitions>

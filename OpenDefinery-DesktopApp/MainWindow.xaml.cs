@@ -7,11 +7,12 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Win32;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -45,6 +46,8 @@ namespace OpenDefinery_DesktopApp
 
             InitializeComponent();
 
+            this.Title = "OpenDefinery Desktop" + " v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
             // Instantiate a new objects
             Definery = new Definery();
             Pager = new Pager();
@@ -67,6 +70,8 @@ namespace OpenDefinery_DesktopApp
             PagerPanel.Visibility = Visibility.Hidden;  // Pager
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
+
+            DashboardVersionText.Text = "(v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() + ")";
 
             AllParamsLoaded = false;
 
