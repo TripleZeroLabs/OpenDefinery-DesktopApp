@@ -832,10 +832,7 @@ namespace OpenDefinery_DesktopApp
                     else
                     {
                         // Add the Shared Parameter to the Collection
-                        SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
-
-                        // Notify the user of the update
-                        MessageBox.Show("Added " + DataGridParameters.SelectedItems.Count + " parameters to " + SelectedCollection.Name + ".");
+                        var response = SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
                     }
                 }
             }
