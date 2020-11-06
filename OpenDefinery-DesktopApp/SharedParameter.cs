@@ -688,10 +688,13 @@ namespace OpenDefinery
             }
 
             // Add the new Collection to the list to be added
-            collectionIds.Add(newCollectionId.ToString());
+            if (!param.CollectionsString.Contains(newCollectionId.ToString()))
+            {
+                collectionIds.Add(newCollectionId.ToString());
+            }
 
             // Instantiate a string to pass Collections to body of API call
-            var field_collections = ", \"field_collections\": [";
+            var bodyFieldCollections = ", \"field_collections\": [";
             foreach (var id in collectionIds)
             {
                 // Remove leading spaces if they exist from the string split
@@ -701,17 +704,17 @@ namespace OpenDefinery
                 }
 
                 // Add the target to the string which will eventually pass to the API call
-                field_collections += "{\"target_id\":" + id + ", \"target_type\": \"node\"},";
+                bodyFieldCollections += "{\"target_id\":" + id + ", \"target_type\": \"node\"},";
             }
 
             // Remove trailing comma
-            if (field_collections.Last() == ',')
+            if (bodyFieldCollections.Last() == ',')
             {
-                field_collections = field_collections.Remove(field_collections.Length - 1, 1);
+                bodyFieldCollections = bodyFieldCollections.Remove(bodyFieldCollections.Length - 1, 1);
             }
 
             // Add trailing bracket
-            field_collections += "]";
+            bodyFieldCollections += "]";
 
             var client = new RestClient(string.Format(Definery.BaseUrl + "node/{0}?_format=json", param.Id));
             client.Timeout = -1;
@@ -723,7 +726,7 @@ namespace OpenDefinery
                 "\"type\": [{" +
                         "\"target_id\": \"shared_parameter\"" +
                     "}]" +
-                    field_collections +
+                    bodyFieldCollections +
                 "}", 
                 ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
