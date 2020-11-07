@@ -302,87 +302,94 @@ namespace OpenDefinery_DesktopApp
                 MessageBox.Show(ex.ToString());
             }
 
-            try
+            if (BatchUploadCollectionCombo.SelectedItem != null)
             {
-                // Parse the parameters string and cast each line to SharedParameter class
-                using (StringReader stringReader = new StringReader(parameterTable))
+                try
                 {
-                    // Instantiate the progress
-                    MainProgressBar.Maximum = parameterTable.Split('\n').Length;
-
-                    var progress = new Progress<int>(value => MainProgressBar.Value = value);
-                    var currentProgress = 0;
-
-                    string line = string.Empty;
-                    string headerLine = stringReader.ReadLine();
-
-                    var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
-
-                    await Task.Run(() =>
+                    // Parse the parameters string and cast each line to SharedParameter class
+                    using (StringReader stringReader = new StringReader(parameterTable))
                     {
-                        do
+                        // Instantiate the progress
+                        MainProgressBar.Maximum = parameterTable.Split('\n').Length;
+
+                        var progress = new Progress<int>(value => MainProgressBar.Value = value);
+                        var currentProgress = 0;
+
+                        string line = string.Empty;
+                        string headerLine = stringReader.ReadLine();
+
+                        var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
+
+                        await Task.Run(() =>
                         {
-                            line = stringReader.ReadLine();
-                            if (line != null)
+                            do
                             {
+                                line = stringReader.ReadLine();
+                                if (line != null)
+                                {
                                 // Cast tab delimited line from shared parameter text file to SharedParameter object
                                 var newParameter = SharedParameter.FromTxt(Definery, line);
 
-                                if (newParameter != null)
-                                {
+                                    if (newParameter != null)
+                                    {
                                     // Update the UI
                                     currentProgress += 1;
-                                    ((IProgress<int>)progress).Report(currentProgress);
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        ProgressStatus.Text = "Uploading " + newParameter.Name + "...";
-                                    });
+                                        ((IProgress<int>)progress).Report(currentProgress);
+                                        Dispatcher.Invoke(() =>
+                                        {
+                                            ProgressStatus.Text = "Uploading " + newParameter.Name + "...";
+                                        });
 
                                     // Get the name of the group and assign this to the property rather than the ID 
                                     // This name will be passed to the Create() method to add as the tag
                                     var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
-                                    newParameter.Group = groupName;
+                                        newParameter.Group = groupName;
 
                                     // Check if the parameter exists
                                     if (SharedParameter.HasExactMatch(Definery, newParameter))
-                                    {
+                                        {
                                         // Do nothing for now
                                         // TODO: Add existing SharedParameters to a log or report of some kind.
                                         Debug.WriteLine(newParameter.Name + " exists. Skipping");
 
-                                        Application.Current.Dispatcher.BeginInvoke(
-                                          DispatcherPriority.Background,
-                                          new Action(() =>
-                                          {
-                                              ProgressStatus.Text = newParameter.Name + " already exists. Skipped.";
-                                          }));
-                                    }
-                                    else
-                                    {
-                                        newParameter.BatchId = batchId;
+                                            Application.Current.Dispatcher.BeginInvoke(
+                                              DispatcherPriority.Background,
+                                              new Action(() =>
+                                              {
+                                                  ProgressStatus.Text = newParameter.Name + " already exists. Skipped.";
+                                              }));
+                                        }
+                                        else
+                                        {
+                                            newParameter.BatchId = batchId;
 
                                         // Instantiate the selected item as a Collection
                                         this.Dispatcher.Invoke(() =>
-                                        {
+                                            {
 
                                             // Create the SharedParameter
                                             SharedParameter.Create(Definery, newParameter, sollection.Id);
-                                        });
+                                            });
+                                        }
                                     }
                                 }
-                            }
 
-                        } while (line != null);
-                    });
+                            } while (line != null);
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Toggle the UI
+                    ProgressGrid.Visibility = Visibility.Hidden;
+                    BatchUploadGrid.Visibility = Visibility.Visible;
+
+                    MessageBox.Show(ex.ToString());
                 }
             }
-            catch (Exception ex)
+            else
             {
-                // Toggle the UI
-                ProgressGrid.Visibility = Visibility.Hidden;
-                BatchUploadGrid.Visibility = Visibility.Visible;
-
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show("You must select a Collection to batch upload Shared Parameters.");
             }
 
             // Update the UI

@@ -158,7 +158,7 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <StackPanel Orientation="Horizontal" Height="Auto">
-                            <Button x:Name="ExportCollectionButton" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file">
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="ExportCollectionButton" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file">
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -283,10 +283,10 @@
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" Foreground="#333333" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
+                <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="Support" VerticalAlignment="Center" Margin="20,0,0,0" HorizontalAlignment="Left" FontSize="13" TextDecorations="Underline" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" Cursor="Help"/>
                 <Grid Width="Auto" Grid.Column="1">
                     <StackPanel FlowDirection="RightToLeft" x:Name="PagerPanel" Height="45" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
-                        <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerNextButton" Click="PagerNextButton_Click" Margin="10,0,0,0" Height="30" Padding="10, 0" Foreground="#FFFFFF">
+                        <Button Style="{StaticResource MaterialDesignFlatDarkBgButton}" x:Name="PagerNextButton" Click="PagerNextButton_Click" Margin="10,0,0,0" Height="30" Padding="10, 0" Foreground="#FFFFFF">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -296,7 +296,7 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <Button Style="{StaticResource MaterialDesignFlatLightBgButton}" x:Name="PagerPreviousButton" Margin="10,0,0,0" Click="PagerPreviousButton_Click" Height="30" Padding="10, 0" Foreground="#FFFFFF">
+                        <Button Style="{StaticResource MaterialDesignFlatDarkBgButton}" x:Name="PagerPreviousButton" Margin="10,0,0,0" Click="PagerPreviousButton_Click" Height="30" Padding="10, 0" Foreground="#FFFFFF">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -306,7 +306,7 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <Button Style="{StaticResource MaterialDesignToolForegroundButton}" x:Name="PagerLoadAllButton" Margin="20,0,0,0" Height="30" Padding="10, 0" Foreground="#FF1976D2" Click="PagerLoadAllButton_Click">
+                        <Button Style="{StaticResource MaterialDesignToolForegroundButton}" x:Name="PagerLoadAllButton" Margin="20,0,0,0" Height="30" Padding="10, 0" Click="PagerLoadAllButton_Click">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -330,11 +330,11 @@
                 <Label Content="USERNAME" Margin="45,25,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,125,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
                 <TextBlock HorizontalAlignment="Center" Margin="0,0,0,25" TextWrapping="Wrap" VerticalAlignment="Bottom"><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/password"><InlineUIContainer>  
-                            <TextBlock Text="Forgot Password"/>  
+                            <TextBlock Text="Forgot Password" Foreground="{StaticResource MaterialDesignBodyLight}" TextDecorations="Underline"/>  
                         </InlineUIContainer></Hyperlink><Run Text=" "/><Run Text=" "/><InlineUIContainer>
-                        <TextBlock Text="|" Margin="15,0" Foreground="#DDA0A0A0"/>  
+                        <TextBlock Text="|" Margin="15,0" />  
                     </InlineUIContainer><Run Text=" "/><Run Text=" "/><Run Text=" "/><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/register"><InlineUIContainer>  
-                                <TextBlock Text="Register for an Account"/>  
+                                <TextBlock Foreground="{StaticResource MaterialDesignBodyLight}" Text="Register for an Account" TextDecorations="Underline"/>  
                             </InlineUIContainer></Hyperlink></TextBlock>
             </Grid>
             <Grid x:Name="ProgressGrid" Margin="0" VerticalAlignment="Top" Width="400" Background="{StaticResource MaterialDesignCardBackground}" Height="110" d:IsHidden="True">
@@ -351,14 +351,14 @@
                 <TextBox x:Name="TxtBoxSpPath" Margin="20,64,100,0" Height="24" VerticalAlignment="Top" HorizontalContentAlignment="Left" IsReadOnly="True"/>
                 <Label Content="ADD TO A COLLECTION" Margin="20,121,20,0" FontSize="12" Height="26" VerticalAlignment="Top" Padding="0,4,4,4"/>
                 <Label Content="CHOOSE A SHARED PARAMETER TXT FILE" Margin="20,38,20,0" FontSize="12" Height="26" VerticalAlignment="Top" Padding="0,4,4,4"/>
-                <Button x:Name="BatchUploadCancel" Style="{DynamicResource MaterialDesignToolButton}" Content="Cancel" Margin="20,0,0,31" Height="41" Click="BatchUploadCancel_Click" IsCancel="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="116"/>
+                <Button x:Name="BatchUploadCancel" Style="{DynamicResource MaterialDesignFlatButton}" Content="Cancel" Margin="20,0,0,31" Height="41" Click="BatchUploadCancel_Click" IsCancel="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="116"/>
                 <ComboBox x:Name="BatchUploadCollectionCombo" Margin="20,147,20,0" VerticalAlignment="Top"/>
             </Grid>
             <Grid x:Name="AddToCollectionGrid" Margin="0" Background="{StaticResource MaterialDesignCardBackground}" HorizontalAlignment="Center" Width="501" Height="237" VerticalAlignment="Top" d:IsHidden="True">
                 <Button x:Name="AddToCollectionFormButton" Content="Add to Collection" HorizontalAlignment="Center" Margin="0,121,0,0" VerticalAlignment="Top" Width="380" Click="AddToCollectionFormButton_Click"/>
                 <ComboBox x:Name="AddToCollectionCombo" Margin="0,64,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
                 <Label Content="CHOOSE A COLLECTION" Margin="0,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380"/>
-                <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
+                <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="CancelAddToCollectionButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,171,0,0" VerticalAlignment="Top" Width="380" IsCancel="True" Click="CancelAddToCollectionButton_Click_1" />
             </Grid>
             <Grid x:Name="NewParameterGrid" Margin="0" Background="{StaticResource MaterialDesignCardBackground}" HorizontalAlignment="Center" Width="501" VerticalAlignment="Top" d:IsHidden="True">
                 <StackPanel Margin="0">
@@ -380,7 +380,7 @@
                         <CheckBox x:Name="NewParamUserModCheckbox" Content="USER MODIFIABLE" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0" IsChecked="True"/>
                     </Grid>
                     <Button x:Name="AddParamFormButton" Content="Create Parameter" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Bottom" Width="379" Click="NewParamFormButton_Click" />
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelAddParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelNewParamButton_Click" />
+                    <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="CancelAddParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelNewParamButton_Click" />
                 </StackPanel>
             </Grid>
             <Grid x:Name="NewCollectionGrid" Margin="0" Width="600" HorizontalAlignment="Center" VerticalAlignment="Top" Background="{StaticResource MaterialDesignCardBackground}" d:IsHidden="True">
@@ -390,7 +390,7 @@
                     <Label Content="DESCRIPTION" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Padding="0,4,4,4" Width="380"/>
                     <TextBox x:Name="NewCollectionFormDesc" HorizontalAlignment="Center" Margin="110,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" Height="118" HorizontalContentAlignment="Left"/>
                     <Button x:Name="NewCollectionFormSaveButton" Content="Save Collection" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Width="380" Click="NewCollectionFormSaveButton_Click"/>
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="NewCollectionFormCancelButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,20" VerticalAlignment="Top" Width="380" IsCancel="True" Click="NewCollectionFormCancelButton_Click"/>
+                    <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="NewCollectionFormCancelButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,20" VerticalAlignment="Top" Width="380" IsCancel="True" Click="NewCollectionFormCancelButton_Click"/>
                 </StackPanel>
             </Grid>
             <Grid x:Name="ModifyParameterGrid" Margin="546.3,0" Background="{StaticResource MaterialDesignCardBackground}" HorizontalAlignment="Center" Width="501" VerticalAlignment="Top" d:IsHidden="True">
@@ -400,7 +400,7 @@
                     <Label Content="DESCRIPTION" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <TextBox x:Name="ModParamDescTextBox" HorizontalAlignment="Center" Height="100" Margin="60,0,60.8,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" MaxLength="260" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Left"/>
                     <Button x:Name="ModParamFormButton" Content="Save" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Bottom" Width="379" Click="ModParamFormButton_Click" />
-                    <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="CancelModParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelModParamButton_Click" />
+                    <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="CancelModParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelModParamButton_Click" />
                 </StackPanel>
             </Grid>
         </Grid>
