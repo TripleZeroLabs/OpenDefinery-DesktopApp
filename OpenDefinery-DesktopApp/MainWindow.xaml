@@ -323,7 +323,7 @@
             </Grid>
         </Grid>
         <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
-            <Grid x:Name="LoginGrid" Margin="0" Background="{StaticResource MaterialDesignCardBackground}" Height="350" VerticalAlignment="Top" Width="500" HorizontalAlignment="Center" d:IsHidden="True">
+            <Grid x:Name="LoginGrid" Margin="0" Background="{StaticResource MaterialDesignCardBackground}" Height="350" VerticalAlignment="Top" Width="400" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,150,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,50,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
                 <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,75" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
@@ -393,7 +393,7 @@
                     <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="NewCollectionFormCancelButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,20" VerticalAlignment="Top" Width="380" IsCancel="True" Click="NewCollectionFormCancelButton_Click"/>
                 </StackPanel>
             </Grid>
-            <Grid x:Name="ModifyParameterGrid" Margin="546.3,0" Background="{StaticResource MaterialDesignCardBackground}" HorizontalAlignment="Center" Width="501" VerticalAlignment="Top" d:IsHidden="True">
+            <Grid x:Name="ModifyParameterGrid" Margin="0" Background="{StaticResource MaterialDesignCardBackground}" HorizontalAlignment="Center" Width="501" VerticalAlignment="Top" d:IsHidden="True">
                 <StackPanel Margin="0">
                     <Label Content="NAME" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="380" Padding="0,4,4,4"/>
                     <TextBox x:Name="ModParamNameTextBox" HorizontalAlignment="Center" Height="36" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" VerticalContentAlignment="Center"/>
