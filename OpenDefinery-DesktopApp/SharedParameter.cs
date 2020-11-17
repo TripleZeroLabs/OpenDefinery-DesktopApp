@@ -446,7 +446,7 @@ namespace OpenDefinery
         }
 
         /// <summary>
-        /// Search for Shared Parmeters by keyword, GUID, or data type.
+        /// Search for Shared Parmeters by keyword, GUID, or data type in a single query.
         /// </summary>
         /// <param name="definery">The main Definery object</param>
         /// <param name="searchQuery">The term(s) to search for</param>
@@ -457,6 +457,58 @@ namespace OpenDefinery
 
             var client = new RestClient(Definery.BaseUrl + 
                 string.Format("rest/params/search?_format=json&keys={0}&items_per_page={1}&offset={2}", searchQuery, itemsPerPage, offset));
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            IRestResponse response = client.Execute(request);
+
+            // Set the pager
+            MainWindow.Pager = Pager.SetFromParamReponse(response, resetTotals);
+            MainWindow.Pager.ItemsPerPage = MainWindow.Pager.ItemsPerPage;
+
+            // Logic if the response was OK
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // Get the SharedParameters as JToken
+                JObject json = JObject.Parse(response.Content);
+                var paramResponse = json.SelectToken("rows");
+
+                if (paramResponse.Count() == 0)
+                {
+                    MessageBox.Show("There were no Shared Parameters found that match that search query.");
+                }
+                else
+                {
+                    // Cast the rows from the reponse to a List of Shared Parameters
+                    listOfParams = JsonConvert.DeserializeObject<List<SharedParameter>>(paramResponse.ToString());
+                }
+            }
+            else
+            {
+                MessageBox.Show("There was an error getting the parameters.");
+            }
+
+            var parameters = new ObservableCollection<SharedParameter>(listOfParams);
+
+            // Set the Collections
+            var updatedParams = SetCollections(definery, parameters);
+
+            return updatedParams;
+        }
+
+        /// <summary>
+        /// Search for Shared Parmeters by keyword or GUID and filter by Data Type
+        /// </summary>
+        /// <param name="definery">The main Definery object</param>
+        /// <param name="searchQuery">The term(s) to search for</param>
+        /// <param name="dataTypeName">The name of the Data Type to filter</param>
+        /// <returns></returns>
+        public static ObservableCollection<SharedParameter> Search(Definery definery, string searchQuery, string dataTypeName, int itemsPerPage, int offset, bool resetTotals)
+        {
+            var listOfParams = new List<SharedParameter>();
+
+            var client = new RestClient(Definery.BaseUrl +
+                string.Format("rest/params/search?_format=json&keys={0}&data_type={1}&items_per_page={2}&offset={3}", searchQuery, dataTypeName, itemsPerPage, offset));
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Basic " + definery.AuthCode);
