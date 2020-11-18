@@ -1882,6 +1882,9 @@ namespace OpenDefinery_DesktopApp
             }
         }
 
+        /// <summary>
+        /// Helper method to search by keyword.
+        /// </summary>
         private void SearchByKeyword()
         {
             // Get the parameters
@@ -1903,6 +1906,9 @@ namespace OpenDefinery_DesktopApp
             RefreshUi();
         }
 
+        /// <summary>
+        /// Helper method to search by keyword and data type.
+        /// </summary>
         private void SearchByKeywordandDataType()
         {
             // Instantiate the selected item as a string
