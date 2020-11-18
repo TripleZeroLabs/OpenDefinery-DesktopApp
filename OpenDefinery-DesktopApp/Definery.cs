@@ -57,7 +57,7 @@ namespace OpenDefinery
             }
             else
             {
-                MessageBox.Show("There was an error logging in.");
+                MessageBox.Show(response.Content, "Error Logging In", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return response.StatusCode;

@@ -435,10 +435,6 @@ namespace OpenDefinery_DesktopApp
                 OverlayGrid.Visibility = Visibility.Hidden;
                 LoginGrid.Visibility = Visibility.Hidden;
             }
-            else
-            {
-                MessageBox.Show("There was an error logging in. Please try again.");
-            }
         }
 
         /// <summary>

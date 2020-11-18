@@ -181,7 +181,7 @@
                         </StackPanel>
                         <StackPanel Background="{StaticResource MaterialDesignToolBackground}" x:Name="SearchToolStack" Orientation="Horizontal" Height="Auto">
                             <Label Content="DATATYPE" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                            <ComboBox Padding="10,7,0,7" Background="{StaticResource MaterialDesignCardBackground}" Foreground="{StaticResource MaterialDesignToolForeground}" x:Name="SearchFilterDataTypeCombo" VerticalAlignment="Center" Width="300" Height="32" Margin="10,0,0,0" SelectionChanged="SearchFilterDataTypeCombo_SelectionChanged" ToolTip="Filter search results by data type."/>
+                            <ComboBox x:Name="SearchFilterDataTypeCombo" VerticalAlignment="Center" Width="300" Height="32" Margin="10,0,0,0" SelectionChanged="SearchFilterDataTypeCombo_SelectionChanged" ToolTip="Filter search results by data type."/>
                             <Button Style ="{StaticResource MaterialDesignOutlinedButton}" x:Name="ClearSearchButton" Content="Reset Search" Height="Auto" Width="Auto" ToolTip="Clear the search query and start over" VerticalAlignment="Center" Margin="15,0,0,0" Click="ClearSearchButton_Click"/>
                         </StackPanel>
                     </Grid>
