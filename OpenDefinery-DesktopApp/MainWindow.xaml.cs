@@ -63,8 +63,7 @@ namespace OpenDefinery_DesktopApp
             NewCollectionGrid.Visibility = Visibility.Hidden;  // The New Collection form
             BatchUploadGrid.Visibility = Visibility.Hidden;  // The Batch Upload form
             ModifyParameterGrid.Visibility = Visibility.Hidden;  // The Modify Parameter form
-            ExportCollectionButton.Visibility = Visibility.Collapsed;  // Export TXT button
-            DeleteCollectionButton.Visibility = Visibility.Collapsed;  // The Collection delete button
+            CollectionToolStack.Visibility = Visibility.Collapsed;  // The main toolbar for Collection views
             ProgressGrid.Visibility = Visibility.Hidden;  // Main Progress Bar
 
             PagerPanel.Visibility = Visibility.Hidden;  // Pager
@@ -131,11 +130,18 @@ namespace OpenDefinery_DesktopApp
                 NewParamDataTypeCombo.ItemsSource = Definery.DataTypes;
                 NewParamDataTypeCombo.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
                 NewParamDataTypeCombo.SelectedIndex = 0;  // Always select the default item so it cannot be left blank
+
                 NewParamDataCatCombo.ItemsSource = Definery.DataCategories;
                 NewParamDataCatCombo.DisplayMemberPath = "Name";
                 NewParamDataCatCombo.SelectedItem = null;
+                
                 PropComboDataType.ItemsSource = Definery.DataTypes;
                 PropComboDataType.DisplayMemberPath = "Name";  // Displays the name rather than object in the combobox
+
+                SearchFilterDataTypeCombo.ItemsSource = Definery.DataTypes;
+                SearchFilterDataTypeCombo.DisplayMemberPath = "Name";
+                SearchFilterDataTypeCombo.Text = "Filter by DATATYPE";
+
                 PropComboDataCategory.ItemsSource = Definery.DataCategories;
                 PropComboDataCategory.DisplayMemberPath = "Name";
 
@@ -686,6 +692,12 @@ namespace OpenDefinery_DesktopApp
 
                     PagerPanel.Visibility = Visibility.Hidden;
                 }
+                if (ParamSource != ParameterSource.Search)
+                {
+                    SearchToolStack.Visibility = Visibility.Collapsed;
+                    CollectionToolStack.Visibility = Visibility.Visible;
+                }
+
                 if (SelectedCollection == null)
                 {
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
@@ -736,6 +748,7 @@ namespace OpenDefinery_DesktopApp
                     PagerPanel.Visibility = Visibility.Visible;
                     ExportCollectionButton.Visibility = Visibility.Collapsed;
                     DeleteCollectionButton.Visibility = Visibility.Collapsed;
+                    SearchToolStack.Visibility = Visibility.Visible;
                 }
                 if (ParamSource == ParameterSource.Collection)
                 {
@@ -1405,23 +1418,15 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            // Get the parameters
-            Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
-
-            // Force the pager to page 0 and update
-            Pager.CurrentPage = 0;
-            UpdatePager(Pager, 0);
-
-            // Set enum for UI purposes
-            ParamSource = ParameterSource.Search;
-
-            // Refresh UI
-            SelectedCollection = null;
-            CollectionsList.SelectedItem = null;
-            CollectionsList_Published.SelectedItem = null;
-            OrphanedList.SelectedItem = null;
-
-            RefreshUi();
+            // If a Data Type filter is selected, include that in the search query
+            if (SearchFilterDataTypeCombo.SelectedItem != null)
+            {
+                SearchByKeywordandDataType();
+            }
+            else
+            {
+                SearchByKeyword();
+            }
         }
 
         /// <summary>
@@ -1858,6 +1863,93 @@ namespace OpenDefinery_DesktopApp
                     AddParamFormButton.IsEnabled = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Method to execute when the Search Filter Data Type combobox changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SearchFilterDataTypeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SearchFilterDataTypeCombo.SelectedItem != null)
+            {
+                SearchByKeywordandDataType();
+            }
+            else
+            {
+                SearchFilterDataTypeCombo.Text = "Filter by DATATYPE";
+            }
+        }
+
+        private void SearchByKeyword()
+        {
+            // Get the parameters
+            Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
+
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
+
+            // Set enum for UI purposes
+            ParamSource = ParameterSource.Search;
+
+            // Refresh UI
+            SelectedCollection = null;
+            CollectionsList.SelectedItem = null;
+            CollectionsList_Published.SelectedItem = null;
+            OrphanedList.SelectedItem = null;
+
+            RefreshUi();
+        }
+
+        private void SearchByKeywordandDataType()
+        {
+            // Instantiate the selected item as a string
+            var selectedDataType = SearchFilterDataTypeCombo.SelectedItem as DataType;
+
+            // Execute a new search including the Data Type in the API call
+            Definery.Parameters = SharedParameter.Search(
+                Definery,
+                SearchTxtBox.Text,
+                selectedDataType.Name,
+                Pager.ItemsPerPage,
+                Pager.Offset,
+                true);
+
+            // Force the pager to page 0 and update
+            Pager.CurrentPage = 0;
+            UpdatePager(Pager, 0);
+
+            // Set enum for UI purposes
+            ParamSource = ParameterSource.Search;
+
+            // Refresh UI
+            SelectedCollection = null;
+            CollectionsList.SelectedItem = null;
+            CollectionsList_Published.SelectedItem = null;
+            OrphanedList.SelectedItem = null;
+
+            RefreshUi();
+        }
+
+        /// <summary>
+        /// Method to execute when Search Reset button is clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Clear all values
+            SearchTxtBox.Text = string.Empty;
+            SearchFilterDataTypeCombo.SelectedItem = null;
+
+            // Move the focus back to the text box
+            SearchTxtBox.Focus();
+
+            // Clear the datagrid for better UX
+            DataGridParameters.ItemsSource = null;
+            DataGridParameters.Items.Refresh();
         }
     }
 }

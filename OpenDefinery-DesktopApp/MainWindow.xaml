@@ -157,7 +157,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
-                        <StackPanel Orientation="Horizontal" Height="Auto">
+                        <StackPanel x:Name="CollectionToolStack" Orientation="Horizontal" Height="Auto" d:IsHidden="True">
                             <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="ExportCollectionButton" HorizontalAlignment="Center" Click="ExportCollectionTxtButton_Click" Margin="10,0,0,0" ToolTip="Export the current set of Shared Parameters to a text file">
                                 <Button.ContentTemplate>
                                     <DataTemplate>
@@ -168,7 +168,7 @@
                                     </DataTemplate>
                                 </Button.ContentTemplate>
                             </Button>
-                            <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DeleteCollectionButton" Content="" HorizontalAlignment="Left" Margin="10,8.8,0,8.8" Padding="10,4" ToolTip="Delete the current Collection" Click="DeleteCollectionButton_Click">
+                            <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DeleteCollectionButton" Content="" HorizontalAlignment="Left" Margin="10,0,0,0" Padding="10,4" ToolTip="Delete the current Collection" Click="DeleteCollectionButton_Click">
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -178,6 +178,11 @@
                                     </DataTemplate>
                                 </Button.ContentTemplate>
                             </Button>   
+                        </StackPanel>
+                        <StackPanel Background="{StaticResource MaterialDesignToolBackground}" x:Name="SearchToolStack" Orientation="Horizontal" Height="Auto">
+                            <Label Content="DATATYPE" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <ComboBox Padding="10,7,0,7" Background="{StaticResource MaterialDesignCardBackground}" Foreground="{StaticResource MaterialDesignToolForeground}" x:Name="SearchFilterDataTypeCombo" VerticalAlignment="Center" Width="300" Height="32" Margin="10,0,0,0" SelectionChanged="SearchFilterDataTypeCombo_SelectionChanged" ToolTip="Filter search results by data type."/>
+                            <Button Style ="{StaticResource MaterialDesignOutlinedButton}" x:Name="ClearSearchButton" Content="Reset Search" Height="Auto" Width="Auto" ToolTip="Clear the search query and start over" VerticalAlignment="Center" Margin="15,0,0,0" Click="ClearSearchButton_Click"/>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="1">
