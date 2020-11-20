@@ -1080,7 +1080,7 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void NewCollectionFormSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var newCollection = Collection.Create(Definery, NewCollectionFormTextBox.Text, NewCollectionFormDesc.Text);
+            var newCollection = Collection.Create(Definery, NewCollectionFormTextBox.Text, NewCollectionFormDesc.Text, NewCollectionFormPublic.IsChecked);
 
             // If the Collection was successfully created, refresh the Collections list
             if (newCollection != null)

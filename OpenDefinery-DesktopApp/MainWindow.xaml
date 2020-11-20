@@ -332,7 +332,7 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Grid x:Name="OverlayGrid" Background="#B2000000" d:IsHidden="True">
+        <Grid x:Name="OverlayGrid" Background="#B2000000">
             <Grid x:Name="LoginGrid" Margin="0" Background="{StaticResource MaterialDesignCardBackground}" Height="350" VerticalAlignment="Top" Width="400" HorizontalAlignment="Center" d:IsHidden="True">
                 <PasswordBox x:Name="PasswordPasswordBox" Margin="50,150,50,0" Height="37" VerticalAlignment="Top" TabIndex="1" FontSize="16"/>
                 <TextBox x:Name="UsernameTextBox" Margin="50,50,50,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Top" TabIndex="0" VerticalContentAlignment="Center" FontSize="16"/>
@@ -393,13 +393,14 @@
                     <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="CancelAddParamButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="380" IsCancel="True" Click="CancelNewParamButton_Click" />
                 </StackPanel>
             </Grid>
-            <Grid x:Name="NewCollectionGrid" Margin="0" Width="600" HorizontalAlignment="Center" VerticalAlignment="Top" Background="{StaticResource MaterialDesignCardBackground}" d:IsHidden="True">
+            <Grid x:Name="NewCollectionGrid" Margin="0" Width="600" HorizontalAlignment="Center" VerticalAlignment="Top" Background="{StaticResource MaterialDesignCardBackground}">
                 <StackPanel>
                     <Label Content="NAME OF NEW COLLECTION" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Padding="0,4,4,4" Width="380"/>
                     <TextBox x:Name="NewCollectionFormTextBox" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380"/>
                     <Label Content="DESCRIPTION" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Padding="0,4,4,4" Width="380"/>
                     <TextBox x:Name="NewCollectionFormDesc" HorizontalAlignment="Center" Margin="110,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" Height="118" HorizontalContentAlignment="Left"/>
-                    <Button x:Name="NewCollectionFormSaveButton" Content="Save Collection" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Width="380" Click="NewCollectionFormSaveButton_Click"/>
+                    <CheckBox x:Name="NewCollectionFormPublic" Content="Make this Collection public" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="110,30,0,0" ToolTip="Public Collections are visible to all OpenDefinery users"/>
+                    <Button x:Name="NewCollectionFormSaveButton" Content="Save Collection" HorizontalAlignment="Center" Margin="0,30,0,0" VerticalAlignment="Top" Width="380" Click="NewCollectionFormSaveButton_Click"/>
                     <Button Style="{DynamicResource MaterialDesignFlatButton}" x:Name="NewCollectionFormCancelButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,20" VerticalAlignment="Top" Width="380" IsCancel="True" Click="NewCollectionFormCancelButton_Click"/>
                 </StackPanel>
             </Grid>

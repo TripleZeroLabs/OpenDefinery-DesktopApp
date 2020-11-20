@@ -132,8 +132,20 @@ namespace OpenDefinery
         /// <param name="name">The name of the Colllection</param>
         /// <param name="description">The description of the Collection</param>
         /// <returns></returns>
-        public static Collection Create(Definery definery, string name, string description)
+        public static Collection Create(Definery definery, string name, string description, bool? isPublic)
         {
+            // Convert booleans to strings
+            var publicString = string.Empty;
+            
+            if (isPublic == false | isPublic == null)
+            {
+                publicString = "0";
+            }
+            else
+            {
+                publicString = "1";
+            }
+
             var client = new RestClient(Definery.BaseUrl + "node?_format=hal_json");
             client.Timeout = -1;
             var request = new RestRequest(Method.POST);
@@ -153,6 +165,10 @@ namespace OpenDefinery
                     "\"body\":" +
                     "[{" +
                         "\"value\": \"" + description + "\"" +
+                    "}]," +
+                    "\"field_public\":" +
+                    "[{" +
+                        "\"value\": \"" + publicString + "\"" +
                     "}]" +
                 "}", 
 
