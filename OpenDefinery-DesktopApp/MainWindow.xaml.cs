@@ -678,6 +678,9 @@ namespace OpenDefinery_DesktopApp
                     MainBrowserGrid.Visibility = Visibility.Visible;
                     DashboardGrid.Visibility = Visibility.Collapsed;
 
+                    // Clear the existing items, set again, then refresh
+                    DataGridParameters.ItemsSource = null;
+                    DataGridParameters.Items.Clear();
                     DataGridParameters.ItemsSource = Definery.Parameters;
                     DataGridParameters.Items.Refresh();
                 }
@@ -1656,13 +1659,59 @@ namespace OpenDefinery_DesktopApp
             // Only select the clicked row
             DataGridParameters.SelectedItem = selectedParam;
 
+            var cm = GetParamContextMenu(selectedParam);
+
+            // Display the menu
+            cm.PlacementTarget = sender as Button;
+            cm.IsOpen = true;
+        }
+
+        /// <summary>
+        /// Method to execute when DataGrid Row is right-clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DataGridParameters_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            // Select the row that was clicked
+            var clickedElement = VisualTreeHelper.GetParent(e.OriginalSource as DependencyObject);
+
+            if (clickedElement is DataGridRow)
+            {
+                // Deselect other rows first
+                DataGridParameters.SelectedItem = null;
+
+                var clickedRow = clickedElement as DataGridRow;
+                clickedRow.IsSelected = true; 
+            }
+
+            // Inherit the datacontext of the row data object
+            var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+
+            // Only select the clicked row
+            DataGridParameters.SelectedItem = selectedParam;
+
+            var cm = GetParamContextMenu(selectedParam);
+
+            // Display the menu
+            cm.PlacementTarget = sender as Button;
+            cm.IsOpen = true;
+        }
+
+        /// <summary>
+        /// Generate the context menu for an individual Shared Parameter
+        /// </summary>
+        /// <param name="selectedParam"></param>
+        /// <returns></returns>
+        private ContextMenu GetParamContextMenu(SharedParameter selectedParam)
+        {
             // Toggle contextual menu
             ContextMenu cm = this.FindResource("ParamContextMenu") as ContextMenu;
 
             foreach (var i in cm.Items)
             {
                 if (i.GetType().Name != "Separator")  // Ignore separators
-                { 
+                {
                     var item = cm.Items[cm.Items.IndexOf(i)] as MenuItem;
 
                     if (item.Header.ToString() == "Fork")
@@ -1719,9 +1768,7 @@ namespace OpenDefinery_DesktopApp
                 }
             }
 
-            // Display the menu
-            cm.PlacementTarget = sender as Button;
-            cm.IsOpen = true;
+            return cm;
         }
 
         /// <summary>
@@ -1742,7 +1789,7 @@ namespace OpenDefinery_DesktopApp
         private void ParamMenuEdit_Click(object sender, RoutedEventArgs e)
         {
             // Inherit the datacontext of the row data object
-            var selectedParam = ((FrameworkElement)sender).DataContext as SharedParameter;
+            var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
 
             // Toggle the UI
             ModifyParameterGrid.Visibility = Visibility.Visible;

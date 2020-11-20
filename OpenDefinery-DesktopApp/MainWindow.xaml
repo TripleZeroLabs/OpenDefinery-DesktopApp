@@ -177,7 +177,7 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </Button.ContentTemplate>
-                            </Button>   
+                            </Button>
                         </StackPanel>
                         <StackPanel Background="{StaticResource MaterialDesignToolBackground}" x:Name="SearchToolStack" Orientation="Horizontal" Height="Auto">
                             <Label Content="DATATYPE" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
@@ -197,7 +197,11 @@
                             SelectionUnit="FullRow" 
                             SelectionChanged="DataGridParameters_SelectionChanged"
                             AutoGenerateColumns="False"
-                            Grid.Column="0">
+                            Grid.Column="0"
+                            MouseRightButtonUp="DataGridParameters_MouseRightButtonUp">
+                            <Style TargetType="DataGridRow">
+                                <EventSetter Event="MouseRightButtonUp" Handler="DataGridParameters_MouseRightButtonUp"/>
+                            </Style>
                             <DataGrid.CellStyle>
                                 <Style
                                 BasedOn="{StaticResource MaterialDesignDataGridCell}"
