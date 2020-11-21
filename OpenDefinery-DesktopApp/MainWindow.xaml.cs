@@ -1673,8 +1673,8 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void DataGridParameters_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            // Select the row that was clicked
-            var clickedElement = VisualTreeHelper.GetParent(e.OriginalSource as DependencyObject);
+            // Retrieve and cast the clicked element
+            DataGridRow clickedElement = GetParent<DataGridRow>(e.OriginalSource as DependencyObject);
 
             if (clickedElement is DataGridRow)
             {
@@ -1682,21 +1682,38 @@ namespace OpenDefinery_DesktopApp
                 DataGridParameters.SelectedItem = null;
 
                 var clickedRow = clickedElement as DataGridRow;
-                clickedRow.IsSelected = true; 
+                clickedRow.IsSelected = true;
+
+                // Inherit the datacontext of the row data object
+                var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+
+                // Only select the clicked row
+                DataGridParameters.SelectedItem = selectedParam;
+
+                var cm = GetParamContextMenu(selectedParam);
+
+                // Display the menu
+                cm.PlacementTarget = sender as Button;
+                cm.IsOpen = true;
             }
-
-            // Inherit the datacontext of the row data object
-            var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
-
-            // Only select the clicked row
-            DataGridParameters.SelectedItem = selectedParam;
-
-            var cm = GetParamContextMenu(selectedParam);
-
-            // Display the menu
-            cm.PlacementTarget = sender as Button;
-            cm.IsOpen = true;
         }
+
+        /// <summary>
+        /// Helper method to get the Parent of a sender
+        /// Useful for showing a context menu when right-clicking on a child element in a DataGridRow
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="d"></param>
+        /// <returns></returns>
+        private T GetParent<T>(DependencyObject d) where T : class
+        {
+            while (d != null && !(d is T))
+            {
+                d = VisualTreeHelper.GetParent(d);
+            }
+            return d as T;
+        }
+
 
         /// <summary>
         /// Generate the context menu for an individual Shared Parameter
