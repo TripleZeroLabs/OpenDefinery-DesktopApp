@@ -126,16 +126,16 @@ namespace OpenDefinery
                 parameter.Group = values[5];
                 parameter.Visible = values[6];
 
-                // Older shared parmater text files do not have the DESCRIPTION column
-                if (values.Count() > 9)
-                {
-                    parameter.Description = values[7];
-                    parameter.UserModifiable = values[8];
-                }
-                if (values.Count() == 9)
+                // Older shared parameter text files do not have the DESCRIPTION column
+                if (values.Count() == 8)
                 {
                     parameter.Description = string.Empty;
                     parameter.UserModifiable = values[7];
+                }
+                if (values.Count() == 9)
+                {
+                    parameter.Description = values[7];
+                    parameter.UserModifiable = values[8];
                 }
 
                 return parameter;
