@@ -60,7 +60,7 @@ namespace OpenDefinery
             }
             else
             {
-                MessageBox.Show("Error retrieving Data Categories (duplicate hashcodes).");
+                MessageBox.Show("Error retrieving Data Category.");
 
                 return null;
             }
