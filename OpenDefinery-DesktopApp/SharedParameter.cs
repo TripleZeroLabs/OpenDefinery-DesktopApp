@@ -350,7 +350,8 @@ namespace OpenDefinery
 
                 if (paramResponse.Count() == 0)
                 {
-                    MessageBox.Show("This collection is empty.");
+                    // Don't show MessageBox - let the UI handle empty state display
+                    // MessageBox.Show("This collection is empty.");
                 }
                 else
                 {

@@ -63,12 +63,30 @@
         <Grid x:Name="MainUiGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="57"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
                 <RowDefinition Height="62.4"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width = "*" />
             </Grid.ColumnDefinitions>
+            
+            <!-- Success/Status Banner (Reusable) -->
+            <Grid x:Name="StatusBanner" Grid.Row="1" Background="#4CAF50" Height="50" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Viewbox Grid.Column="0" Width="24" Height="24" VerticalAlignment="Center" Margin="20,0,10,0">
+                    <iconPacks:BoxIcons x:Name="StatusBannerIcon" Kind="RegularCheckCircle"/>
+                </Viewbox>
+                <TextBlock x:Name="StatusBannerText" Grid.Column="1" Text="Success!" Foreground="White" FontSize="14" VerticalAlignment="Center" FontWeight="Medium"/>
+                <Button x:Name="StatusBannerCloseButton" Grid.Column="2" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="StatusBannerCloseButton_Click" Width="30" Height="30" Margin="10,0,10,0">
+                    <iconPacks:BoxIcons Kind="RegularX"/>
+                </Button>
+            </Grid>
+            
             <Grid x:Name="ToolbarGrid" Height="57" VerticalAlignment="Top" Margin="0,0,-0.4,0" Background="{StaticResource MaterialDesignDarkBackground}" Grid.Row="0" Grid.RowSpan="2">
                 <StackPanel Margin="0" Orientation="Horizontal">
                     <Button Style="{DynamicResource MaterialDesignToolButton}" x:Name="DashboardButton" Margin="20,0,0,0" Height="Auto" Foreground="{StaticResource MaterialDesignDarkForeground}" Padding="0,4,4,4" ToolTip="See all of the things" Click="DashboardButton_Click">
@@ -128,7 +146,7 @@
                     </Button.Resources>
                 </Button>
             </Grid>
-            <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0" Grid.Row="1">
+            <DockPanel x:Name="MainPanel" LastChildFill="True" Margin="0" Grid.Row="2">
                 <ScrollViewer Background="{DynamicResource MaterialDesignToolBarBackground}" Height="Auto" Style="{DynamicResource MaterialDesignScrollViewer}"  VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -190,6 +208,32 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+                        
+                        <!-- Empty Collection State -->
+                        <Grid x:Name="EmptyCollectionGrid" Grid.Column="0" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel>
+                                <Viewbox Width="80" Height="80" HorizontalAlignment="Center">
+                                    <iconPacks:BoxIcons Kind="RegularFolder"/>
+                                </Viewbox>
+                                <TextBlock Text="This collection is empty." FontSize="24" Foreground="#999999" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+                                <TextBlock Text="Get started by adding parameters" FontSize="14" Foreground="#BBBBBB" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+                                    <Button Style="{StaticResource MaterialDesignRaisedButton}" x:Name="EmptyStateNewParamButton" Click="EmptyStateNewParamButton_Click" Margin="0,0,10,0" Height="40" Padding="20,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="SolidPlusCircle"/>
+                                            <TextBlock Text="New Parameter" Margin="10,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="EmptyStateBatchUploadButton" Click="EmptyStateBatchUploadButton_Click" Margin="10,0,0,0" Height="40" Padding="20,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:BoxIcons Kind="SolidLayer"/>
+                                            <TextBlock Text="Batch Upload" Margin="10,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                        
                         <DataGrid
                             x:Name="DataGridParameters" 
                             Margin="10,0" 
@@ -288,7 +332,7 @@
                     </Grid>
                 </Grid>
             </DockPanel>
-            <Grid x:Name="FooterGrid" Grid.Row="2" Background="{StaticResource MaterialDesignToolBarBackground}">
+            <Grid x:Name="FooterGrid" Grid.Row="3" Background="{StaticResource MaterialDesignToolBarBackground}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*" />

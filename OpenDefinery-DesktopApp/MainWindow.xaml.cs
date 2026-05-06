@@ -75,6 +75,8 @@ namespace OpenDefinery_DesktopApp
             AllParamsLoaded = false;
 
             PropertiesSideBar.Visibility = Visibility.Collapsed; // Sidebar should be collapsed by default
+            EmptyCollectionGrid.Visibility = Visibility.Collapsed; // Empty state should be hidden by default
+            StatusBanner.Visibility = Visibility.Collapsed; // Status banner should be hidden by default
 
             MainBrowserGrid.Visibility = Visibility.Hidden; // Hide the main UI until logged in
 
@@ -348,6 +350,7 @@ namespace OpenDefinery_DesktopApp
                         // Process parameters in parallel batches
                         var semaphore = new SemaphoreSlim(10); // Limit to 10 concurrent requests
                         var tasks = new List<Task>();
+                        var uploadedCount = 0;
 
                         foreach (var param in parametersToUpload)
                         {
@@ -366,7 +369,12 @@ namespace OpenDefinery_DesktopApp
                                         });
 
                                         // Create the SharedParameter using async method
-                                        await SharedParameter.CreateAsync(Definery, param, sollection.Id);
+                                        var result = await SharedParameter.CreateAsync(Definery, param, sollection.Id);
+                                        
+                                        if (result != null)
+                                        {
+                                            Interlocked.Increment(ref uploadedCount);
+                                        }
                                         
                                         currentProgress++;
                                         ((IProgress<int>)progress).Report(currentProgress);
@@ -388,6 +396,9 @@ namespace OpenDefinery_DesktopApp
                         }
 
                         await Task.WhenAll(tasks);
+                        
+                        // Show success banner with count
+                        ShowStatusBanner($"Batch upload complete! {uploadedCount} parameter(s) uploaded successfully.", "success");
                     }
                 }
                 catch (Exception ex)
@@ -413,7 +424,7 @@ namespace OpenDefinery_DesktopApp
             ProgressGrid.Visibility = Visibility.Hidden;
             OverlayGrid.Visibility = Visibility.Hidden;
 
-            MessageBox.Show("Batch upload complete.");
+            // MessageBox.Show("Batch upload complete."); // Replaced with banner
         }
 
         /// <summary>
@@ -684,11 +695,23 @@ namespace OpenDefinery_DesktopApp
                     MainBrowserGrid.Visibility = Visibility.Visible;
                     DashboardGrid.Visibility = Visibility.Collapsed;
 
-                    // Clear the existing items, set again, then refresh
-                    DataGridParameters.ItemsSource = null;
-                    DataGridParameters.Items.Clear();
-                    DataGridParameters.ItemsSource = Definery.Parameters;
-                    DataGridParameters.Items.Refresh();
+                    // Check if collection is empty and show appropriate UI
+                    if (Definery.Parameters != null && Definery.Parameters.Count() == 0 && ParamSource == ParameterSource.Collection)
+                    {
+                        DataGridParameters.Visibility = Visibility.Collapsed;
+                        EmptyCollectionGrid.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        DataGridParameters.Visibility = Visibility.Visible;
+                        EmptyCollectionGrid.Visibility = Visibility.Collapsed;
+                        
+                        // Clear the existing items, set again, then refresh
+                        DataGridParameters.ItemsSource = null;
+                        DataGridParameters.Items.Clear();
+                        DataGridParameters.ItemsSource = Definery.Parameters;
+                        DataGridParameters.Items.Refresh();
+                    }
                 }
                 if (ParamSource == ParameterSource.None)
                 {
@@ -2022,6 +2045,102 @@ namespace OpenDefinery_DesktopApp
             // Clear the datagrid for better UX
             DataGridParameters.ItemsSource = null;
             DataGridParameters.Items.Refresh();
+        }
+
+        /// <summary>
+        /// Show a status banner with a message
+        /// </summary>
+        /// <param name="message">The message to display</param>
+        /// <param name="type">The type of banner: "success", "error", "info", "warning"</param>
+        public void ShowStatusBanner(string message, string type = "success")
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                StatusBannerText.Text = message;
+                
+                // Set colors and icon based on type
+                switch (type.ToLower())
+                {
+                    case "success":
+                        StatusBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+                        StatusBannerIcon.Kind = MahApps.Metro.IconPacks.PackIconBoxIconsKind.RegularCheckCircle;
+                        break;
+                    case "error":
+                        StatusBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                        StatusBannerIcon.Kind = MahApps.Metro.IconPacks.PackIconBoxIconsKind.RegularErrorCircle;
+                        break;
+                    case "warning":
+                        StatusBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9800"));
+                        StatusBannerIcon.Kind = MahApps.Metro.IconPacks.PackIconBoxIconsKind.RegularError;
+                        break;
+                    case "info":
+                        StatusBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2196F3"));
+                        StatusBannerIcon.Kind = MahApps.Metro.IconPacks.PackIconBoxIconsKind.RegularInfoCircle;
+                        break;
+                }
+                
+                StatusBanner.Visibility = Visibility.Visible;
+                
+                // Auto-hide after 5 seconds
+                var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+                timer.Tick += (s, args) =>
+                {
+                    timer.Stop();
+                    StatusBanner.Visibility = Visibility.Collapsed;
+                };
+                timer.Start();
+            });
+        }
+
+        /// <summary>
+        /// Close the status banner
+        /// </summary>
+        private void StatusBannerCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            StatusBanner.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Handle New Parameter button click from empty collection state
+        /// </summary>
+        private void EmptyStateNewParamButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Clear form
+            NewParamNameTextBox.Text = string.Empty;
+            NewParamGuidTextBox.Text = Guid.NewGuid().ToString();
+            NewParamDescTextBox.Text = string.Empty;
+            NewParamDataTypeCombo.SelectedIndex = 0;
+            NewParamDataCatCombo.SelectedItem = null;
+            NewParamVisibleCheck.IsChecked = true;
+            NewParamUserModCheckbox.IsChecked = true;
+            ForkedParamIdTextBox.Text = string.Empty;
+
+            // Populate the Collections combo
+            NewParamFormCollectionsCombo.ItemsSource = Definery.MyCollections;
+            NewParamFormCollectionsCombo.DisplayMemberPath = "Name";
+
+            // Set the current collection as default if one is selected
+            if (SelectedCollection != null)
+            {
+                NewParamFormCollectionsCombo.SelectedItem = SelectedCollection;
+            }
+            else
+            {
+                NewParamFormCollectionsCombo.SelectedIndex = 0;
+            }
+
+            // Show the New Parameter form
+            OverlayGrid.Visibility = Visibility.Visible;
+            NewParameterGrid.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Handle Batch Upload button click from empty collection state
+        /// </summary>
+        private void EmptyStateBatchUploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Reuse the existing batch upload button logic
+            BatchUploadOverlayButton_Click(sender, e);
         }
     }
 }
