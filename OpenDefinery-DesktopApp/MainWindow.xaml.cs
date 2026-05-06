@@ -326,62 +326,68 @@ namespace OpenDefinery_DesktopApp
 
                         var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
 
-                        await Task.Run(() =>
+                        // Collect all parameters to upload
+                        var parametersToUpload = new List<SharedParameter>();
+                        
+                        do
                         {
-                            do
+                            line = stringReader.ReadLine();
+                            if (line != null)
                             {
-                                line = stringReader.ReadLine();
-                                if (line != null)
-                                {
-                                // Cast tab delimited line from shared parameter text file to SharedParameter object
                                 var newParameter = SharedParameter.FromTxt(Definery, line);
+                                if (newParameter != null)
+                                {
+                                    var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
+                                    newParameter.Group = groupName;
+                                    newParameter.BatchId = batchId;
+                                    parametersToUpload.Add(newParameter);
+                                }
+                            }
+                        } while (line != null);
 
-                                    if (newParameter != null)
+                        // Process parameters in parallel batches
+                        var semaphore = new SemaphoreSlim(10); // Limit to 10 concurrent requests
+                        var tasks = new List<Task>();
+
+                        foreach (var param in parametersToUpload)
+                        {
+                            await semaphore.WaitAsync();
+                            
+                            var task = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    // Check if parameter exists (consider removing this check for better performance)
+                                    if (!SharedParameter.HasExactMatch(Definery, param))
                                     {
-                                    // Update the UI
-                                    currentProgress += 1;
-                                        ((IProgress<int>)progress).Report(currentProgress);
-                                        Dispatcher.Invoke(() =>
+                                        await Dispatcher.InvokeAsync(() =>
                                         {
-                                            ProgressStatus.Text = "Uploading " + newParameter.Name + "...";
+                                            ProgressStatus.Text = "Uploading " + param.Name + "...";
                                         });
 
-                                    // Get the name of the group and assign this to the property rather than the ID 
-                                    // This name will be passed to the Create() method to add as the tag
-                                    var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
-                                        newParameter.Group = groupName;
-
-                                    // Check if the parameter exists
-                                    if (SharedParameter.HasExactMatch(Definery, newParameter))
-                                        {
-                                        // Do nothing for now
-                                        // TODO: Add existing SharedParameters to a log or report of some kind.
-                                        Debug.WriteLine(newParameter.Name + " exists. Skipping");
-
-                                            Application.Current.Dispatcher.BeginInvoke(
-                                              DispatcherPriority.Background,
-                                              new Action(() =>
-                                              {
-                                                  ProgressStatus.Text = newParameter.Name + " already exists. Skipped.";
-                                              }));
-                                        }
-                                        else
-                                        {
-                                            newParameter.BatchId = batchId;
-
-                                        // Instantiate the selected item as a Collection
-                                        this.Dispatcher.Invoke(() =>
-                                            {
-
-                                            // Create the SharedParameter
-                                            SharedParameter.Create(Definery, newParameter, sollection.Id);
-                                            });
-                                        }
+                                        // Create the SharedParameter using async method
+                                        await SharedParameter.CreateAsync(Definery, param, sollection.Id);
+                                        
+                                        currentProgress++;
+                                        ((IProgress<int>)progress).Report(currentProgress);
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine(param.Name + " exists. Skipping");
+                                        currentProgress++;
+                                        ((IProgress<int>)progress).Report(currentProgress);
                                     }
                                 }
+                                finally
+                                {
+                                    semaphore.Release();
+                                }
+                            });
+                            
+                            tasks.Add(task);
+                        }
 
-                            } while (line != null);
-                        });
+                        await Task.WhenAll(tasks);
                     }
                 }
                 catch (Exception ex)

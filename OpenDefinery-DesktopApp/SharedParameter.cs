@@ -549,6 +549,144 @@ namespace OpenDefinery
         }
 
         /// <summary>
+        /// Creates a new Shared Parameter on Drupal (Async version for better performance)
+        /// Response codes:
+        ///     201: Created
+        ///     422: Unprocessable entity (possibly missing a required field)
+        /// </summary>
+        public static async Task<SharedParameter> CreateAsync(Definery definery, SharedParameter param, int? collectionId = null, int? forkedId = null)
+        {
+            var client = new RestClient(Definery.BaseUrl + "node?_format=json");
+            client.Timeout = -1;
+
+            // Assign the datatype value by the Term ID defined by Drupal to pass to the API call (we cannot pass the name)
+            var dataType = definery.DataTypes.Find(d => d.Name.ToString() == param.DataType);
+            var dataCategory = new DataCategory();
+
+            // Format values before assigning
+            if (dataType != null)
+            {
+                param.DataType = dataType.Id.ToString();
+            }
+
+            if (!string.IsNullOrEmpty(param.DataCategoryHashcode))
+            {
+                dataCategory = DataCategory.GetByHashcode(definery, param.DataCategoryHashcode);
+            }
+
+            // Get the tag ID from Drupal. If the tag does not exist, create a tag and assign the ID to request body
+            var tagName = string.Empty;
+            var tagId = string.Empty;
+
+            if (!string.IsNullOrEmpty(param.Group))
+            {
+                tagName = Tag.FormatName(param.Group);
+                tagId = Tag.GetIdFromName(definery, tagName);
+
+                if (tagId == "[]")
+                {
+                    Debug.WriteLine(string.Format("The tag \"{0}\" does not exist. Creating...", tagName));
+                    var newTagId = Tag.Create(definery, tagName);
+                    Debug.WriteLine(string.Format("New tag created for {0} with ID: {1}", tagName, newTagId));
+                    tagId = newTagId;
+                }
+            }
+            else
+            {
+                tagId = null;
+            }
+
+            // Add default values
+            if (param.UserModifiable == null)
+            {
+                param.UserModifiable = "1";
+            }
+            if (param.Visible == null)
+            {
+                param.Visible = "1";
+            }
+
+            var requestBody = "{" +
+                "\"type\": [{" +
+                    "\"target_id\": \"shared_parameter\"" +
+                "}]," +
+                "\"title\": [{" +
+                    "\"value\": \"" + param.Name + "\"" +
+                "}]," +
+                "\"field_guid\": [{" +
+                    "\"value\": \"" + param.Guid.ToString() + "\"" +
+                "}]," +
+                "\"field_description\": [{" +
+                    "\"value\": \"" + param.Description + "\"" +
+                "}]," +
+                 "\"field_batch_id\": [{" +
+                    "\"value\": \"" + param.BatchId + "\"" +
+                "}]," +
+                "\"field_group\": {" +
+                    "\"und\": \"41\"" +
+                "}," +
+                "\"field_data_type\": {" +
+                "\"und\": \"" + param.DataType + "\"" +
+                "}," +
+                "\"field_data_category\": {" +
+                "\"und\": \"" + dataCategory.Id + "\"" +
+                "}," +
+                "\"field_visible\": {" +
+                "\"und\": \"" + param.Visible + "\"" +
+                "}," +
+                "\"field_user_modifiable\": {" +
+                "\"und\": \"" + param.UserModifiable + "\"" +
+                "}";
+
+            if (collectionId != null)
+            {
+                requestBody += "," +
+                    "\"field_collections\": {" +
+                "\"und\": \"" + collectionId + "\"" +
+                "}";
+            }
+
+            if (!string.IsNullOrEmpty(forkedId.ToString()))
+            {
+                requestBody += ",\"field_forked_source\": {" +
+                "\"und\": \"" + forkedId.ToString() + "\"" +
+                "}";
+            }
+
+            if (!string.IsNullOrEmpty(tagId))
+            {
+                requestBody += ",\"field_tags\": {" +
+                    "\"und\": \"" + tagId + "\"" +
+                    "}";
+            }
+
+            requestBody += "}";
+
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
+            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddParameter("application/json", requestBody, ParameterType.RequestBody);
+
+            IRestResponse response = await client.ExecuteAsync(request);
+
+            Debug.WriteLine(response);
+
+            // Get Shared Parameter if successful - return the created param without additional GET request
+            if (response.StatusCode.ToString() == "Created")
+            {
+                var node = JsonConvert.DeserializeObject<Node>(response.Content);
+                param.Id = node.Nid[0].Value;
+                return param;
+            }
+            else
+            {
+               Debug.WriteLine("Error creating Shared Parameter: " + response.Content);
+               return null;
+            }
+        }
+
+        /// <summary>
         /// Creates a new Shared Parameter on Drupal
         /// Response codes:
         ///     201: Created
