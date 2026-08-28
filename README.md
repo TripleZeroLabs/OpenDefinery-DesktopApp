@@ -23,4 +23,9 @@ In its current state, the desktop application provides improved methods to manag
 - A Revit add-in to allow users to manage the Shared Parameters within their Revit projects or Revit families.
 
 # OpenDefinery API
-This application leverages the OpenDefinery REST API to manage Shared Parameters. For API documentation, refer to https://documenter.getpostman.com/view/5483074/T1LHGpQo.
+This application talks to the OpenDefinery REST API (Django REST Framework) to manage Shared Parameters.
+
+- **Base URL:** `https://api.opendefinery.com/v1/`
+- **Authentication:** token auth — request a token from `POST /v1/auth/token/`, then send it as the `Authorization: Token <key>` header on subsequent requests.
+- **API documentation (Swagger UI):** https://api.opendefinery.com/v1/docs/
+- **OpenAPI schema:** https://api.opendefinery.com/v1/schema/
