@@ -36,6 +36,11 @@ namespace OpenDefinery_DesktopApp
         ParameterSource ParamSource { get; set; }
         bool AllParamsLoaded { get; set; }
 
+        /// <summary>Semantic app version (AssemblyInformationalVersion, e.g. "0.1.0"), shown in the UI.</summary>
+        private static readonly string AppVersion =
+            Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
         public MainWindow()
         {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -44,7 +49,7 @@ namespace OpenDefinery_DesktopApp
 
             InitializeComponent();
 
-            this.Title = "OpenDefinery Desktop" + " v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            this.Title = "OpenDefinery Desktop v" + AppVersion;
 
             // Instantiate a new objects
             Definery = new Definery();
@@ -68,7 +73,7 @@ namespace OpenDefinery_DesktopApp
             PagerNextButton.IsEnabled = false;  // Pager
             PagerPreviousButton.IsEnabled = false;  // Pager
 
-            DashboardVersionText.Text = "(v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() + ")";
+            DashboardVersionText.Text = "(v" + AppVersion + ")";
 
             AllParamsLoaded = false;
 

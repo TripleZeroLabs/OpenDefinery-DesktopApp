@@ -51,6 +51,8 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.0.4.0")]
-[assembly: AssemblyFileVersion("0.0.4.0")]
+[assembly: AssemblyVersion("0.1.0.0")]
+[assembly: AssemblyFileVersion("0.1.0.0")]
+// Semantic version (matches the eventual NuGet PackageVersion); shown in the UI.
+[assembly: AssemblyInformationalVersion("0.1.0")]
 [assembly: Guid("72f3c578-88c1-40ed-bae0-a1db62b24f72")]

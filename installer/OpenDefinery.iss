@@ -1,6 +1,6 @@
 #define AppName "OpenDefinery"
 #define AppExeName "OpenDefinery-DesktopApp.exe"
-#define AppVersion "0.0.4"
+#define AppVersion "0.1.0"
 #define AppPublisher "Triple Zero Labs, LLC"
 #define AppUrl "https://opendefinery.com"
 ; Release output of the WPF app (exe + dependencies + config + assets\).
