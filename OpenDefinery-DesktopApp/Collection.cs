@@ -1,294 +1,284 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OpenDefinery_DesktopApp;
-using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OpenDefinery
 {
     public class Collection
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("pk")]
         public int Id { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("author")]
+        /// <summary>The author's user id. Compare against Definery.CurrentUser.Id.</summary>
+        [JsonPropertyName("author")]
         public string Author { get; set; }
 
+        /// <summary>"public" or "private". Use <see cref="IsPublic"/> to read it as a flag.</summary>
+        [JsonPropertyName("visibility")]
+        public string Visibility { get; set; }
+
+        [JsonIgnore]
+        public bool IsPublic
+        {
+            get { return Visibility != "private"; }
+            set { Visibility = value ? "public" : "private"; }
+        }
+
         /// <summary>
-        /// Retrieve the currently logged in user's Collections.
+        /// Returned on both the list and the detail payloads, so unlike the old backend there
+        /// is nothing to fetch separately before editing.
         /// </summary>
-        /// <param name="definery">The main Definery object provides the CSRF token.</param>
-        /// <returns>A list of Collection objects</returns>
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        /// <summary>How many definitions the Collection holds. Read-only.</summary>
+        [JsonPropertyName("definition_count")]
+        public int DefinitionCount { get; set; }
+
+        /// <summary>
+        /// The requesting user's effective role: "author", "editor", "viewer", or null for no
+        /// access beyond it being public. A better test than comparing <see cref="Author"/>,
+        /// because it accounts for a Collection shared with you.
+        /// </summary>
+        [JsonPropertyName("my_role")]
+        public string MyRole { get; set; }
+
+        /// <summary>
+        /// Revit releases this Collection works in, derived by the API from the data types and
+        /// categories its definitions use. Not assignable.
+        /// </summary>
+        [JsonPropertyName("revit_versions")]
+        public List<int> RevitVersions { get; set; }
+
+        /// <summary>Whether the current user may change this Collection's contents.</summary>
+        [JsonIgnore]
+        public bool CanWrite => MyRole == "author" || MyRole == "editor";
+
+        /// <summary>
+        /// One page of Shared Parameters from a Collection.
+        /// </summary>
+        public static ObservableCollection<DefineryParameter> GetParameters(
+            Definery definery, Collection collection, int itemsPerPage, int page, bool resetTotals)
+        {
+            var listOfParams = new List<DefineryParameter>();
+
+            var url = Definery.BaseUrl + string.Format(
+                "definitions/?collection={0}&page={1}&page_size={2}",
+                collection.Id, page, itemsPerPage);
+
+            var chunk = OdPage.Get<DefineryParameter>(definery, url);
+            if (chunk != null && chunk.Results != null)
+            {
+                listOfParams = chunk.Results;
+            }
+
+            return new ObservableCollection<DefineryParameter>(listOfParams);
+        }
+
+        /// <summary>
+        /// Every Shared Parameter in a Collection, across as many pages as it takes.
+        /// </summary>
+        public static ObservableCollection<DefineryParameter> GetParameters(
+            Definery definery, Collection collection)
+        {
+            var paramsOut = new ObservableCollection<DefineryParameter>();
+
+            if (definery != null && collection != null)
+            {
+                var all = OdPage.GetAll<DefineryParameter>(
+                    definery,
+                    Definery.BaseUrl + string.Format(
+                        "definitions/?collection={0}&page_size={1}",
+                        collection.Id, OdPage.MaxPageSize));
+
+                paramsOut = new ObservableCollection<DefineryParameter>(all);
+            }
+
+            return paramsOut;
+        }
+
+        /// <summary>
+        /// The Collections the signed-in user authored or has been granted a role on.
+        ///
+        /// An anonymous session has none, so this falls back to the public list rather than
+        /// returning nothing at all - which is what the old two-route split did.
+        /// </summary>
         public static List<Collection> ByCurrentUser(Definery definery)
         {
-            var client = new RestClient(Definery.BaseUrl + "rest/collections?_format=json");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-            IRestResponse response = client.Execute(request);
-
-            // Return the data if the response was OK
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (definery == null || !definery.IsAuthenticated)
             {
-                // If the user has no Collections, it returns an empty array
-                // Only process the response if it is not an empty array
-                if (response.Content != "[]")
-                {
-                    try
-                    {
-                        var collections = JsonConvert.DeserializeObject<List<Collection>>(response.Content);
-
-                        return collections;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString());
-
-                        return null;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
+                return GetPublished(definery);
             }
-            else
-            {
-                MessageBox.Show(response.StatusCode.ToString());
 
-                return null;
-            }
+            return OdPage.GetAll<Collection>(
+                definery,
+                Definery.BaseUrl + "collections/?mine=true&page_size=" + OdPage.MaxPageSize);
         }
 
         /// <summary>
-        /// Retrieve all published Collections excluding the current user's Collections.
+        /// Every Collection visible to this session: the public library, plus anything private
+        /// the user can see. Never returns null - callers enumerate it directly.
         /// </summary>
-        /// <param name="definery"></param>
-        /// <returns></returns>
         public static List<Collection> GetPublished(Definery definery)
         {
-            var client = new RestClient(Definery.BaseUrl + "rest/collections/published?_format=json");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-            IRestResponse response = client.Execute(request);
+            return OdPage.GetAll<Collection>(
+                definery,
+                Definery.BaseUrl + "collections/?page_size=" + OdPage.MaxPageSize);
+        }
 
-            // Return the data if the response was OK
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        /// <summary>Retrieve one Collection by id, or null if it isn't visible.</summary>
+        public static Collection GetById(Definery definery, int collectionId)
+        {
+            var response = OdHttp.Get(
+                Definery.BaseUrl + string.Format("collections/{0}/", collectionId), definery);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                // If the user has no Collections, it returns an empty array
-                // Only process the response if it is not an empty array
-                if (response.Content != "[]")
+                Debug.WriteLine(response.Content, "Error retrieving the Collection");
+                return null;
+            }
+
+            try
+            {
+                return OdJson.Deserialize<Collection>(response.Content);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// The parameters in a Collection, for membership checks. The list payload already
+        /// carries the GUID and id, so this is the same call as
+        /// <see cref="GetParameters(Definery, Collection)"/> - kept as a name that says why
+        /// it is being asked for.
+        /// </summary>
+        public static List<DefineryParameter> GetIds(Definery definery, Collection collection)
+        {
+            if (definery == null || collection == null) return new List<DefineryParameter>();
+
+            return OdPage.GetAll<DefineryParameter>(
+                definery,
+                Definery.BaseUrl + string.Format(
+                    "definitions/?collection={0}&page_size={1}",
+                    collection.Id, OdPage.MaxPageSize));
+        }
+
+        /// <summary>
+        /// Create a new Collection. Returns the created Collection, or null on failure.
+        /// </summary>
+        public static Collection Create(Definery definery, string name, string description, bool? isPublic)
+        {
+            var body =
+                "{" +
+                    "\"name\": " + OdJson.ToJsonString(name ?? string.Empty) + "," +
+                    "\"description\": " + OdJson.ToJsonString(description ?? string.Empty) + "," +
+                    "\"visibility\": \"" + (isPublic == true ? "public" : "private") + "\"" +
+                "}";
+
+            var response = OdHttp.Post(Definery.BaseUrl + "collections/", body, definery);
+            Debug.WriteLine(response.Content);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                try
                 {
-                    try
-                    {
-                        var collections = JsonConvert.DeserializeObject<List<Collection>>(response.Content);
-                        var filteredCollections = new List<Collection>();
-
-                        // Add Collection to filtered list only if it isn't authored by the current user
-                        foreach(var collection in collections)
-                        {
-                            if (collection.Author != Definery.CurrentUser.Id)
-                            {
-                                filteredCollections.Add(collection);
-                            }
-                        }
-
-                        return filteredCollections;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString());
-
-                        return null;
-                    }
+                    // The API echoes the whole record back, so there is nothing to reconstruct.
+                    return OdJson.Deserialize<Collection>(response.Content);
                 }
-                else
+                catch (Exception ex)
                 {
+                    Debug.WriteLine(ex.ToString());
                     return null;
                 }
             }
-            else
-            {
-                MessageBox.Show(response.StatusCode.ToString());
 
-                return null;
-            }
+            Debug.WriteLine("There was an error creating the Collection.");
+
+            return null;
         }
 
         /// <summary>
-        /// Create a new Collction.
+        /// Update a Collection's name, description, and visibility.
+        /// Returns true when the API accepts the change.
         /// </summary>
-        /// <param name="definery">The main Definery object</param>
-        /// <param name="name">The name of the Colllection</param>
-        /// <param name="description">The description of the Collection</param>
-        /// <returns></returns>
-        public static Collection Create(Definery definery, string name, string description, bool? isPublic)
+        public static bool Update(Definery definery, int collectionId, string name, string description, bool isPublic)
         {
-            // Convert booleans to strings
-            var publicString = string.Empty;
-            
-            if (isPublic == false | isPublic == null)
-            {
-                publicString = "0";
-            }
-            else
-            {
-                publicString = "1";
-            }
-
-            var client = new RestClient(Definery.BaseUrl + "node?_format=hal_json");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
-            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-            request.AddParameter("application/json", 
+            var body =
                 "{" +
-                    "\"type\":" +
-                    "[{" +
-                        "\"target_id\": \"collection\"" +
-                    "}]," +
-                    "\"title\":" +
-                    "[{" +
-                        "\"value\": \"" + name + "\"" +
-                    "}]," +
-                    "\"body\":" +
-                    "[{" +
-                        "\"value\": \"" + description + "\"" +
-                    "}]," +
-                    "\"field_public\":" +
-                    "[{" +
-                        "\"value\": \"" + publicString + "\"" +
-                    "}]" +
-                "}", 
+                    "\"name\": " + OdJson.ToJsonString(name ?? string.Empty) + "," +
+                    "\"description\": " + OdJson.ToJsonString(description ?? string.Empty) + "," +
+                    "\"visibility\": \"" + (isPublic ? "public" : "private") + "\"" +
+                "}";
 
-                ParameterType.RequestBody);
+            var response = OdHttp.Patch(
+                Definery.BaseUrl + string.Format("collections/{0}/", collectionId), body, definery);
 
-            IRestResponse response = client.Execute(request);
             Debug.WriteLine(response.Content);
 
-            // Deserialize the response to a generic Node first
-            if (response.StatusCode.ToString() == "Created")
-            {
-                var genericNode = JsonConvert.DeserializeObject<Node>(response.Content);
-
-                // Instantiate the collection
-                var newCollection = new Collection();
-                newCollection.Id = genericNode.Nid[0].Value;
-                newCollection.Name = genericNode.Title[0].Value;
-                newCollection.Author = Definery.CurrentUser.Id.ToString();
-
-                return newCollection;
-            }
-            else
-            {
-                MessageBox.Show("There was an error creating the Collection.");
-
-                return null;
-            }
+            var code = (int)response.StatusCode;
+            return code >= 200 && code < 300;
         }
 
         /// <summary>
-        /// Delete a Collection
+        /// Delete a Collection. Its parameters are orphaned rather than destroyed.
         /// </summary>
-        /// <param name="definery">The main Definery object</param>
-        /// <param name="collectionId">The ID of the Collection to delete</param>
         public static void Delete(Definery definery, int collectionId)
         {
-            var client = new RestClient(Definery.BaseUrl + string.Format("node/{0}?_format=hal_json", collectionId.ToString()));
-            var request = new RestRequest(Method.DELETE);
-            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
-            request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-            request.AddParameter("application/json",
-                "{\"type\": [" +
-                "{\"target_id\": \"collection\"}" +
-                "]}", 
-                ParameterType.RequestBody);
-            IRestResponse response = client.Execute(request);
-            Console.WriteLine(response.Content);
+            var response = OdHttp.Delete(
+                Definery.BaseUrl + string.Format("collections/{0}/", collectionId), definery);
+
+            Debug.WriteLine(response.Content);
         }
 
         /// <summary>
-        /// Check that a Collection has duplicate GUIDs.
+        /// Compares the shared parameters in the OpenDefinery Collection to the parameters
+        /// extracted from the current Revit model.
         /// </summary>
-        /// <param name="collection">The Collection to check</param>
-        /// <param name="guid">The GUID to check for</param>
-        /// <returns></returns>
-        public static bool HasDuplicateGuids(Collection collection, Guid guid)
+        public static List<DefineryParameter> ValidateParameters(
+            Definery definery,
+            Collection collection,
+            List<DefineryParameter> revitParams)
         {
-            var hasDuplicate = false;
-
-            
-
-            return hasDuplicate;
-        }
-
-        /// <summary>
-        /// Retrieve a list of Collections from a comma separated values string (typically returned from the API).
-        /// </summary>
-        /// <param name="definery">The main Definery object</param>
-        /// <param name="collectionsString">A comma separated values string of Collection IDs</param>
-        /// <returns></returns>
-        public static SharedParameter GetFromString(Definery definery, SharedParameter parameter, string collectionsString)
-        {
-            var collections = new List<Collection>();
-
-            // Get multiple Collections
-            if (!string.IsNullOrEmpty(collectionsString) && collectionsString.Contains(","))
+            if (definery == null || collection == null)
             {
-                var strings = collectionsString.Split(',');
+                Debug.Write("There was an error retrieving the Collection.", "Error retrieving collection.");
 
-                foreach (var s in strings)
+                return null;
+            }
+
+            var odParams = GetParameters(definery, collection).ToList();
+            var validatedParams = new List<DefineryParameter>();
+
+            // A GUID is unique within a Collection - the API enforces it, because a Revit file
+            // cannot use the same GUID twice - so this matches at most one. The old "multiple
+            // found, using the first" branch could only ever fire under the previous backend,
+            // where one parameter belonged to many Collections at once.
+            foreach (var p in revitParams)
+            {
+                var found = odParams.FirstOrDefault(o => o.Guid == p.Guid);
+
+                if (found == null)
                 {
-                    // Get Collection from ID
-                    var foundCollections = definery.AllCollections.Where(o => o.Id.ToString() == s.Trim());
-
-                    foreach (var foundCollection in foundCollections)
-                    {
-                        // Add Collection to list
-                        collections.Add(foundCollection);
-                    }
+                    p.IsStandard = false;
+                    validatedParams.Add(p);
+                }
+                else
+                {
+                    validatedParams.Add(DefineryParameter.SetDefineryData(found, p));
                 }
             }
-            // Get a single Collection
-            if (!string.IsNullOrEmpty(collectionsString) && !collectionsString.Contains(","))
-            {
-                // Get Collection from ID
-                var foundCollection = definery.AllCollections.Where(o => o.Id.ToString() == collectionsString.Trim()).FirstOrDefault();
 
-                // Add Collection to list
-                collections.Add(foundCollection);
-            }
-            
-            // Set the new list to the SharedParameter property and return
-            parameter.Collections = collections;
-
-            return parameter;
-        }
-
-        public static List<SharedParameter> GetIds(Definery definery, Collection collection)
-        {
-            // Make the API call
-            var client = new RestClient(Definery.BaseUrl + string.Format("rest/lite/collection/{0}?_format=json", collection.Id.ToString()));
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", "Bearer " + definery.AuthCode);
-            IRestResponse response = client.Execute(request);
-            Debug.WriteLine(response.Content);
-
-            // Deserialize into "lite" SharedParameter objects which only have a GUID and ID
-            var parameters = JsonConvert.DeserializeObject<List<SharedParameter>>(response.Content);
-
-            return parameters;
+            return validatedParams;
         }
     }
 }

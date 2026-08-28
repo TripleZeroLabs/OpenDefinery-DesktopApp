@@ -1,0 +1,88 @@
+Token,ParameterType,Discipline
+# Revit 2024 shared-parameter data types that are NOT yet in the OpenDefinery
+# 'data_type' taxonomy (diffed against /rest/datatypes on 2026-06-22).
+#
+# Token          = the value written to the DATATYPE column of a Revit shared
+#                  parameter .txt file. This is what OpenDefinery stores as the
+#                  taxonomy term "name" and what the desktop app shows + exports.
+# ParameterType  = the matching Autodesk.Revit.DB.ParameterType enum member
+#                  (reference only; not sent to Drupal).
+# Discipline     = grouping for human review only.
+#
+# Lines beginning with '#' and blank lines are ignored by the script.
+# NOTE: Tokens are derived from the ParameterType enum using OpenDefinery's
+# existing UPPER_SNAKE_CASE convention. A few legacy tokens in Revit deviate
+# from a pure transform (e.g. HVACAirflow -> HVAC_AIR_FLOW). Those special cases
+# are already in the database, so they are intentionally omitted here. Before
+# running with -Execute, sanity-check this list against a shared parameter file
+# exported from Revit 2024 if you need a guaranteed byte-for-byte match.
+
+MOMENT,Moment,Structural
+AREA_FORCE,AreaForce,Structural
+STRESS,Stress,Structural
+UNIT_WEIGHT,UnitWeight,Structural
+THERMAL_EXPANSION,ThermalExpansion,Structural
+LINEAR_MOMENT,LinearMoment,Structural
+FORCE_PER_LENGTH,ForcePerLength,Structural
+FORCE_LENGTH_PER_ANGLE,ForceLengthPerAngle,Structural
+LINEAR_FORCE_PER_LENGTH,LinearForcePerLength,Structural
+LINEAR_FORCE_LENGTH_PER_ANGLE,LinearForceLengthPerAngle,Structural
+AREA_FORCE_PER_LENGTH,AreaForcePerLength,Structural
+SLOPE,Slope,Common
+ACCELERATION,Acceleration,Structural
+BAR_DIAMETER,BarDiameter,Structural
+CRACK_WIDTH,CrackWidth,Structural
+DISPLACEMENT_DEFLECTION,DisplacementDeflection,Structural
+ENERGY,Energy,Energy
+STRUCTURAL_FREQUENCY,StructuralFrequency,Structural
+MOMENT_OF_INERTIA,MomentOfInertia,Structural
+SURFACE_AREA,SurfaceArea,Structural
+PERIOD,Period,Structural
+PULSATION,Pulsation,Structural
+REINFORCEMENT_AREA,ReinforcementArea,Structural
+REINFORCEMENT_AREA_PER_UNIT_LENGTH,ReinforcementAreaPerUnitLength,Structural
+REINFORCEMENT_COVER,ReinforcementCover,Structural
+REINFORCEMENT_LENGTH,ReinforcementLength,Structural
+REINFORCEMENT_SPACING,ReinforcementSpacing,Structural
+REINFORCEMENT_VOLUME,ReinforcementVolume,Structural
+ROTATION,Rotation,Structural
+SECTION_AREA,SectionArea,Structural
+SECTION_DIMENSION,SectionDimension,Structural
+SECTION_MODULUS,SectionModulus,Structural
+SECTION_PROPERTY,SectionProperty,Structural
+STRUCTURAL_VELOCITY,StructuralVelocity,Structural
+WARPING_CONSTANT,WarpingConstant,Structural
+WEIGHT_PER_UNIT_LENGTH,WeightPerUnitLength,Structural
+MASS_DENSITY,MassDensity,Common
+HVAC_FRICTION,HVACFriction,HVAC
+HVAC_POWER_DENSITY,HVACPowerDensity,HVAC
+HVAC_CROSS_SECTION,HVACCrossSection,HVAC
+HVAC_ROUGHNESS,HVACRoughness,HVAC
+HVAC_VISCOSITY,HVACViscosity,HVAC
+HVAC_COEFFICIENT_OF_HEAT_TRANSFER,HVACCoefficientOfHeatTransfer,HVAC
+HVAC_AIRFLOW_DENSITY,HVACAirflowDensity,HVAC
+HVAC_COOLING_LOAD_DIVIDED_BY_VOLUME,HVACCoolingLoadDividedByVolume,HVAC
+HVAC_AIRFLOW_DIVIDED_BY_VOLUME,HVACAirflowDividedByVolume,HVAC
+HVAC_SLOPE,HVACSlope,HVAC
+HVAC_AREA_DIVIDED_BY_HEATING_LOAD,HVACAreaDividedByHeatingLoad,HVAC
+HVAC_THERMAL_MASS,HVACThermalMass,HVAC
+HVAC_PERMEABILITY,HVACPermeability,HVAC
+ELECTRICAL_ILLUMINANCE,ElectricalIlluminance,Electrical
+ELECTRICAL_POWER_DENSITY,ElectricalPowerDensity,Electrical
+ELECTRICAL_EFFICACY,ElectricalEfficacy,Electrical
+ELECTRICAL_LUMINANCE,ElectricalLuminance,Electrical
+ELECTRICAL_TEMPERATURE,ElectricalTemperature,Electrical
+ELECTRICAL_CABLE_TRAY_SIZE,ElectricalCableTraySize,Electrical
+ELECTRICAL_CONDUIT_SIZE,ElectricalConduitSize,Electrical
+ELECTRICAL_DEMAND_FACTOR,ElectricalDemandFactor,Electrical
+ELECTRICAL_RESISTIVITY,ElectricalResistivity,Electrical
+ELECTRICAL_TEMPERATURE_DIFFERENCE,ElectricalTemperatureDifference,Electrical
+WIRE_SIZE,WireSize,Electrical
+PIPING_FRICTION,PipingFriction,Piping
+PIPING_VISCOSITY,PipingViscosity,Piping
+PIPING_ROUGHNESS,PipingRoughness,Piping
+PIPE_DIMENSION,PipeDimension,Piping
+PIPE_MASS_PER_UNIT_LENGTH,PipeMassPerUnitLength,Piping
+TIME_INTERVAL,TimeInterval,Common
+SPEED,Speed,Common
+STATIONING,Stationing,Infrastructure

@@ -1,0 +1,6 @@
+{
+  "//": "Copy this file to signing-metadata.json (gitignored) and fill in your Azure Trusted Signing details. Used by installer\\deploy.ps1.",
+  "Endpoint": "https://<region>.codesigning.azure.net/",
+  "CodeSigningAccountName": "<your-trusted-signing-account>",
+  "CertificateProfileName": "<your-certificate-profile>"
+}

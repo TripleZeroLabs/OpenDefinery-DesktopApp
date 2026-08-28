@@ -351,3 +351,9 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Installer output (installer\deploy.ps1 -> dist\)
+dist/
+
+# Local code-signing config (Azure Trusted Signing account/profile) - not for public repos
+signing-metadata.json

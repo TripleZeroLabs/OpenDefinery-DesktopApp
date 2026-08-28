@@ -1,5 +1,4 @@
 ﻿using OpenDefinery;
-using RestSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,7 +22,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using RestSharp;
 
 namespace OpenDefinery_DesktopApp
 {
@@ -83,7 +81,7 @@ namespace OpenDefinery_DesktopApp
             ParamSource = ParameterSource.None;  // Make the ParameterSource none until there is some action
 
             // Show the login modal
-            if (string.IsNullOrEmpty(Definery.AuthCode) | string.IsNullOrEmpty(Definery.CsrfToken))
+            if (Definery == null || !Definery.IsAuthenticated)
             {
                 OverlayGrid.Visibility = Visibility.Visible;
                 LoginGrid.Visibility = Visibility.Visible;
@@ -97,9 +95,9 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         private void LoadData()
         {
-            if (!string.IsNullOrEmpty(Definery.CsrfToken))
+            if (Definery != null && Definery.IsAuthenticated)
             {
-                // Load the data from Drupal
+                // Load the data from the API
                 Definery.Groups = Group.GetAll(Definery);
                 Definery.DataTypes = DataType.GetAll(Definery);
                 Definery.DataCategories = DataCategory.GetAll(Definery);
@@ -285,7 +283,7 @@ namespace OpenDefinery_DesktopApp
             var groupTable = string.Empty;
             var parameterTable = string.Empty;
 
-            var parameters = new List<SharedParameter>();
+            var parameters = new List<DefineryParameter>();
 
             DataTable datatable = new DataTable();
 
@@ -314,7 +312,7 @@ namespace OpenDefinery_DesktopApp
             {
                 try
                 {
-                    // Parse the parameters string and cast each line to SharedParameter class
+                    // Parse the parameters string and cast each line to DefineryParameter class
                     using (StringReader stringReader = new StringReader(parameterTable))
                     {
                         // Instantiate the progress
@@ -329,14 +327,14 @@ namespace OpenDefinery_DesktopApp
                         var sollection = BatchUploadCollectionCombo.SelectedItem as Collection;
 
                         // Collect all parameters to upload
-                        var parametersToUpload = new List<SharedParameter>();
+                        var parametersToUpload = new List<DefineryParameter>();
                         
                         do
                         {
                             line = stringReader.ReadLine();
                             if (line != null)
                             {
-                                var newParameter = SharedParameter.FromTxt(Definery, line);
+                                var newParameter = DefineryParameter.FromTxt(Definery, line);
                                 if (newParameter != null)
                                 {
                                     var groupName = Group.GetNameFromTable(groupTable, newParameter.Group);
@@ -361,15 +359,15 @@ namespace OpenDefinery_DesktopApp
                                 try
                                 {
                                     // Check if parameter exists (consider removing this check for better performance)
-                                    if (!SharedParameter.HasExactMatch(Definery, param))
+                                    if (!DefineryParameter.HasExactMatch(Definery, param))
                                     {
                                         await Dispatcher.InvokeAsync(() =>
                                         {
                                             ProgressStatus.Text = "Uploading " + param.Name + "...";
                                         });
 
-                                        // Create the SharedParameter using async method
-                                        var result = await SharedParameter.CreateAsync(Definery, param, sollection.Id);
+                                        // Create the DefineryParameter using async method
+                                        var result = await DefineryParameter.CreateAsync(Definery, param, sollection.Id);
                                         
                                         if (result != null)
                                         {
@@ -437,14 +435,11 @@ namespace OpenDefinery_DesktopApp
             var username = UsernameTextBox.Text;
             var password = PasswordPasswordBox.Password;
 
-            var loginResponse = Definery.Authenticate(Definery, username, password);
+            Definery = Definery.Init(Definery, username, password);
 
-            // If the CSRF token was retrieved from Drupal
-            if (!string.IsNullOrEmpty(Definery.CsrfToken))
+            // If a token was returned, the sign-in succeeded (DRF token auth).
+            if (Definery != null && Definery.IsAuthenticated)
             {
-                // Store the auth code for GET requests
-                Definery.AuthCode = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
-
                 // Load all of the things!!!
                 LoadData();
 
@@ -484,14 +479,14 @@ namespace OpenDefinery_DesktopApp
             // Load the data based on the current source and display in the DataGrid
             if (ParamSource == ParameterSource.Collection)
             {
-                Definery.Parameters = SharedParameter.ByCollection(
-                  Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
+                Definery.Parameters = DefineryParameter.ByCollection(
+                  Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Page, false, Pager
                   );
             }
             if (ParamSource == ParameterSource.Search)
             {
-                Definery.Parameters = SharedParameter.Search(
-                  Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, false
+                Definery.Parameters = DefineryParameter.Search(
+                  Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Page, false, Pager
                   );
             }
 
@@ -514,15 +509,15 @@ namespace OpenDefinery_DesktopApp
             if (CollectionsList.SelectedItems.Count > 0 && ParamSource == ParameterSource.Collection)
             {
                 // Load the data based on selected Collection and display in the DataGrid
-                Definery.Parameters = SharedParameter.ByCollection(
-                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false
+                Definery.Parameters = DefineryParameter.ByCollection(
+                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Page, false, Pager
                     );
                 DataGridParameters.ItemsSource = Definery.Parameters;
             }
             if (ParamSource == ParameterSource.Search)
             {
-                Definery.Parameters = SharedParameter.Search(
-                  Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, false
+                Definery.Parameters = DefineryParameter.Search(
+                  Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Page, false, Pager
                   );
             }
 
@@ -612,7 +607,7 @@ namespace OpenDefinery_DesktopApp
         {
             if (DataGridParameters.SelectedItems.Count == 1)
             {
-                var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+                var selectedParam = DataGridParameters.SelectedItem as DefineryParameter;
 
                 // Toggle UI
                 PropertiesSideBar.Visibility = Visibility.Visible;
@@ -622,7 +617,7 @@ namespace OpenDefinery_DesktopApp
                 PropTextGuid.Text = selectedParam.Guid.ToString();
 
                 // Update Data type field and select the item in the ComboBox
-                var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
+                var paramDataType = DataType.GetFromName(Definery, selectedParam.DataType);
                 PropComboDataType.SelectedItem = paramDataType;
 
                 // Update Data Category field and select the item in the ComboBox
@@ -646,7 +641,7 @@ namespace OpenDefinery_DesktopApp
                 }
 
                 // Update boolean fields
-                if (selectedParam.Visible == "1")
+                if (selectedParam.Visible)
                 {
                     PropCheckVisible.IsChecked = true;
                 }
@@ -655,7 +650,7 @@ namespace OpenDefinery_DesktopApp
                     PropCheckVisible.IsChecked = false;
                 }
                 
-                if (selectedParam.UserModifiable == "1")
+                if (selectedParam.UserModifiable)
                 {
                     PropCheckUserMod.IsChecked = true;
                 }
@@ -869,8 +864,8 @@ namespace OpenDefinery_DesktopApp
             {
                 foreach (var p in DataGridParameters.SelectedItems)
                 {
-                    // Get current Shared Parameter as a SharedParameter object
-                    var selectedParam = p as SharedParameter;
+                    // Get current Shared Parameter as a DefineryParameter object
+                    var selectedParam = p as DefineryParameter;
 
                     // Don't allow adding to a Collection if the user isn't the author because Drupal permissions won't allow it
                     if (selectedParam.Author != Definery.CurrentUser.Id)
@@ -880,7 +875,7 @@ namespace OpenDefinery_DesktopApp
                     else
                     {
                         // Add the Shared Parameter to the Collection
-                        var response = SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                        var response = DefineryParameter.AddToCollection(Definery, selectedParam, SelectedCollection.Id);
                     }
                 }
             }
@@ -888,15 +883,15 @@ namespace OpenDefinery_DesktopApp
             {
                 foreach (var p in DataGridParameters.SelectedItems)
                 {
-                    // Get current Shared Parameter as a SharedParameter object
-                    var selectedParam = p as SharedParameter;
+                    // Get current Shared Parameter as a DefineryParameter object
+                    var selectedParam = p as DefineryParameter;
 
-                    var response = SharedParameter.AddCollection(Definery, selectedParam, SelectedCollection.Id);
+                    var response = DefineryParameter.AddToCollection(Definery, selectedParam, SelectedCollection.Id);
                 }
 
                 // Load the data based on selected Collection and display in the DataGrid
-                Definery.Parameters = SharedParameter.GetOrphaned(
-                    Definery, Pager.ItemsPerPage, Pager.Offset, true
+                Definery.Parameters = DefineryParameter.GetOrphaned(
+                    Definery, Pager.ItemsPerPage, Pager.Page, true, Pager
                     );
 
                 // Notify the user of the update
@@ -936,7 +931,15 @@ namespace OpenDefinery_DesktopApp
             // Pass the Collections list to the combobox and configure
             NewParamFormCollectionsCombo.ItemsSource = Definery.MyCollections;
             NewParamFormCollectionsCombo.DisplayMemberPath = "Name";  // Displays the Collection name rather than object in the combobox
-            NewParamDataTypeCombo.SelectedIndex = 0;
+
+            // Default the Collection to whatever is selected in the sidebar
+            if (SelectedCollection != null)
+                NewParamFormCollectionsCombo.SelectedItem = SelectedCollection;
+            else
+                NewParamFormCollectionsCombo.SelectedIndex = 0;
+
+            // Default the data type to TEXT
+            SelectDefaultDataType();
             NewParamDataCatCombo.SelectedItem = null;
 
             // Generate a GUID by default
@@ -989,12 +992,12 @@ namespace OpenDefinery_DesktopApp
             }
 
             // TODO: Refactor this logic using the new constructor 
-            var param = new SharedParameter();
+            var param = new DefineryParameter();
             param.Description = NewParamDescTextBox.Text;
             param.DataType = dataType.Name;
             param.DataCategoryHashcode = dataCategory.Hashcode;
-            param.Visible = (NewParamVisibleCheck.IsChecked ?? false) ? "1" : "0";  // Reports out a 1 or 0 as a string
-            param.UserModifiable = (NewParamUserModCheckbox.IsChecked ?? false) ? "1" : "0";
+            param.Visible = NewParamVisibleCheck.IsChecked ?? false;
+            param.UserModifiable = NewParamUserModCheckbox.IsChecked ?? false;
 
             // Only create parameter if the form validates
             if (NewParamNameTextBox.Text.Length < 4)
@@ -1006,12 +1009,7 @@ namespace OpenDefinery_DesktopApp
                 // Assign the name from the form
                 param.Name = NewParamNameTextBox.Text;
 
-                // Check that the description has a value
-                if (NewParamDescTextBox.Text.Length < 1)
-                {
-                    MessageBox.Show("The parameter description is required.");
-                }
-                else
+                // Description is optional - no validation needed.
                 {
                     // Try to convert the string from the from into a GUID
                     try
@@ -1035,11 +1033,11 @@ namespace OpenDefinery_DesktopApp
                             // Pass the ID of the Parameter that is being forked if provided
                             if (!string.IsNullOrEmpty(ForkedParamIdTextBox.Text))
                             {
-                                SharedParameter.Create(Definery, param, selectedCollection.Id, Convert.ToInt32(ForkedParamIdTextBox.Text));
+                                DefineryParameter.Create(Definery, param, selectedCollection.Id, Convert.ToInt32(ForkedParamIdTextBox.Text));
                             }
                             else
                             {
-                                SharedParameter.Create(Definery, param, selectedCollection.Id);
+                                DefineryParameter.Create(Definery, param, selectedCollection.Id);
                             }
 
                             // Hide the overlay and form
@@ -1048,6 +1046,17 @@ namespace OpenDefinery_DesktopApp
 
                             // Reset the form values and UI
                             InitializeParamForm();
+
+                            // Refresh the datagrid if the new parameter went into the collection
+                            // currently in view.
+                            if (SelectedCollection != null && selectedCollection.Id == SelectedCollection.Id)
+                            {
+                                Definery.Parameters = DefineryParameter.ByCollection(
+                                    Definery, SelectedCollection, Pager.ItemsPerPage, 1, true, Pager);
+                                Pager.CurrentPage = 0;
+                                UpdatePager(Pager, 0);
+                                RefreshUi();
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -1196,7 +1205,7 @@ namespace OpenDefinery_DesktopApp
                 CollectionsList.SelectedItem = null;
 
                 // Get the parameters
-                Definery.Parameters = SharedParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 0, true);
+                Definery.Parameters = DefineryParameter.GetOrphaned(Definery, Pager.ItemsPerPage, 1, true, Pager);
 
                 // Force the pager to page 0 and update
                 Pager.CurrentPage = 0;
@@ -1245,7 +1254,7 @@ namespace OpenDefinery_DesktopApp
             Pager.IsLastPage = false;
 
             // Get the first page of SharedParameters
-            var allParams = SharedParameter.ByCollection(Definery, SelectedCollection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Offset, true).ToList();
+            var allParams = DefineryParameter.ByCollection(Definery, SelectedCollection, MainWindow.Pager.ItemsPerPage, MainWindow.Pager.Page, true, MainWindow.Pager).ToList();
 
             // Update the pager since it is not the last page
             UpdatePager(Pager, 1);
@@ -1254,8 +1263,8 @@ namespace OpenDefinery_DesktopApp
             do
             {
                 // Get all SharedParameters of the current page
-                allParams.AddRange(SharedParameter.ByCollection(
-                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false));
+                allParams.AddRange(DefineryParameter.ByCollection(
+                    Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Page, false, Pager));
 
                 // Update the pager since it is not the last page
                 UpdatePager(Pager, 1);
@@ -1288,7 +1297,7 @@ namespace OpenDefinery_DesktopApp
                 SelectedCollection = listBox.SelectedItem as Collection;
 
                 // Get the parameters
-                Definery.Parameters = SharedParameter.ByCollection(Definery, SelectedCollection, Pager.ItemsPerPage, 0, true
+                Definery.Parameters = DefineryParameter.ByCollection(Definery, SelectedCollection, Pager.ItemsPerPage, 1, true, Pager
                     );
 
                 // Force the pager to page 0 and update
@@ -1323,17 +1332,17 @@ namespace OpenDefinery_DesktopApp
                 NewParamVisibleCheck.IsEnabled = false;
                 NewParamUserModCheckbox.IsEnabled = false;
 
-                var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+                var selectedParam = DataGridParameters.SelectedItem as DefineryParameter;
 
                 // Set ID to track which parameter it was forked from
                 // This is the Drupal node ID, not the GUID
-                ForkedParamIdTextBox.Text = selectedParam.Id.ToString();
+                ForkedParamIdTextBox.Text = selectedParam.DefineryId.ToString();
 
                 // Prepopulate the fields based on the selected parameter
                 NewParamNameTextBox.Text = selectedParam.Name;
                 NewParamGuidTextBox.Text = selectedParam.Guid.ToString();
                 NewParamDescTextBox.Text = selectedParam.Description;
-                var paramDataType = DataType.GetFromName(Definery.DataTypes, selectedParam.DataType);
+                var paramDataType = DataType.GetFromName(Definery, selectedParam.DataType);
                 NewParamDataTypeCombo.SelectedItem = paramDataType;
 
                 // Set the DataCategory if the DataType is a FamilyType
@@ -1345,7 +1354,7 @@ namespace OpenDefinery_DesktopApp
                     NewParamDataCatCombo.IsEnabled = false;
                 }
 
-                if (selectedParam.Visible == "1")
+                if (selectedParam.Visible)
                 {
                     NewParamVisibleCheck.IsChecked = true;
                 }
@@ -1354,7 +1363,7 @@ namespace OpenDefinery_DesktopApp
                     NewParamVisibleCheck.IsChecked = false;
                 }
 
-                if (selectedParam.UserModifiable == "1")
+                if (selectedParam.UserModifiable)
                 {
                     NewParamUserModCheckbox.IsChecked = true;
                 }
@@ -1373,6 +1382,24 @@ namespace OpenDefinery_DesktopApp
         /// <summary>
         /// Helper method to clear the New Parameter form.
         /// </summary>
+        /// <summary>
+        /// Default the New Parameter data-type dropdown to TEXT (case-insensitive match, with a
+        /// substring fallback), so a new parameter starts on the most common type.
+        /// </summary>
+        private void SelectDefaultDataType()
+        {
+            var types = Definery.DataTypes;
+            if (types == null || types.Count == 0) return;
+
+            var textType = types.FirstOrDefault(d => string.Equals(d.Name, "text", StringComparison.OrdinalIgnoreCase))
+                        ?? types.FirstOrDefault(d => (d.Name ?? string.Empty).IndexOf("text", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            if (textType != null)
+                NewParamDataTypeCombo.SelectedItem = textType;
+            else
+                NewParamDataTypeCombo.SelectedIndex = 0;
+        }
+
         private void InitializeParamForm()
         {
             // Enable editing of certain fields just in case this method was triggered from forking
@@ -1405,11 +1432,11 @@ namespace OpenDefinery_DesktopApp
         private void RemoveFromCollectionButton_Click(object sender, RoutedEventArgs e)
         {
             // Instantiate a list of SharedParameters
-            var sharedParameters = new List<SharedParameter>();
+            var sharedParameters = new List<DefineryParameter>();
 
             foreach (var i in DataGridParameters.SelectedItems)
             {
-                var param = i as SharedParameter;
+                var param = i as DefineryParameter;
 
                 sharedParameters.Add(param);
             }
@@ -1417,12 +1444,12 @@ namespace OpenDefinery_DesktopApp
             // Process selected items
             foreach (var param in sharedParameters)
             {
-                var response = SharedParameter.RemoveCollection(Definery, param, SelectedCollection.Id);
+                var response = DefineryParameter.RemoveCollection(Definery, param, SelectedCollection.Id);
 
                 if (response)
                 {
                     // Instantiate a new Pager
-                    // TODO: Make it so that the user stays on the same page after deleting a SharedParameter
+                    // TODO: Make it so that the user stays on the same page after deleting a DefineryParameter
                     // from the Collection
                     Pager.CurrentPage = 0;
 
@@ -1430,8 +1457,8 @@ namespace OpenDefinery_DesktopApp
                     UpdatePager(Pager, 0);
 
                     // Load the data based on selected Collection and display in the DataGrid
-                    Definery.Parameters = SharedParameter.ByCollection(
-                        Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, true
+                    Definery.Parameters = DefineryParameter.ByCollection(
+                        Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Page, true, Pager
                         );
 
                     RefreshUi();
@@ -1581,7 +1608,7 @@ namespace OpenDefinery_DesktopApp
             UpdatePager(Pager, 0);
 
             // Instantiate a new list of Parameters
-            var allParams = new ObservableCollection<SharedParameter>();
+            var allParams = new ObservableCollection<DefineryParameter>();
 
             if (ParamSource == ParameterSource.Collection)
             {
@@ -1591,8 +1618,8 @@ namespace OpenDefinery_DesktopApp
                     do
                       {
                         // Get all SharedParameters of the current page
-                        var currentPage = SharedParameter.ByCollection(
-                            Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Offset, false);
+                        var currentPage = DefineryParameter.ByCollection(
+                            Definery, SelectedCollection, Pager.ItemsPerPage, Pager.Page, false, Pager);
 
                         this.Dispatcher.Invoke(() =>
                         {
@@ -1683,7 +1710,7 @@ namespace OpenDefinery_DesktopApp
             var contextMenu = new ContextMenu();
 
             // Inherit the datacontext of the row data object
-            var selectedParam = ((FrameworkElement)sender).DataContext as SharedParameter;
+            var selectedParam = ((FrameworkElement)sender).DataContext as DefineryParameter;
 
             // Only select the clicked row
             DataGridParameters.SelectedItem = selectedParam;
@@ -1714,7 +1741,7 @@ namespace OpenDefinery_DesktopApp
                 clickedRow.IsSelected = true;
 
                 // Inherit the datacontext of the row data object
-                var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+                var selectedParam = DataGridParameters.SelectedItem as DefineryParameter;
 
                 // Only select the clicked row
                 DataGridParameters.SelectedItem = selectedParam;
@@ -1749,7 +1776,7 @@ namespace OpenDefinery_DesktopApp
         /// </summary>
         /// <param name="selectedParam"></param>
         /// <returns></returns>
-        private ContextMenu GetParamContextMenu(SharedParameter selectedParam)
+        private ContextMenu GetParamContextMenu(DefineryParameter selectedParam)
         {
             // Toggle contextual menu
             ContextMenu cm = this.FindResource("ParamContextMenu") as ContextMenu;
@@ -1835,7 +1862,7 @@ namespace OpenDefinery_DesktopApp
         private void ParamMenuEdit_Click(object sender, RoutedEventArgs e)
         {
             // Inherit the datacontext of the row data object
-            var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+            var selectedParam = DataGridParameters.SelectedItem as DefineryParameter;
 
             // Toggle the UI
             ModifyParameterGrid.Visibility = Visibility.Visible;
@@ -1862,10 +1889,10 @@ namespace OpenDefinery_DesktopApp
         /// <param name="e"></param>
         private void ModParamFormButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedParam = DataGridParameters.SelectedItem as SharedParameter;
+            var selectedParam = DataGridParameters.SelectedItem as DefineryParameter;
 
-            // Update the SharedParameter
-            SharedParameter.Modify(Definery, selectedParam, ModParamNameTextBox.Text, ModParamDescTextBox.Text);
+            // Update the DefineryParameter
+            DefineryParameter.Modify(Definery, selectedParam, ModParamNameTextBox.Text, ModParamDescTextBox.Text);
 
             selectedParam.Name = ModParamNameTextBox.Text;
             selectedParam.Description = ModParamDescTextBox.Text;
@@ -1977,7 +2004,7 @@ namespace OpenDefinery_DesktopApp
         private void SearchByKeyword()
         {
             // Get the parameters
-            Definery.Parameters = SharedParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Offset, true);
+            Definery.Parameters = DefineryParameter.Search(Definery, SearchTxtBox.Text, Pager.ItemsPerPage, Pager.Page, true, Pager);
 
             // Force the pager to page 0 and update
             Pager.CurrentPage = 0;
@@ -2004,13 +2031,13 @@ namespace OpenDefinery_DesktopApp
             var selectedDataType = SearchFilterDataTypeCombo.SelectedItem as DataType;
 
             // Execute a new search including the Data Type in the API call
-            Definery.Parameters = SharedParameter.Search(
+            Definery.Parameters = DefineryParameter.Search(
                 Definery,
                 SearchTxtBox.Text,
                 selectedDataType.Name,
                 Pager.ItemsPerPage,
-                Pager.Offset,
-                true);
+                Pager.Page,
+                true, Pager);
 
             // Force the pager to page 0 and update
             Pager.CurrentPage = 0;
@@ -2109,7 +2136,7 @@ namespace OpenDefinery_DesktopApp
             NewParamNameTextBox.Text = string.Empty;
             NewParamGuidTextBox.Text = Guid.NewGuid().ToString();
             NewParamDescTextBox.Text = string.Empty;
-            NewParamDataTypeCombo.SelectedIndex = 0;
+            SelectDefaultDataType();
             NewParamDataCatCombo.SelectedItem = null;
             NewParamVisibleCheck.IsChecked = true;
             NewParamUserModCheckbox.IsChecked = true;

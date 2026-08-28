@@ -19,7 +19,7 @@ namespace OpenDefinery_DesktopApp
         /// <param name="definery">The main Definery object</param>
         /// <param name="parameters">The List of SharedParameters to convert</param>
         /// <returns>The full shared parameter text file contents</returns>
-        public static string ToRevitTxt (Definery definery, List<SharedParameter> parameters)
+        public static string ToRevitTxt (Definery definery, List<DefineryParameter> parameters)
         {
             // Instantiate parts of the txt file which are organized in tables separated by an asterisk per Revit standards
 
@@ -28,7 +28,7 @@ namespace OpenDefinery_DesktopApp
                 "# This is a Revit shared parameter file.\n" +
                 "# These parameters are part of an ongoing collaborative effort by OpenDefinery.\n" +
                 "# If you would like to add, remove, or modify any parameters in this file, " +
-                "please join us: http://opendefinery.com.\n";
+                "please join us: https://opendefinery.com.\n";
 
             // Create the table for metadata
             var metaTable =
@@ -42,7 +42,7 @@ namespace OpenDefinery_DesktopApp
                 "GROUP\t1\tDefault Group\n";
 
             // Create the parameters
-            var parameterTable = SharedParameter.CreateParamTable(parameters);
+            var parameterTable = DefineryParameter.CreateParamTable(parameters);
 
             // Output a concatenated string
             var output = header + metaTable + groupTable + parameterTable;

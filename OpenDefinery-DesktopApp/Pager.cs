@@ -1,79 +1,75 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OpenDefinery_DesktopApp;
-using RestSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace OpenDefinery
 {
+    /// <summary>
+    /// Page state for a paginated list endpoint.
+    ///
+    /// The v1 API pages by number and size (?page=&amp;page_size=) and returns an absolute
+    /// `count`. That replaced Drupal's offset-based scheme, whose `pager` object reported
+    /// totals relative to the request - which is why this class used to reach back into
+    /// MainWindow to carry the real totals forward between calls. It no longer needs to,
+    /// and no longer lives in the UI project.
+    /// </summary>
     public class Pager
     {
-        // Ignoring the current_page property from Drupal response until it reports the correct value
-        //[JsonProperty("current_page")]
+        /// <summary>Zero-based page index, as the pager UI counts.</summary>
         public int CurrentPage { get; set; }
 
-        [JsonProperty("total_items")]
+        /// <summary>One-based page number, as ?page= counts. Pass this to the API.</summary>
+        public int Page => CurrentPage + 1;
+
+        public int ItemsPerPage { get; set; } = 100;
+
+        /// <summary>
+        /// Item offset for the current page. The API is now page-based (see <see cref="Page"/>);
+        /// this is kept for legacy offset-based call sites and maps to/from <see cref="CurrentPage"/>.
+        /// </summary>
+        public int Offset
+        {
+            get => CurrentPage * ItemsPerPage;
+            set => CurrentPage = ItemsPerPage > 0 ? value / ItemsPerPage : 0;
+        }
+
         public int TotalItems { get; set; }
 
-        [JsonProperty("total_pages")]
         public int TotalPages { get; set; }
 
-        [JsonProperty("items_per_page")]
-        public int ItemsPerPage { get; set; }
-
-        // The Offset is not included in the Drupal response, so it must be set elsewhere
-        public int Offset { get; set; }
         public bool IsFirstPage { get; set; }
+
         public bool IsLastPage { get; set; }
 
         /// <summary>
-        /// Helper method to update the Pager object based on a Response
+        /// Record the totals from a response.
+        ///
+        /// `resetTotals` is kept for the call sites that pass it, but it no longer changes
+        /// anything: `count` is the size of the whole result set, not of this page, so there
+        /// is nothing to preserve across calls.
         /// </summary>
-        /// <param name="responseContent">The IRestResponse.Content value as a string</param>
-        /// <returns>The new Pager object</returns>
-        public static Pager SetFromParamReponse(IRestResponse response, bool resetTotals)
+        public void Update<T>(Paginated<T> response, bool resetTotals = true)
         {
-            // Instantiate a new pager
-            var pager = new Pager();
+            if (response == null) return;
 
-            // Cast the rows from the reponse to a generic JSON object
-            JObject json = JObject.Parse(response.Content);
+            TotalItems = response.Count;
+            TotalPages = ItemsPerPage > 0
+                ? (int)Math.Ceiling(response.Count / (double)ItemsPerPage)
+                : 0;
 
-            // Add the Drupal pager data to the Pager object
-            var pagerResponse = json.SelectToken("pager");
-            pager = JsonConvert.DeserializeObject<Pager>(pagerResponse.ToString());
-
-            // Always reassign values for total pages and items because the pager property from Drupal is relative to the current request,
-            // however we always want to report the absolute totals if they are greater than zero.
-            if (!resetTotals)
-            {
-                // Add the MainWindow data to the Pager object
-                pager.TotalPages = MainWindow.Pager.TotalPages;
-                pager.TotalItems = MainWindow.Pager.TotalItems;
-                pager.CurrentPage = MainWindow.Pager.CurrentPage;
-            }
-            else
-            {
-                pager.CurrentPage = 0;
-            }
-
-            return pager;
+            IsFirstPage = string.IsNullOrEmpty(response.Previous);
+            IsLastPage = string.IsNullOrEmpty(response.Next);
         }
 
-        public static Pager Reset()
+        public static Pager Reset(int itemsPerPage = 100)
         {
-            var pager = new Pager();
-            pager.TotalItems = 0;
-            pager.TotalPages = 0;
-            pager.CurrentPage = 0;
-            pager.ItemsPerPage = MainWindow.Pager.ItemsPerPage;
-
-            return pager;
+            return new Pager
+            {
+                CurrentPage = 0,
+                ItemsPerPage = itemsPerPage,
+                TotalItems = 0,
+                TotalPages = 0,
+                IsFirstPage = true,
+                IsLastPage = false
+            };
         }
     }
 }

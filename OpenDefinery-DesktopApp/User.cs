@@ -1,88 +1,46 @@
-﻿using Newtonsoft.Json;
-using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace OpenDefinery
 {
+    /// <summary>
+    /// The signed-in account. Populated straight from the token response, which carries the
+    /// identity alongside the key.
+    ///
+    /// There is no user directory in the v1 API - the old lookups by id and by username have
+    /// no replacement, and had no callers. A definition's `author` is an integer primary key,
+    /// compared against <see cref="Id"/> rather than resolved to a name.
+    /// </summary>
     public class User
     {
+        [JsonPropertyName("pk")]
         public string Id { get; set; }
+
+        [JsonPropertyName("username")]
         public string Name { get; set; }
 
+        [JsonPropertyName("email")]
+        public string Email { get; set; }
+
         /// <summary>
-        /// Retrieve a User by their user ID.
+        /// Who the session's token belongs to. Returns null if the token is not accepted,
+        /// which is how a restored "remember me" session finds out it has been revoked.
         /// </summary>
-        /// <param name="definery">The main Definery object provides the auth code</param>
-        /// <param name="userId">The ID of the user</param>
-        /// <returns></returns>
-        public static User GetById(Definery definery, int userId)
+        public static User GetCurrent(Definery definery)
         {
-            var users = new List<User>();
-            var user = new User();
+            if (definery == null || !definery.IsAuthenticated) return null;
 
             try
             {
-                var client = new RestClient(Definery.BaseUrl + string.Format("rest/user/id/{0}?_format=json", userId.ToString()));
-                client.Timeout = -1;
-                var request = new RestRequest(Method.GET);
-                request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-                IRestResponse response = client.Execute(request);
-                Console.WriteLine(response.Content);
+                var response = OdHttp.Get(Definery.BaseUrl + "auth/user/", definery);
 
-                users = JsonConvert.DeserializeObject<List<User>>(response.Content);
-
-                if (users.Count() == 1)
+                if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    return users.FirstOrDefault();
-                }
-                // If there are none or more than one result, return null
-                else
-                {
+                    Debug.WriteLine(response.Content, "Error resolving the current user");
                     return null;
                 }
-            }
-            catch
-            {
-                return null;
-            }
-        }
 
-        /// <summary>
-        /// Retrieve a User by their username.
-        /// </summary>
-        /// <param name="definery">The main Definery object provides the auth code</param>
-        /// <param name="userId">The name of the user</param>
-        /// <returns></returns>
-        public static User GetByUserName(Definery definery, string username)
-        {
-            var users = new List<User>();
-            var user = new User();
-
-            try
-            {
-                var client = new RestClient(Definery.BaseUrl + string.Format("rest/user/name/{0}?_format=json", username));
-                client.Timeout = -1;
-                var request = new RestRequest(Method.GET);
-                request.AddHeader("Authorization", "Basic " + definery.AuthCode);
-                IRestResponse response = client.Execute(request);
-                Console.WriteLine(response.Content);
-
-                users = JsonConvert.DeserializeObject<List<User>>(response.Content);
-
-                if (users.Count() == 1)
-                {
-                    return users.FirstOrDefault();
-                }
-                // If there are none or more than one result, return null
-                else
-                {
-                    return null;
-                }
+                return OdJson.Deserialize<User>(response.Content);
             }
             catch
             {

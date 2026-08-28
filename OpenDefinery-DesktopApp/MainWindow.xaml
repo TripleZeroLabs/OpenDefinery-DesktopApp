@@ -167,7 +167,7 @@
                 </ScrollViewer>
                 <Grid x:Name="DashboardGrid" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Top" Visibility="Collapsed">
                     <TextBlock TextWrapping="Wrap" Text="Welcome to OpenDefinery" Margin="0,100,0,0" VerticalAlignment="Top" FontSize="36" Foreground="#DD767676" HorizontalAlignment="Center"/>
-                    <TextBlock x:Name="DashboardVersionText" Margin="0,155,0,0" TextWrapping="Wrap" Text="(private beta v0.0.1)" VerticalAlignment="Top" FontSize="15" HorizontalAlignment="Center" Foreground="#DD767676"/>
+                    <TextBlock x:Name="DashboardVersionText" Margin="0,155,0,0" TextWrapping="Wrap" Text="(beta)" VerticalAlignment="Top" FontSize="15" HorizontalAlignment="Center" Foreground="#DD767676"/>
                 </Grid>
                 <Grid x:Name="MainBrowserGrid">
                     <Grid.RowDefinitions>
@@ -266,11 +266,7 @@
                                                 Style="{StaticResource MaterialDesignToolForegroundButton}"
                                                 Foreground="#cccccc"
                                                 Margin="0"
-                                                Click="ParamContextMenu_Click"
-                                                Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl},
-                                                    Mode=FindAncestor},
-                                                    Path=DataContext.OpenItemCommand}" 
-                                                >
+                                                Click="ParamContextMenu_Click">
                                                 <iconPacks:BoxIcons Kind="RegularMenu"/>
                                             </Button>
                                         </DataTemplate>
@@ -287,6 +283,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Data Type" Binding="{Binding DataType}" Width="160"/>
                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="300" Visibility="Hidden"/>
                                 <!--<DataGridTextColumn Header="Description" Binding="{Binding Description}" MaxWidth="400">
                                     <DataGridTextColumn.ElementStyle>
@@ -383,11 +380,11 @@
                 <Button x:Name="LoginButton" Content="Login" Margin="50,0,50,75" VerticalAlignment="Bottom" Click="LoginButton_Click" IsDefault="True" TabIndex="2" Height="46" FontSize="18"/>
                 <Label Content="USERNAME" Margin="45,25,50,0" VerticalAlignment="Top" FontSize="12" Height="20"/>
                 <Label Content="PASSWORD" Margin="45,125,50,0" FontSize="12" Height="20" VerticalAlignment="Top"/>
-                <TextBlock HorizontalAlignment="Center" Margin="0,0,0,25" TextWrapping="Wrap" VerticalAlignment="Bottom"><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/password"><InlineUIContainer>  
+                <TextBlock HorizontalAlignment="Center" Margin="0,0,0,25" TextWrapping="Wrap" VerticalAlignment="Bottom"><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="https://app.opendefinery.com/user/password"><InlineUIContainer>  
                             <TextBlock Text="Forgot Password" Foreground="{StaticResource MaterialDesignBodyLight}" TextDecorations="Underline"/>  
                         </InlineUIContainer></Hyperlink><Run Text=" "/><Run Text=" "/><InlineUIContainer>
                         <TextBlock Text="|" Margin="15,0" />  
-                    </InlineUIContainer><Run Text=" "/><Run Text=" "/><Run Text=" "/><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="http://app.opendefinery.com/user/register"><InlineUIContainer>  
+                    </InlineUIContainer><Run Text=" "/><Run Text=" "/><Run Text=" "/><Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="https://app.opendefinery.com/user/register"><InlineUIContainer>  
                                 <TextBlock Foreground="{StaticResource MaterialDesignBodyLight}" Text="Register for an Account" TextDecorations="Underline"/>  
                             </InlineUIContainer></Hyperlink></TextBlock>
             </Grid>

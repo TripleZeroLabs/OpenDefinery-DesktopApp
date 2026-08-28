@@ -1,45 +1,50 @@
-﻿using Newtonsoft.Json;
-using OpenDefinery_DesktopApp;
-using RestSharp;
+﻿using System.Text.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace OpenDefinery
 {
     public class DataCategory
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("pk")]
         public long Id { get; set; }
 
-        [JsonProperty("name")]
+        /// <summary>The BuiltInCategory member, e.g. "OST_Doors". An identifier, not a label.</summary>
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("hashcode")]
-        public string Hashcode { get; set; }
+        /// <summary>
+        /// What to show a user, e.g. "Doors". Computed by the API: Revit's own label where it
+        /// has been harvested, otherwise derived from <see cref="Name"/>. Bind pickers to this.
+        /// </summary>
+        [JsonPropertyName("display_name")]
+        public string DisplayName { get; set; }
 
         /// <summary>
-        /// Retrieve all DataCategoreis from Drupal.
+        /// The value a shared parameter file carries in its DATACATEGORY column - the
+        /// BuiltInCategory integer, e.g. "-2000023". This identifies the category, and it is
+        /// the only form Revit hands the add-in.
         /// </summary>
-        /// <param name="definery">The main Definery object provides the CSRF token.</param>
-        /// <returns>A list of DataType objects.</returns>
+        [JsonPropertyName("hashcode")]
+        public string Hashcode { get; set; }
+
+        /// <summary>Revit releases this category exists in.</summary>
+        [JsonPropertyName("revit_versions")]
+        public List<int> RevitVersions { get; set; }
+
+        /// <summary>
+        /// Retrieve all DataCategories from OpenDefinery.
+        ///
+        /// Over 1,200 of them, so this spans more than one page - see
+        /// <see cref="OdPage.GetAll{T}"/>.
+        /// </summary>
         public static List<DataCategory> GetAll(Definery definery)
         {
-            var dataCategories = new List<DataCategory>();
-
-            var client = new RestClient(Definery.BaseUrl + "rest/datacategories?_format=json");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("X-CSRF-Token", definery.CsrfToken);
-            IRestResponse response = client.Execute(request);
-            Console.WriteLine(response.Content);
-
-            dataCategories = JsonConvert.DeserializeObject<List<DataCategory>>(response.Content);
-
-            return dataCategories;
+            return OdPage.GetAll<DataCategory>(
+                definery,
+                Definery.BaseUrl + "data-categories/?page_size=" + OdPage.MaxPageSize);
         }
 
         /// <summary>
@@ -60,7 +65,7 @@ namespace OpenDefinery
             }
             else
             {
-                MessageBox.Show("Error retrieving Data Category.");
+                Debug.WriteLine("Error retrieving Data Categories (duplicate hashcodes).");
 
                 return null;
             }
